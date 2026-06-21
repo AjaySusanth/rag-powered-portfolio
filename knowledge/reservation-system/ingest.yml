@@ -1,0 +1,24 @@
+# knowledge/reservation-system/ingest.yml
+
+project: reservation-system
+type: backend
+github_repo: ajay/reservation-system
+
+auto_ingest:
+  - README.md
+  - docs/**
+  - src/routes/**
+  - src/controllers/**
+  - src/services/**
+  - src/middleware/**
+  - prisma/schema.prisma
+  - docker-compose.yml
+  - Dockerfile
+
+ignore:
+  - node_modules/**
+  - dist/**
+  - build/**
+  - "**/*.generated.*"
+  - "**/*.lock"
+  - "**/*.test.*"
