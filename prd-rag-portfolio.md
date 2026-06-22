@@ -305,7 +305,7 @@ Chunking — heading-aware two-pass strategy
                              If it is the FIRST section and undersized, emit
                              standalone — never silently discard content.
     ↓
-Embedding — OpenAI text-embedding-3-small (1536-dim)
+Embedding — Azure OpenAI Service (text-embedding-3-small, 1536-dim)
     ↓
 BM25 index update (in-process, keyword retrieval)
     ↓
@@ -394,7 +394,7 @@ _Nothing else works until retrieval works._
 | 1   | Knowledge base structure — `/knowledge/{project}/` with Layer 1, 2, 3 docs       |
 | 2   | Write all source documents — resume, per-project manual docs, about-me, faq      |
 | 3   | Chunking pipeline — variable chunk sizes per layer                               |
-| 4   | Embedding — OpenAI text-embedding-3-small, store in pgvector with HNSW index     |
+| 4   | Embedding — Azure OpenAI (text-embedding-3-small), store in pgvector with HNSW index |
 | 5   | GitHub API ingestion — reads `ingest.yml`, fetches whitelisted files per project |
 | 6   | Metadata tagging — project, layer, source_file, chunk_index on every chunk       |
 | 7   | Basic vector retrieval — end-to-end query → chunks → Gemini answer working       |
@@ -760,7 +760,7 @@ Cloud deployment begins only after Blocks 1–3 are working and tested locally. 
 | Frontend          | React + Tailwind CSS                            |
 | Database          | PostgreSQL 16 + pgvector extension              |
 | Cache             | Redis 7                                         |
-| Embeddings        | OpenAI text-embedding-3-small (1536-dim)        |
+| Embeddings        | Azure OpenAI Service (text-embedding-3-small, 1536-dim) |
 | LLM — Primary     | Gemini 2.0 Flash                                |
 | LLM — Fallback    | Groq llama-3.1-70b                              |
 | GitHub Ingestion  | GitHub REST API (per-project ingest.yml config) |
