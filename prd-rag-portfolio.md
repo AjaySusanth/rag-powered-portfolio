@@ -276,10 +276,34 @@ GitHub API — fetch whitelisted files only
     ↓
 Merge with manual Layer 2 docs
     ↓
-Chunking
-    Layer 1 (identity):  256 tokens, 32 overlap
-    Layer 2 (design):    512 tokens, 64 overlap
-    Layer 3 (artifacts): 256 tokens, 32 overlap
+Preprocessing
+    Strip HTML/Markdown comment blocks (<!-- ... -->) before tokenizing.
+    Comments hold internal RAG design rationale for human contributors
+    — not for retrieval or embedding.
+    ↓
+Chunking — heading-aware two-pass strategy
+    Pass 1: Split document at Markdown heading lines (# / ## / ###).
+            Each heading + its body text = one discrete section.
+    Pass 2: Token-chunk each section independently using a sliding window
+            scoped to that section. Chunk boundaries never cross headings.
+            The section heading is prepended to every sub-chunk so each
+            chunk is self-contained and retrieves correctly in isolation.
+
+    Per-layer token limits (unchanged):
+        Layer 1 (identity):  256 tokens, 32 overlap
+        Layer 2 (design):    512 tokens, 64 overlap
+        Layer 3 (artifacts): 256 tokens, 32 overlap
+
+    Edge-case handling:
+        Oversized section  → internal sliding window within that section;
+                             heading prepended to each sub-chunk produced.
+        Undersized section → standalone chunk (no cross-section merging).
+                             Exception: if section body < MIN_SECTION_BODY_TOKENS
+                             (default: 20) AND a previous chunk exists, fold
+                             heading+body into the previous chunk to avoid
+                             near-empty embeddings polluting the vector space.
+                             If it is the FIRST section and undersized, emit
+                             standalone — never silently discard content.
     ↓
 Embedding — OpenAI text-embedding-3-small (1536-dim)
     ↓
@@ -292,6 +316,7 @@ Metadata tagging per chunk:
       project,
       layer,         // identity | design | artifact
       source_file,
+      heading,       // Markdown heading of the section this chunk belongs to
       chunk_index,
       ingested_at
     }
