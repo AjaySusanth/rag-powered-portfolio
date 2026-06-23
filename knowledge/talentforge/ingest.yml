@@ -1,0 +1,47 @@
+project: talentforge
+type: fullstack
+github_repo: AjaySusanth/smart-talent-selection
+
+auto_ingest:
+  # Documentation
+  - "README.md"
+  - "APPROACH.md"
+
+  # Core Business Logic & AI Workflows
+  - "backend/app/services/*.py"
+  - "backend/app/services/jd/*.py"
+  - "backend/app/services/parsing/*.py"
+  - "backend/app/services/ranking/*.py"
+
+  # Async Tasks & Queue Integrations
+  - "backend/app/workers/celery_app.py"
+  - "backend/app/workers/tasks/*.py"
+
+  # Persistence, Schemas, & Data Models
+  - "backend/app/models/*.py"
+  - "backend/app/schemas/*.py"
+
+  # API Layer
+  - "backend/app/api/v1/routes/*.py"
+
+  # Frontend Pages, Layout & Types
+  - "frontend/src/pages/*.tsx"
+  - "frontend/src/components/**/*.tsx"
+  - "frontend/src/types/*.ts"
+  - "frontend/src/lib/*.ts"
+  - "frontend/src/App.tsx"
+
+  # Infrastructure & Configuration
+  - "backend/app/core/config.py"
+  - "docker-compose.yml"
+
+ignore:
+  - "**/__pycache__/**"
+  - "**/.venv/**"
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/.git/**"
+  - "docs/**"
+  - "backend/app/db/migrations/**"
+  - "docs/sample_resumes/**"
+  - "**/*.pdf"
