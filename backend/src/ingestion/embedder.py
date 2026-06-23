@@ -103,3 +103,16 @@ async def embed_texts(texts: List[str], batch_size: int = 100) -> List[List[floa
             raise EmbeddingError(f"Azure OpenAI embedding generation failed: {e}") from e
 
     return embeddings
+
+
+async def embed_query(text: str) -> List[float]:
+    """
+    Embeds a single query string and returns its 1536-dimensional vector.
+
+    This is a thin wrapper around embed_texts() for the retrieval path.
+    Keeping it separate from embed_texts() makes call sites readable:
+    embed_texts() is for bulk ingestion; embed_query() is for a single
+    user query at search time. The underlying client and config are shared.
+    """
+    results = await embed_texts([text])
+    return results[0]

@@ -10,7 +10,7 @@ with `@pytest.mark.anyio` to execute async test coroutines cleanly.
 
 from unittest.mock import AsyncMock, patch
 import pytest
-from src.ingestion.embedder import embed_texts, EmbeddingError
+from src.ingestion.embedder import embed_texts, embed_query, EmbeddingError
 
 
 @pytest.mark.anyio
@@ -73,3 +73,45 @@ async def test_embed_texts_failure() -> None:
             await embed_texts(["error test"])
 
         assert "Azure OpenAI embedding generation failed" in str(exc_info.value)
+
+
+@pytest.mark.anyio
+async def test_embed_query_returns_single_vector() -> None:
+    """
+    Verifies that embed_query returns a single flat vector (list[float])
+    for a single input string, not a nested list.
+    """
+    mock_response = AsyncMock()
+    mock_item = AsyncMock()
+    mock_item.index = 0
+    mock_item.embedding = [0.42] * 1536
+    mock_response.data = [mock_item]
+
+    with patch("src.ingestion.embedder.get_azure_client") as mock_get_client:
+        mock_client = AsyncMock()
+        mock_client.embeddings.create.return_value = mock_response
+        mock_get_client.return_value = mock_client
+
+        result = await embed_query("what is Ajay's experience with Kubernetes?")
+
+        # Must be a flat list of floats, not a list of lists
+        assert isinstance(result, list)
+        assert len(result) == 1536
+        assert result[0] == 0.42
+        # Exactly one API call, with the query wrapped in a single-element list
+        mock_client.embeddings.create.assert_called_once()
+
+
+@pytest.mark.anyio
+async def test_embed_query_propagates_error() -> None:
+    """
+    Verifies that EmbeddingError raised inside embed_texts propagates
+    cleanly through the embed_query wrapper without being swallowed.
+    """
+    with patch("src.ingestion.embedder.get_azure_client") as mock_get_client:
+        mock_client = AsyncMock()
+        mock_client.embeddings.create.side_effect = Exception("timeout")
+        mock_get_client.return_value = mock_client
+
+        with pytest.raises(EmbeddingError):
+            await embed_query("trigger failure")

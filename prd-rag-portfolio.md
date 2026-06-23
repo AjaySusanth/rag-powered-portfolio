@@ -359,11 +359,13 @@ Step 4: Log correction event to PostgreSQL
 
 ### 4.5 LLM Layer
 
-| Role              | Model                           | Fallback           |
+| Role              | Model (Configurable)            | Fallback           |
 | ----------------- | ------------------------------- | ------------------ |
-| Answer generation | Gemini 2.0 Flash                | Groq llama-3.1-70b |
-| Query rewriting   | Gemini 2.0 Flash                | Groq               |
-| Retrieval grading | Gemini 2.0 Flash (small prompt) | Rule-based scorer  |
+| Answer generation | Gemini 2.5 Flash-Lite           | Groq llama-3.1-70b |
+| Query rewriting   | Gemini 2.5 Flash-Lite           | Groq               |
+| Retrieval grading | Gemini 2.5 Flash-Lite           | Rule-based scorer  |
+
+> **Note on Free-Tier Model Configuration:** While Gemini 2.0 Flash was initially specified, API quota availability on the Google AI Studio free tier led to adopting `gemini-2.5-flash-lite` (1500 RPM, 1M TPM, 15 RPM limits) as the sensible default. The model name is fully configurable via the `GEMINI_MODEL_NAME` setting (loaded from `.env`) to easily absorb future changes in the Gemini catalog and quota offerings without codebase edits.
 
 System prompt enforces strict grounding: answer only from retrieved context, cite sources inline, never speculate or invent facts.
 
