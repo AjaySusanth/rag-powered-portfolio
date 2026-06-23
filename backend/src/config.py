@@ -55,6 +55,16 @@ class Settings(BaseSettings):
         description="The deployment name of the embedding model in Azure"
     )
 
+    GEMINI_API_KEY: Optional[str] = Field(
+        default=None,
+        description="Google Gemini API Key"
+    )
+    GEMINI_MODEL_NAME: str = Field(
+        default="gemini-2.5-flash-lite",
+        description="The Gemini model name to use for answer generation"
+    )
+
+
     @field_validator("AZURE_OPENAI_ENDPOINT", mode="before")
     @classmethod
     def clean_endpoint(cls, v: str) -> str:
