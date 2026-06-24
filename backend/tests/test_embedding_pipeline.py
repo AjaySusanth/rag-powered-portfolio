@@ -67,7 +67,7 @@ async def test_pipeline_end_to_end_mocked() -> None:
     try:
         # 3. Read and chunk local knowledge files
         resume_path = WORKSPACE_ROOT / "knowledge" / "resume.md"
-        decisions_path = WORKSPACE_ROOT / "knowledge" / "reservation-system" / "decisions.md"
+        decisions_path = WORKSPACE_ROOT / "knowledge" / "talentforge" / "decisions.md"
         
         assert resume_path.exists(), f"Missing test file: {resume_path}"
         assert decisions_path.exists(), f"Missing test file: {decisions_path}"
@@ -162,7 +162,7 @@ async def test_pipeline_end_to_end_live() -> None:
     try:
         # 3. Read raw files
         resume_path = WORKSPACE_ROOT / "knowledge" / "resume.md"
-        decisions_path = WORKSPACE_ROOT / "knowledge" / "reservation-system" / "decisions.md"
+        decisions_path = WORKSPACE_ROOT / "knowledge" / "talentforge" / "decisions.md"
         
         resume_text = resume_path.read_text(encoding="utf-8")
         decisions_text = decisions_path.read_text(encoding="utf-8")

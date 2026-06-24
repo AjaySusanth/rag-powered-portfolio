@@ -42,9 +42,9 @@ async def ingest_test_documents(force: bool = False) -> None:
     print("[Ingestion] Checking database status...")
     await init_db()
 
-    # Check if we already have chunks for portfolio or reservation-system
+    # Check if we already have chunks for portfolio or talentforge
     existing_resume = await search_similar_chunks([0.0] * 1536, limit=1, project_filter="portfolio")
-    existing_decisions = await search_similar_chunks([0.0] * 1536, limit=1, project_filter="reservation-system")
+    existing_decisions = await search_similar_chunks([0.0] * 1536, limit=1, project_filter="talentforge")
 
     if existing_resume and existing_decisions and not force:
         print("[Ingestion] Test documents already present in database. Skipping ingestion.")
@@ -53,7 +53,7 @@ async def ingest_test_documents(force: bool = False) -> None:
     print("[Ingestion] Ingesting source files into database...")
     workspace_root = BACKEND_DIR.parent
     resume_path = workspace_root / "knowledge" / "resume.md"
-    decisions_path = workspace_root / "knowledge" / "reservation-system" / "decisions.md"
+    decisions_path = workspace_root / "knowledge" / "talentforge" / "decisions.md"
 
     if not resume_path.exists() or not decisions_path.exists():
         print(f"[Error] Required knowledge files not found in workspace:\n  - {resume_path}\n  - {decisions_path}")
@@ -79,13 +79,13 @@ async def ingest_test_documents(force: bool = False) -> None:
     decisions_chunks = chunk_text(decisions_text, DocumentLayer.DESIGN)
     decisions_embeddings = await embed_texts([c.content for c in decisions_chunks])
     await upsert_document_chunks(
-        project="reservation-system",
+        project="talentforge",
         layer=DocumentLayer.DESIGN,
         source_file="decisions.md",
         chunks=decisions_chunks,
         embeddings=decisions_embeddings
     )
-    print(f"[Ingestion] Saved {len(decisions_chunks)} chunks for reservation-system (decisions.md)")
+    print(f"[Ingestion] Saved {len(decisions_chunks)} chunks for talentforge (decisions.md)")
 
 
 async def run_rag_pipeline(query: str, project_filter: str = None) -> None:

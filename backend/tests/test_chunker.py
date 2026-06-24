@@ -189,10 +189,10 @@ def test_resume_integration_layer1():
 
 def test_decisions_integration_layer2():
     """
-    Integration test against the live knowledge/reservation-system/decisions.md.
+    Integration test against the live knowledge/talentforge/decisions.md.
     Validates: Layer 2 token limits, heading isolation, comment stripping.
     """
-    path = WORKSPACE_ROOT / "knowledge" / "reservation-system" / "decisions.md"
+    path = WORKSPACE_ROOT / "knowledge" / "talentforge" / "decisions.md"
     assert path.exists(), f"decisions.md not found at {path}"
 
     text = path.read_text(encoding="utf-8")
