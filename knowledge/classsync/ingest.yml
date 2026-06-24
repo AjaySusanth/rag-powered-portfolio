@@ -1,0 +1,56 @@
+project: classsync
+type: fullstack-automation
+github_repo: AjaySusanth/automate-classwork
+
+auto_ingest:
+  # Design and architectural documentation
+  - README.md
+  - n8n-workflows/README.md
+
+  # Database schema (declares actual relational structure and constraints)
+  - backend/prisma/schema.prisma
+
+  # Entry point and API configuration
+  - backend/src/server.js
+
+  # Middlewares (secures APIs and manages RBAC and service-to-service auth keys)
+  - backend/src/middleware/auth.js
+  - backend/src/middleware/serviceAuth.js
+
+  # Abstractions (channel-agnostic notifications and cloud storage adapters)
+  - backend/src/services/notifications/NotificationChannel.js
+  - backend/src/services/notifications/NotificationService.js
+  - backend/src/services/notifications/TelegramChannel.js
+  - backend/src/services/storage/StorageProvider.js
+  - backend/src/services/storage/SupabaseStorage.js
+
+  # Business controllers (Prisma transactions, token linking, and concurrency locking)
+  - backend/src/controllers/*.js
+
+  # n8n workflows (core visual automations, cron engines, and routers)
+  - n8n-workflows/assignment-and-reminders.json
+  - n8n-workflows/Telegram Command Router.json
+
+  # Infrastructure-as-code and container routes
+  - infra/terraform/**/*.tf
+  - nginx.conf
+  - .github/workflows/ci-cd.yml
+  - Dockerfile
+  - entrypoint.sh
+  
+  # Frontend (Router, view layers, session state, and Axios configuration)
+  - frontend/src/App.jsx
+  - frontend/src/pages/**
+  - frontend/src/context/**
+  - frontend/src/services/api.js
+
+
+ignore:
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/.git/**"
+  - "backend/prisma/migrations/**"
+  - "infra/terraform/.terraform/**"
+  - "infra/terraform/*.tfstate*"
+  - "**/package-lock.json"

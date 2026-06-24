@@ -1,74 +1,91 @@
-<!-- 
-DESIGN DECISION: This file is structured with clear, semantic Markdown headers (H1, H2, H3) and concise bullet points. This layout is designed to support the RAG ingestion pipeline's Layer 1 chunking strategy (256-token chunk size, 32-token overlap). Keeping each section under 200 tokens ensures that the vector and BM25 search queries retrieve coherent, contextually complete blocks of information without bleeding into unrelated topics.
--->
+# Ajay Susanth
 
-# Ajay's Resume
+## Contact Information
+
+The contact details for Ajay Susanth are:
+- **Location**: Kochi, Kerala, India
+- **Email**: ajaysusanth10@gmail.com
+- **LinkedIn**: https://www.linkedin.com/in/ajay2005susanth/
+- **GitHub**: https://github.com/AjaySusanth
+- **Phone**: +918943460250
 
 ## Professional Summary
-Highly skilled Full-Stack and DevOps Engineer with a strong foundation in building scalable, cloud-native backend systems and automation pipelines. Specialized in FastAPI, React, PostgreSQL, Redis, Docker, and Kubernetes. Passionate about applying AI/ML patterns (such as Retrieval-Augmented Generation) to solve real-world problems and optimizing infrastructure delivery via Infrastructure as Code (IaC) and GitOps.
 
----
+Ajay Susanth is a final-year B.Tech student in Artificial Intelligence and Machine Learning with hands-on experience building and operating production-style systems end to end — from cloud infrastructure to running services. Ajay Susanth has designed and provisioned Azure infrastructure with Terraform, built distributed backend systems with FastAPI and Express.js, and re-architected monolithic n8n deployments into scalable, observable Kubernetes platforms with CI/CD and GitOps. Ajay Susanth is skilled at owning a project from infrastructure to production, including application development, containerization, orchestration, and continuous integration and deployment.
+
+## Career Interests
+
+Ajay Susanth is interested in Software Engineering, Backend Engineering, Cloud Engineering, DevOps Engineering, Full Stack Development and AI-powered applications. Ajay Susanth prefers projects that combine software development with infrastructure, automation, deployment, observability, and operational excellence.
 
 ## Technical Skills
 
-### Backend & Databases
-- **Languages**: Python (FastAPI, Flask), TypeScript/JavaScript (Node.js, Express)
-- **Databases**: PostgreSQL (pgvector, HNSW indexes), Redis (Caching, Session State, Pub/Sub), MongoDB
-- **ORM/Query Builders**: Prisma, SQLAlchemy, Alembic
-
-### Frontend
-- **Frameworks & Libraries**: React, Next.js, Redux Toolkit, HTML5, CSS3, Tailwind CSS
-- **APIs**: REST, Server-Sent Events (SSE), WebSockets, GraphQL
-
-### DevOps & Cloud Infrastructure
-- **IaC & Config Management**: Terraform, Ansible
-- **Containerization & Orchestration**: Docker, Docker Compose, Kubernetes (AKS), Helm
+The technical skills of Ajay Susanth include:
+- **Languages**: Python, JavaScript, TypeScript, MERN stack
+- **Backend Frameworks**: FastAPI, Express.js
+- **Frontend**: React, HTML5, CSS3, Tailwind CSS
+- **Databases**: PostgreSQL, pgvector, MongoDB, Redis
+- **ORMs & Query Tools**: Prisma ORM, Postman
+- **Containerization & Orchestration**: Docker, Kubernetes, Azure Kubernetes Service (AKS), Helm
 - **CI/CD & GitOps**: GitHub Actions, ArgoCD
-- **Cloud Providers**: Microsoft Azure, AWS
-- **Monitoring & Observability**: Prometheus, Grafana, ELK Stack
+- **Cloud & IaC**: Microsoft Azure, Terraform (modular), Azure Container Apps, Azure Container Registry, Azure PostgreSQL Flexible Server
+- **Security & Policies**: Calico Network Policies, OPA Gatekeeper, Secrets Store CSI Driver
+- **Monitoring & Observability**: Prometheus, Grafana, KEDA
+- **AI & ML**: Embeddings, Vector Search, LLM Integration, Natural Language Processing, Document Intelligence, Named Entity Recognition
+- **Automation**: n8n workflow automation, Telegram Bot API
 
----
+## Project: Scalable n8n Architecture on AKS
 
-## Professional Experience
+Scalable n8n Architecture on AKS is a DevOps and container orchestration project built by Ajay Susanth. For Scalable n8n Architecture on AKS, Ajay Susanth redesigned n8n's monolithic deployment into independently scalable UI, webhook, and worker workloads on Azure Kubernetes Service (AKS), provisioning Azure infrastructure through reusable Terraform modules.
 
-### Senior Software Engineer | Cloud Solutions Corp
-*June 2024 — Present*
-- Architected and built microservices-based backends using **FastAPI** and Node.js, improving system response times by 35%.
-- Implemented hybrid caching models using **Redis**, reducing primary database loads by 40% and cutting API latency.
-- Migrated legacy database infrastructures to **PostgreSQL**, leveraging optimized indexing strategies and connection pooling.
-- Led the containerization transition by writing production-grade multi-stage **Dockerfiles** and managing deployments using **Docker Compose** and **Kubernetes**.
+Ajay Susanth built a GitOps deployment workflow using GitHub Actions, Helm, and ArgoCD, enabling automated Kubernetes releases with versioned OCI Helm packages stored in Azure Container Registry.
 
-### Software Engineer | InnovateTech
-*January 2022 — June 2024*
-- Developed responsive, performant user interfaces with **React** and **Tailwind CSS**, increasing user engagement by 20%.
-- Integrated robust authentication systems using JSON Web Tokens (JWT) and OAuth2 protocols in backend APIs.
-- Built automated CI/CD pipelines via **GitHub Actions** to automate linting, testing, and deployment processes.
-- Contributed to database design and migrations using **Prisma ORM**, ensuring schema integrity and performance.
+Ajay Susanth implemented horizontal autoscaling to scale worker pods dynamically based on Redis queue depth, with Prometheus alerting rules and Grafana dashboards for operational visibility.
 
----
+Ajay Susanth strengthened cluster security using validating admission policies via OPA Gatekeeper, Azure Key Vault CSI integration for secret projection, and Calico Network Policies enforcing default-deny traffic controls with scoped webhook egress.
 
-## Projects
+## Project: TalentForge
 
-### RAG-Powered Developer Portfolio ("Ask Ajay")
-- Designed and implemented a terminal-style developer portfolio utilizing **FastAPI**, **React**, and **PostgreSQL** with the **pgvector** extension.
-- Built a hybrid search engine combining vector search (HNSW index, cosine similarity) and BM25 keyword search, merged via Reciprocal Rank Fusion (RRF) for retrieval precision.
-- Engineered a self-healing retrieval pipeline that automatically rewrites low-confidence queries using **Gemini 2.0 Flash**.
-- Implemented SSE (Server-Sent Events) streaming for low-latency chat interactions and Redis response caching.
+TalentForge is an AI-powered resume parsing and candidate ranking platform built by Ajay Susanth. For TalentForge, Ajay Susanth built an asynchronous resume ingestion pipeline using FastAPI, Celery, and Redis with MIME validation, upload size limits, and idempotent task orchestration to ensure reliable background processing.
 
-### TalentForge (Full-Stack Platform)
-- Built a developer talent platform using **React**, **FastAPI**, and **Prisma ORM** with a PostgreSQL database.
-- Implemented complex search and filtering algorithms for matching resumes with job postings.
-- Dockerized the frontend and backend microservices to ensure identical dev/prod environments.
+Ajay Susanth developed a multi-stage LLM parsing pipeline integrating document parsing services, Named Entity Recognition (NER) models, and fallback LLMs to generate structured candidate profiles and normalized skills data.
 
-### ClassSync (DevOps & Orchestration Project)
-- Created a highly available containerized environment utilizing **Kubernetes (AKS)**, **Helm**, and **ArgoCD** for continuous deployment.
-- Configured automated infrastructure provisioning via **Terraform** on Azure.
-- Structured automated rolling updates and blue-green deployments using GitOps principles.
+Ajay Susanth architected a hybrid ranking engine using OpenAI embeddings and configurable rule-based scoring, backed by pgvector with an HNSW index for cosine similarity search at scale.
 
----
+Ajay Susanth designed an LLM explainability layer that asynchronously generates ranked-candidate rationales using primary and fallback LLMs, cached in Redis to eliminate redundant inference calls.
+
+## Project: ClassSync (Automated Classwork)
+
+ClassSync (also known as Automated Classwork) is a multi-tenant classwork automation platform built by Ajay Susanth. For ClassSync, Ajay Susanth architected a multi-tenant REST API using Express.js with classroom-scoped authorization for assignment and grading workflows.
+
+Ajay Susanth integrated n8n-based workflow automation with webhook-driven event processing and authenticated internal APIs for Telegram notification delivery and reminder scheduling.
+
+Ajay Susanth provisioned Azure cloud infrastructure including Azure Container Apps, container registry, relational database, log analytics, and Key Vault via Terraform, enabling repeatable infrastructure-as-code deployments.
+
+Ajay Susanth containerized the application with multi-stage Docker builds behind an Nginx reverse proxy and designed a Telegram-first account-linking flow using short-lived tokens and chat-ID binding.
 
 ## Education
 
-### Bachelor of Science in Computer Science
-*State University | 2018 — 2022*
-- Core coursework: Data Structures & Algorithms, Database Management Systems, Software Engineering, Cloud Computing.
+The educational background of Ajay Susanth consists of:
+- **Degree**: Bachelor of Technology (B.Tech) in Artificial Intelligence and Machine Learning
+- **University**: APJ Abdul Kalam Technological University
+- **College**: Mar Athanasius College of Engineering, Kothamangalam, Kerala, India
+- **Duration**: 2023 — 2027
+- **CGPA**: 8.78
+
+## Certifications
+
+Ajay Susanth holds the following professional certifications:
+- Oracle Cloud Infrastructure Certified Foundations Associate, obtained in 2025
+- Deploy Kubernetes Applications on Google Cloud (Google Cloud Skill Badge), obtained in 2025
+
+## Project-to-Skill Index
+
+This index maps Ajay Susanth's projects to specific technologies to support retrieval queries:
+- **Which project demonstrates Kubernetes?** → Scalable n8n Architecture on AKS (using AKS, Helm, KEDA, and ArgoCD)
+- **Which project demonstrates Terraform?** → Scalable n8n Architecture on AKS (for AKS infrastructure) and ClassSync (for Azure Container Apps and PostgreSQL Flexible Server)
+- **Which project demonstrates AI and machine learning engineering?** → TalentForge (LLM integration, embeddings, vector search, resume parsing, explainable ranking)
+- **Which project demonstrates backend engineering?** → TalentForge (using FastAPI, Celery, and Redis) and ClassSync (using Express.js, Prisma ORM, and PostgreSQL)
+- **Which project demonstrates workflow automation?** → ClassSync (using n8n webhook triggers and Telegram notifications) and Scalable n8n Architecture on AKS (decoupling and operating n8n workflows at scale)
+- **Which project demonstrates GitOps and CI/CD?** → Scalable n8n Architecture on AKS (using GitHub Actions, ArgoCD, and OCI chart packaging)
+- **Which project demonstrates security hardening?** → Scalable n8n Architecture on AKS (implementing OPA Gatekeeper, Calico policies, and Key Vault CSI)
+- **What are Ajay's strongest technical areas?** → Cloud infrastructure and Kubernetes (AKS, Terraform, ArgoCD), distributed backend APIs (FastAPI, Express.js), AI/ML pipeline integration (LLM APIs, vector search), and workflow automation (n8n)
