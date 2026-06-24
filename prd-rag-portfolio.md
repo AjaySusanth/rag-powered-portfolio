@@ -131,6 +131,13 @@ knowledge/
 │   ├── decisions.md
 │   ├── challenges.md
 │   └── lessons-learned.md
+│
+└── n8n-aks-platform/
+    ├── ingest.yml
+    ├── architecture.md
+    ├── decisions.md
+    ├── challenges.md
+    └── lessons-learned.md
 ```
 
 ### 3.3 Per-Project GitHub Ingestion Config (`ingest.yml`)
@@ -169,25 +176,31 @@ ignore:
 **DevOps Project Example:**
 
 ```yaml
-# knowledge/classsync/ingest.yml
+# knowledge/n8n-aks-platform/ingest.yml
 
-project: classsync
+project: n8n-aks-platform
 type: devops
-github_repo: ajay/classsync
+github_repo: AjaySusanth/n8n-production-platform
 
 auto_ingest:
   - README.md
-  - terraform/**
-  - helm/**
-  - k8s/**
-  - .github/workflows/**
-  - argocd/**
-  - Dockerfile
+  - docs/verification_ledger.md
+  - docs/architecture/component-communication.md
+  - terraform/modules/**/*.tf
+  - terraform/envs/**/*.tf
+  - helm/n8n/Chart.yaml
+  - helm/n8n/values.yaml
+  - helm/n8n/templates/**/*.yaml
+  - gitops/argocd/**/*.yaml
+  - .github/workflows/*.yaml
+  - monitoring/alerts/*.yaml
 
 ignore:
-  - .terraform/**
-  - "**/*.tfstate"
+  - "**/node_modules/**"
+  - "**/.terraform/**"
+  - "**/*.tfstate*"
   - "**/*.tfstate.backup"
+  - "**/aks_kubeconfig"
 ```
 
 **Full-Stack Project Example:**

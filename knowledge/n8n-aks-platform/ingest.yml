@@ -1,0 +1,23 @@
+project: n8n-aks-platform
+type: devops
+github_repo: AjaySusanth/scalable-n8n-deployment-architecture
+
+auto_ingest:
+  - README.md
+  - docs/verification_ledger.md
+  - docs/architecture/component-communication.md
+  - terraform/modules/**/*.tf
+  - terraform/envs/**/*.tf
+  - helm/n8n/Chart.yaml
+  - helm/n8n/values.yaml
+  - helm/n8n/templates/**/*.yaml
+  - gitops/argocd/**/*.yaml
+  - .github/workflows/*.yaml
+  - monitoring/alerts/*.yaml
+
+ignore:
+  - "**/node_modules/**"
+  - "**/.terraform/**"
+  - "**/*.tfstate*"
+  - "**/*.tfstate.backup"
+  - "**/aks_kubeconfig"
