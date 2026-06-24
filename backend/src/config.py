@@ -64,6 +64,11 @@ class Settings(BaseSettings):
         description="The Gemini model name to use for answer generation"
     )
 
+    GITHUB_TOKEN: Optional[str] = Field(
+        default=None,
+        description="GitHub Personal Access Token"
+    )
+
 
     @field_validator("AZURE_OPENAI_ENDPOINT", mode="before")
     @classmethod
