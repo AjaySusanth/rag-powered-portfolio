@@ -1,37 +1,107 @@
-<!-- 
-DESIGN DECISION: This document outlines Ajay's professional character, work values, and engineering approach. Like resume.md, it is structured with clear headers to match the 256-token chunk limit. Spreading these concepts (Philosophy, Tech Interests, Communication) into explicit headers ensures that the RAG model can isolate personal background from specific engineering ideologies during query retrieval.
--->
+# About Ajay Susanth
 
-# About Ajay
+## Professional Profile
 
-## Professional Mission & Philosophy
-I believe that software engineering is about solving human and business problems, not just writing lines of code. I design systems with the long term in mind, prioritizing simplicity, readability, and maintenance over complex, over-engineered architectures. 
+Ajay Susanth is a final-year B.Tech student in Artificial Intelligence and Machine Learning at Mar Athanasius College of Engineering (MACE), Kerala.
 
-My core principles are:
-1. **Automate Ruthlessly**: If a task has to be performed more than twice, it deserves a script or pipeline. 
-2. **Observability First**: Code is only as good as your ability to monitor it in production. I build monitoring, metrics, and alerting pipelines directly into my design phases.
-3. **Explicit over Implicit**: I prefer code that is easy to read and understand at first glance, avoiding complex abstractions that hinder troubleshooting.
-4. **Security by Design**: Least-privilege access, encrypted secrets, and secure configurations are prerequisites, not retrofitted features.
+Ajay Susanth is interested in building software systems that extend beyond application code and into the infrastructure, automation, deployment, and operational layers that support them. While many projects focus primarily on features, Ajay is particularly interested in understanding how software is deployed, scaled, monitored, secured, and maintained in real-world environments.
 
----
+As a fresher, Ajay has developed his skills primarily through personal, academic, and portfolio projects. These projects have provided opportunities to explore backend development, cloud infrastructure, DevOps practices, workflow automation, and AI-powered applications while gaining practical experience with modern software engineering tools and workflows.
 
-## Technical Interests & Focus
-My technical focus is at the intersection of **Backend Development**, **Cloud Infrastructure (DevOps)**, and **Applied AI**. 
+## Engineering Philosophy
 
-I am particularly interested in:
-- **Retrieval-Augmented Generation (RAG)**: Engineering high-quality retrieval pipelines using hybrid search, semantic ranking, and self-healing LLM strategies to query private datasets.
-- **GitOps and Infrastructure-as-Code (IaC)**: Eliminating configuration drift by treating infrastructure exactly like application code—version-controlled, tested, and automatically applied.
-- **Microservices Orchestration**: Navigating the tradeoffs of service discovery, asynchronous message queuing, and distributed caching in large-scale applications.
+Ajay Susanth approaches software development from a systems perspective.
 
----
+When building projects, Ajay prefers to think beyond the immediate functionality of an application and consider questions such as:
 
-## Communication & Collaboration Style
-I value transparent, documentation-heavy communication. I find that writing down design specs, decisions, and challenges before coding saves days of wasted effort.
-- **Written Documentation**: I document system designs, API changes, and migration strategies thoroughly, making it easier for new developers to onboard.
-- **Feedback & Code Reviews**: I view code reviews as a collaborative learning tool, not a gatekeeping process. I welcome constructive criticism and strive to give actionable, helpful feedback.
-- **Blameless Post-Mortems**: When production issues occur, I focus on system-level weaknesses and process gaps rather than human errors, ensuring that the same failure mode never happens twice.
+* How will the system scale?
+* How will it be deployed?
+* How will failures be handled?
+* How will it be monitored and maintained?
+* How can repetitive work be automated?
 
----
+This perspective has led Ajay to explore cloud-native technologies, Infrastructure as Code, containerization, CI/CD pipelines, observability, and automation alongside traditional application development.
 
-## Personal Background & Interests
-Beyond the terminal, I enjoy exploring the internals of open-source projects, participating in coding challenges, and mentoring junior developers. I am a lifelong learner who reads technical documentation and RFCs to understand the "why" behind the tools we use daily. When I am not coding, I enjoy playing strategy video games, reading science fiction, and hiking.
+## Why Cloud and DevOps
+
+Over time, Ajay Susanth's interests expanded from backend development into cloud infrastructure and DevOps.
+
+While building applications, Ajay became increasingly interested in the operational challenges surrounding software systems, including deployment automation, environment consistency, infrastructure provisioning, observability, security, and reliability.
+
+This interest motivated Ajay to learn technologies such as Docker, Kubernetes, Terraform, GitHub Actions, Helm, ArgoCD, and Microsoft Azure through project-based learning.
+
+Ajay views cloud and DevOps practices as important skills for understanding how software moves from development environments into production systems.
+
+## Technical Interests
+
+The areas that currently interest Ajay Susanth the most include:
+
+* Cloud Engineering
+* DevOps Engineering
+* Backend Engineering
+* Distributed Systems
+* Infrastructure as Code
+* Kubernetes and Container Orchestration
+* Workflow Automation
+* AI-Powered Applications
+* Developer Productivity
+* Observability and Reliability
+
+Ajay enjoys projects that combine multiple areas of software engineering rather than focusing on a single technology or framework.
+
+## Approach to Learning
+
+Ajay Susanth prefers learning through projects rather than isolated tutorials.
+
+Instead of studying technologies independently, Ajay typically learns new concepts by incorporating them into practical systems. This approach has led him to explore cloud infrastructure, CI/CD pipelines, container orchestration, workflow automation, AI integrations, and distributed backend architectures through end-to-end project development.
+
+Ajay also places importance on understanding the reasoning behind technical decisions, trade-offs, and architecture choices rather than simply implementing technologies because they are popular.
+
+## Approach to Software Development
+
+Ajay Susanth values simplicity, maintainability, and automation when designing software systems.
+
+When possible, Ajay prefers:
+
+* Clear service boundaries
+* Reproducible infrastructure
+* Automated deployment processes
+* Strong observability
+* Practical security controls
+* Reliable data models
+* Well-documented architecture decisions
+
+Ajay believes that good software engineering involves balancing technical complexity with maintainability and long-term operability.
+
+## Strengths as a Fresher
+
+As a fresher, Ajay Susanth's primary strengths include curiosity, adaptability, and a willingness to learn unfamiliar technologies when required by a project.
+
+Ajay is comfortable moving across different parts of the software stack, including frontend development, backend development, databases, cloud infrastructure, CI/CD pipelines, containerization, automation workflows, and AI integrations.
+
+This broad exposure helps Ajay understand how different parts of a system interact and provides a foundation for continued growth as a software engineer.
+
+## Community and Professional Development
+
+Ajay Susanth actively participates in technical communities and student-led initiatives that encourage learning, collaboration, and knowledge sharing.
+
+Through involvement in engineering communities, project work, technical discussions, and continuous learning, Ajay seeks opportunities to improve both technical depth and practical software engineering skills.
+
+## Career Interests
+
+Ajay Susanth is interested in pursuing opportunities related to:
+
+* Software Engineering
+* Backend Engineering
+* Full Stack Development
+* Cloud Engineering
+* DevOps Engineering
+* AI-Powered Software Systems
+
+Ajay is particularly interested in roles that provide opportunities to work on modern software systems while continuing to develop expertise in cloud infrastructure, automation, distributed systems, and backend technologies.
+
+## Long-Term Goals
+
+Ajay Susanth aims to become a well-rounded software engineer with strong foundations in both application development and cloud infrastructure.
+
+His long-term goal is to contribute to systems that are reliable, scalable, maintainable, and useful, while continuing to learn new technologies and engineering practices throughout his career.
