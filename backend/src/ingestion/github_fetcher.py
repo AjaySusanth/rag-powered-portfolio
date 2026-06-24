@@ -16,10 +16,10 @@ import yaml
 import httpx
 import asyncio
 from pathlib import Path, PurePosixPath
-from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 
 from src.config import settings
+from src.models.document import Document, determine_document_layer
 
 # Setup logger
 logger = logging.getLogger(__name__)
@@ -46,15 +46,6 @@ BINARY_EXTENSIONS = {
 class GitHubIngestionError(Exception):
     """Raised for unrecoverable failures during GitHub ingestion."""
     pass
-
-
-@dataclass
-class GitHubDocument:
-    """Strongly typed representation of a fetched GitHub document."""
-    path: str
-    content: str
-    project: str
-    source_type: str = "github"
 
 
 def parse_ingest_yaml(yaml_path: str) -> Dict[str, Any]:
@@ -182,10 +173,10 @@ def _match_path(path: str, includes: List[str], ignores: List[str]) -> bool:
     return False
 
 
-async def fetch_github_repository(yaml_path: str) -> List[GitHubDocument]:
+async def fetch_github_repository(yaml_path: str) -> List[Document]:
     """
     Reads ingest.yml, queries the GitHub REST API to discover matching files,
-    downloads their raw contents, and returns a list of GitHubDocuments.
+    downloads their raw contents, and returns a list of Documents.
     """
     config = parse_ingest_yaml(yaml_path)
     project = config["project"]
@@ -278,23 +269,45 @@ async def fetch_github_repository(yaml_path: str) -> List[GitHubDocument]:
         # 4. Fetch file contents concurrently using the blob API with a concurrency limit
         sem = asyncio.Semaphore(10)
         
-        async def fetch_file(path: str, sha: str) -> Optional[GitHubDocument]:
+        async def fetch_file(path: str, sha: str) -> Optional[Document]:
             async with sem:
                 blob_url = f"https://api.github.com/repos/{repo}/git/blobs/{sha}"
-                # Request raw content directly
+                # Use the standard vnd.github+json response type.
+                # The deprecated vnd.github.v3.raw media type causes 401 errors
+                # on some blob requests (notably empty files like e69de29b).
                 blob_headers = headers.copy()
-                blob_headers["Accept"] = "application/vnd.github.v3.raw"
+                blob_headers["Accept"] = "application/vnd.github+json"
                 
                 try:
                     resp = await client.get(blob_url, headers=blob_headers)
                     resp.raise_for_status()
                     
+                    blob_data = resp.json()
+                    encoding = blob_data.get("encoding")
+                    raw_content = blob_data.get("content", "")
+
+                    if encoding == "base64":
+                        # GitHub returns base64-encoded content with embedded newlines
+                        import base64
+                        raw_bytes = base64.b64decode(raw_content.replace("\n", ""))
+                    else:
+                        # Unlikely, but handle plain text blobs defensively
+                        raw_bytes = raw_content.encode("utf-8")
+
                     # Attempt to decode as UTF-8 (filters out binary files)
-                    content = resp.content.decode('utf-8')
-                    return GitHubDocument(
-                        path=path,
+                    try:
+                        content = raw_bytes.decode("utf-8")
+                    except UnicodeDecodeError:
+                        logger.info(f"Skipping file {path} as it could not be decoded as UTF-8 text.")
+                        return None
+
+                    layer = determine_document_layer(path, "github")
+                    return Document(
                         content=content,
-                        project=project
+                        project=project,
+                        layer=layer,
+                        source_type="github",
+                        source_file=path
                     )
                 except UnicodeDecodeError:
                     logger.info(f"Skipping file {path} as it could not be decoded as UTF-8 text.")
@@ -302,6 +315,7 @@ async def fetch_github_repository(yaml_path: str) -> List[GitHubDocument]:
                 except Exception as e:
                     logger.error(f"Failed to fetch content for file {path} (SHA: {sha}): {e}")
                     return None
+
                     
         tasks = [fetch_file(path, sha) for path, sha in matched_items]
         results = await asyncio.gather(*tasks)

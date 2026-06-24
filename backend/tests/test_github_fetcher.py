@@ -7,11 +7,11 @@ import httpx
 from src.ingestion.github_fetcher import (
     match_pattern,
     parse_ingest_yaml,
-    GitHubDocument,
     GitHubIngestionError,
     fetch_github_repository,
     is_binary_file
 )
+from src.models.document import Document, determine_document_layer
 
 # -----------------------------------------------------------------------------
 # Unit Tests for Matcher (Satisfying Rule 6)
@@ -173,13 +173,15 @@ async def test_fetch_github_repository_success(mock_client_class):
             docs = await fetch_github_repository("dummy_path.yml")
             
             assert len(docs) == 2
-            assert docs[0].path == "README.md"
+            assert docs[0].source_file == "README.md"
             assert docs[0].content == "My Readme Content"
             assert docs[0].project == "test-project"
             assert docs[0].source_type == "github"
+            assert docs[0].layer == "artifact"
             
-            assert docs[1].path == "src/main.py"
+            assert docs[1].source_file == "src/main.py"
             assert docs[1].content == "print('Hello')"
+            assert docs[1].layer == "artifact"
 
 
 @pytest.mark.anyio
@@ -209,3 +211,29 @@ async def test_fetch_github_repository_rate_limit(mock_client_class):
             await fetch_github_repository("dummy_path.yml")
         
     assert "rate limit" in str(exc_info.value).lower()
+
+
+# -----------------------------------------------------------------------------
+# Unit Tests for determine_document_layer
+# -----------------------------------------------------------------------------
+
+@pytest.mark.parametrize(
+    "source_file,source_type,expected_layer",
+    [
+        ("resume.md", "manual", "identity"),
+        ("path/to/about-me.md", "manual", "identity"),
+        ("FAQ.md", "manual", "identity"),
+        ("architecture.md", "manual", "design"),
+        ("decisions.md", "manual", "design"),
+        ("challenges.md", "manual", "design"),
+        ("lessons-learned.md", "manual", "design"),
+        ("approach.md", "github", "design"),
+        # README.md should be artifact!
+        ("README.md", "github", "artifact"),
+        ("path/to/README.md", "github", "artifact"),
+        ("main.py", "github", "artifact"),
+        ("frontend/src/App.tsx", "github", "artifact"),
+    ]
+)
+def test_determine_document_layer(source_file: str, source_type: str, expected_layer: str):
+    assert determine_document_layer(source_file, source_type) == expected_layer
