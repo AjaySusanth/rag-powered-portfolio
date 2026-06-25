@@ -11,7 +11,7 @@ and returns them. It guarantees that chunks[i] corresponds exactly to embeddings
 import logging
 from typing import List
 from src.models.chunk import Chunk
-from src.ingestion.embedder import embed_texts
+from src.ingestion.embedder import embed_texts, embed_query as raw_embed_query
 
 logger = logging.getLogger(__name__)
 
@@ -42,4 +42,17 @@ async def embed_chunks(chunks: List[Chunk], batch_size: int = 100) -> List[List[
         return embeddings
     except Exception as e:
         logger.error(f"Failed to generate embeddings for chunks batch: {e}")
+        raise
+
+
+async def embed_query(query: str) -> List[float]:
+    """
+    Generates a 1536-dimensional embedding vector for a natural language query.
+    Delegates to the existing Azure OpenAI embedding client to ensure queries
+    and document chunks share the same embedding space.
+    """
+    try:
+        return await raw_embed_query(query)
+    except Exception as e:
+        logger.error(f"Failed to generate embedding for query: {e}")
         raise
