@@ -3,36 +3,26 @@ type: fullstack
 github_repo: AjaySusanth/smart-talent-selection
 
 auto_ingest:
-  # Documentation
+  # Documentation — always include
   - "README.md"
   - "APPROACH.md"
 
-  # Core Business Logic & AI Workflows
-  - "backend/app/services/*.py"
+  # Core AI & Business Logic — the "how" that Layer 2 doesn't fully show
+  - "backend/app/services/ranking/*.py"
   - "backend/app/services/jd/*.py"
   - "backend/app/services/parsing/*.py"
-  - "backend/app/services/ranking/*.py"
-
-  # Async Tasks & Queue Integrations
-  - "backend/app/workers/celery_app.py"
-  - "backend/app/workers/tasks/*.py"
-
-  # Persistence, Schemas, & Data Models
-  - "backend/app/models/*.py"
-  - "backend/app/schemas/*.py"
 
   # API Layer
   - "backend/app/api/v1/routes/*.py"
 
-  # Frontend Pages, Layout & Types
-  - "frontend/src/pages/*.tsx"
-  - "frontend/src/components/**/*.tsx"
-  - "frontend/src/types/*.ts"
-  - "frontend/src/lib/*.ts"
-  - "frontend/src/App.tsx"
+  # Async Pipeline — unique architectural proof point
+  - "backend/app/workers/celery_app.py"
+  - "backend/app/workers/tasks/*.py"
 
-  # Infrastructure & Configuration
-  - "backend/app/core/config.py"
+  # Data contracts — schemas only (models are redundant)
+  - "backend/app/schemas/*.py"
+
+  # Infra config — one file that proves deployment knowledge
   - "docker-compose.yml"
 
 ignore:
@@ -45,3 +35,7 @@ ignore:
   - "backend/app/db/migrations/**"
   - "docs/sample_resumes/**"
   - "**/*.pdf"
+  # Newly excluded — low signal, redundant, or Layer 2 territory
+  - "backend/app/models/**"
+  - "backend/app/core/**"
+  - "frontend/**"
