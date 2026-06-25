@@ -370,7 +370,223 @@ Step 4: Log correction event to PostgreSQL
         { original_query, rewritten_query, outcome, timestamp }
 ```
 
-### 4.5 LLM Layer
+## 4.5 Retrieval Debugger *(Admin Only)*
+
+### Purpose
+
+The Retrieval Debugger is an internal engineering tool used to inspect, diagnose, and improve retrieval quality.
+
+It is **not** exposed to recruiters or public users. Instead, it allows the developer to visualize every stage of the retrieval pipeline and understand *why* a particular answer was produced.
+
+This tool is essential during development of hybrid retrieval and provides evidence that retrieval quality improves after introducing BM25, Reciprocal Rank Fusion (RRF), and retrieval grading.
+
+---
+
+### Goals
+
+The debugger should answer questions such as:
+
+* Why was this chunk retrieved?
+* Why was another chunk ranked lower?
+* Did BM25 outperform vector search?
+* Which chunks were removed by the retrieval grader?
+* What exact context was sent to the LLM?
+* Where is retrieval latency spent?
+
+---
+
+### Retrieval Pipeline Visualization
+
+For every query, the debugger displays each stage independently.
+
+```
+User Query
+      │
+      ▼
+Query Embedding
+      │
+      ▼
+Vector Search
+      │
+      ▼
+(Optional) BM25 Search
+      │
+      ▼
+(Optional) Reciprocal Rank Fusion
+      │
+      ▼
+(Optional) Retrieval Grader
+      │
+      ▼
+Final Context
+      │
+      ▼
+LLM Response
+```
+
+---
+
+### Example — Vector Search Only
+
+**Query**
+
+```
+How are resumes ranked?
+```
+
+**Vector Search Results**
+
+```
+Rank  Score   Source
+-----------------------------------------
+1     0.517   APPROACH.md
+2     0.500   regex_extractor.py
+3     0.455   gemini_extractor.py
+4     0.446   job_descriptions.py
+5     0.446   ranking_service.py
+```
+
+Observation:
+
+Although `ranking_service.py` contains the actual ranking algorithm, pure vector similarity placed it fifth because `APPROACH.md` contains more semantically similar wording.
+
+---
+
+### Example — After BM25
+
+```
+Rank  BM25 Score   Source
+-----------------------------------------
+1     18.2         ranking_service.py
+2     15.8         job_descriptions.py
+3     10.4         APPROACH.md
+4      8.1         regex_extractor.py
+5      7.3         gemini_extractor.py
+```
+
+Observation:
+
+BM25 correctly favors files containing ranking-specific terminology such as:
+
+* ranking
+* score
+* candidate
+* semantic_score
+
+---
+
+### Example — After Reciprocal Rank Fusion
+
+```
+Final Ranking
+
+1. ranking_service.py
+2. APPROACH.md
+3. job_descriptions.py
+4. gemini_extractor.py
+5. regex_extractor.py
+```
+
+Observation:
+
+Hybrid retrieval combines semantic understanding from vector search with lexical precision from BM25.
+
+---
+
+### Example — Retrieval Grader
+
+```
+ranking_service.py
+
+Relevance: 0.98
+
+Reason:
+Contains the candidate ranking algorithm.
+
+----------------------------------------
+
+APPROACH.md
+
+Relevance: 0.61
+
+Reason:
+Explains the project's goals but not the ranking implementation.
+
+----------------------------------------
+
+regex_extractor.py
+
+Relevance: 0.08
+
+Reason:
+Discusses resume parsing only.
+```
+
+Chunks below the configured threshold are discarded before generation.
+
+---
+
+### Final Context Sent to the LLM
+
+```
+1. ranking_service.py
+
+2. APPROACH.md
+
+3. job_descriptions.py
+```
+
+The debugger displays the exact context assembled for the prompt, making hallucination analysis significantly easier.
+
+---
+
+### Performance Metrics
+
+For each retrieval request the debugger records:
+
+```
+Embedding Time
+
+Vector Search Time
+
+BM25 Time
+
+Fusion Time
+
+Retrieval Grader Time
+
+Total Retrieval Latency
+```
+
+Example:
+
+```
+Embedding         82 ms
+Vector Search     21 ms
+BM25               6 ms
+RRF                1 ms
+LLM Grader       302 ms
+--------------------------------
+Total            412 ms
+```
+
+---
+
+### Benefits
+
+The Retrieval Debugger enables:
+
+* Retrieval quality analysis
+* Hybrid retrieval evaluation
+* Latency optimization
+* Hallucination debugging
+* Prompt context inspection
+* Engineering demonstrations during interviews
+
+Most importantly, it allows retrieval improvements to be measured objectively rather than assumed.
+
+
+### 4.6 LLM Layer
 
 | Role              | Model (Configurable)            | Fallback           |
 | ----------------- | ------------------------------- | ------------------ |
@@ -382,7 +598,7 @@ Step 4: Log correction event to PostgreSQL
 
 System prompt enforces strict grounding: answer only from retrieved context, cite sources inline, never speculate or invent facts.
 
-### 4.6 Caching Layer (Redis)
+### 4.7 Caching Layer (Redis)
 
 | Cache Type      | Key Pattern                          | TTL        |
 | --------------- | ------------------------------------ | ---------- |
@@ -459,8 +675,9 @@ _Production-grade signal. Your strongest differentiator._
 | 24  | Retrieval analytics aggregation — topic frequency, avg latency, cache hit rate, correction rate, hire submissions                              |
 | 25  | `/admin/analytics` endpoint — serves aggregated metrics as JSON                                                                                |
 | 26  | Prometheus metrics — expose key RAG metrics as `/metrics` endpoint                                                                             |
-| 27  | Docker multi-stage builds — FastAPI + React + NGINX in one Compose stack                                                                       |
-| 28  | **Background ingestion job** _(optional)_ — scheduled job polls GitHub API for changes to whitelisted files, re-ingests on diff, flushes Redis |
+| 27  | Retrieval Debugger (Admin Only) — visualize vector search, BM25, RRF, retrieval grader, final prompt context, and latency breakdown for every query                                                                   |
+| 28  | Docker multi-stage builds — FastAPI + React + NGINX in one Compose stack                                                                       |
+| 29  | **Background ingestion job** _(optional)_ — scheduled job polls GitHub API for changes to whitelisted files, re-ingests on diff, flushes Redis |
 
 ---
 
