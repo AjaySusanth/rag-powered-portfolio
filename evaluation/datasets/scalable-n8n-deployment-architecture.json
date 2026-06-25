@@ -1,0 +1,202 @@
+{
+    "project": "n8n-aks-platform",
+    "generated_at": "2026-06-25T16:33:02Z",
+    "questions": [
+        {
+            "id": "N8N-001",
+            "category": "core_logic",
+            "question": "How does the OPA Gatekeeper constraint template evaluate and prevent pods from running without specified container image tags or with the 'latest' tag in the dev namespace?",
+            "expected_sources": [
+                "gitops/argocd/gatekeeper/templates/disallowed-tags-template.yaml",
+                "gitops/argocd/gatekeeper/constraints/disallowed-tags-constraints.yaml"
+            ],
+            "expected_layers": [
+                "design",
+                "design"
+            ],
+            "reason": "These files contain the Rego policy template and constraints that parse image properties and enforce tag rules."
+        },
+        {
+            "id": "N8N-002",
+            "category": "core_logic",
+            "question": "How does the OPA Gatekeeper policy ensure that every container and initContainer in a pod defines CPU and Memory requests and limits prior to scheduler placement?",
+            "expected_sources": [
+                "gitops/argocd/gatekeeper/templates/required-resources-template.yaml",
+                "gitops/argocd/gatekeeper/constraints/required-resources-constraint.yaml"
+            ],
+            "expected_layers": [
+                "design",
+                "design"
+            ],
+            "reason": "These files define the Rego validation functions that extract both standard containers and initContainers from the Pod spec to check for the presence of CPU and memory limits/requests parameters."
+        },
+        {
+            "id": "N8N-003",
+            "category": "core_logic",
+            "question": "How does the NetworkPolicy configuration isolate inter-pod communication for the database layer (Postgres and Redis) while allowing necessary metrics collection and operator polling?",
+            "expected_sources": [
+                "helm/n8n/templates/networkpolicies.yaml"
+            ],
+            "expected_layers": [
+                "design"
+            ],
+            "reason": "This file defines the allow-db-ingress NetworkPolicy that whitelists ingress from the dev namespace pods to Postgres/Redis, namespace keda to Redis, and namespace monitoring to redis-exporter."
+        },
+        {
+            "id": "N8N-004",
+            "category": "core_logic",
+            "question": "Why and how does the n8n egress NetworkPolicy permit outbound traffic to the public internet while strictly blocking lateral access to internal private IP ranges?",
+            "expected_sources": [
+                "helm/n8n/templates/networkpolicies.yaml"
+            ],
+            "expected_layers": [
+                "design"
+            ],
+            "reason": "This file configures an egress NetworkPolicy that opens communication to CIDR 0.0.0.0/0 on port 443 for external APIs but explicitly excludes RFC 1918 private subnets under the ipBlock except field."
+        },
+        {
+            "id": "N8N-005",
+            "category": "core_logic",
+            "question": "How does the Helm chart configure container security settings and privilege constraints for n8n application pods to conform to zero-trust standards?",
+            "expected_sources": [
+                "helm/n8n/templates/main.yaml",
+                "helm/n8n/templates/serviceaccounts.yaml"
+            ],
+            "expected_layers": [
+                "artifact",
+                "artifact"
+            ],
+            "reason": "These templates configure securityContext settings such as readOnlyRootFilesystem and non-root execution, mapping them to dedicated ServiceAccounts."
+        },
+        {
+            "id": "N8N-006",
+            "category": "pipeline",
+            "question": "How does the Helm Chart CI pipeline automate chart version promotion and synchronize state changes with ArgoCD upon a git commit to the Helm directory?",
+            "expected_sources": [
+                ".github/workflows/ci.yaml",
+                "gitops/argocd/application.yaml"
+            ],
+            "expected_layers": [
+                "artifact",
+                "artifact"
+            ],
+            "reason": "The CI workflow lint-and-publish job packages the chart with the short git commit SHA, pushes the OCI package to ACR, and uses sed to update targetRevision directly in the ArgoCD application manifest."
+        },
+        {
+            "id": "N8N-007",
+            "category": "pipeline",
+            "question": "How do the n8n application pods securely retrieve database passwords and encryption keys from Azure Key Vault without storing credentials in the git repository or Kubernetes Secret manifests?",
+            "expected_sources": [
+                "helm/n8n/templates/secretproviderclass.yaml",
+                "helm/n8n/templates/main.yaml"
+            ],
+            "expected_layers": [
+                "artifact",
+                "artifact"
+            ],
+            "reason": "The SecretProviderClass instructs the Secrets Store CSI driver to mount secrets from Azure Key Vault via a managed identity, creating a projected Kubernetes Secret that is subsequently injected into pod environment variables."
+        },
+        {
+            "id": "N8N-008",
+            "category": "pipeline",
+            "question": "How does the KEDA autoscaling loop coordinate with the Redis message broker and the n8n-worker deployment to dynamically manage worker replica counts?",
+            "expected_sources": [
+                "helm/n8n/templates/hpa-worker.yaml",
+                "helm/n8n/templates/worker.yaml"
+            ],
+            "expected_layers": [
+                "design",
+                "artifact"
+            ],
+            "reason": "The ScaledObject triggers on the length of the bull:jobs:wait Redis list and scales the n8n-worker deployment between min and max replica counts using authentication targets from the CSI-projected database secret."
+        },
+        {
+            "id": "N8N-009",
+            "category": "data_models",
+            "question": "How is the default resource request and limit configuration structured for the n8n components and database instances within the Helm values schema?",
+            "expected_sources": [
+                "helm/n8n/values.yaml"
+            ],
+            "expected_layers": [
+                "artifact"
+            ],
+            "reason": "The values.yaml file defines hierarchical blocks outlining the exact CPU/Memory request and limit allocations for n8n main, worker, webhook, postgres, and redis containers."
+        },
+        {
+            "id": "N8N-010",
+            "category": "data_models",
+            "question": "How are Azure Key Vault secret objects mapped to specific environment variable keys inside the SecretProviderClass definition?",
+            "expected_sources": [
+                "helm/n8n/templates/secretproviderclass.yaml"
+            ],
+            "expected_layers": [
+                "artifact"
+            ],
+            "reason": "This file exposes the spec.parameters.objects mapping schema and the secretObjects block translating Azure Key Vault secret names to internal keys inside the opaque Kubernetes secret object."
+        },
+        {
+            "id": "N8N-011",
+            "category": "data_models",
+            "question": "How is the PrometheusRule alerting expression for high workflow failure rates calculated using metrics from n8n queue execution?",
+            "expected_sources": [
+                "monitoring/alerts/n8n-rules.yaml"
+            ],
+            "expected_layers": [
+                "artifact"
+            ],
+            "reason": "The alerting rule calculates the ratio of the 5-minute rate of n8n_scaling_mode_queue_jobs_failed over the sum of completed and failed jobs rates to determine if it exceeds 10%."
+        },
+        {
+            "id": "N8N-012",
+            "category": "infrastructure",
+            "question": "How is the user-assigned or system-assigned kubelet identity in AKS configured in Terraform to allow read access to Azure Key Vault secrets?",
+            "expected_sources": [
+                "terraform/env/dev/main.tf",
+                "terraform/modules/keyvault/main.tf"
+            ],
+            "expected_layers": [
+                "artifact",
+                "design"
+            ],
+            "reason": "The Terraform root main.tf passes the kubelet_identity_object_id output from the AKS module to the Key Vault module, which configures a read-only access policy for secrets."
+        },
+        {
+            "id": "N8N-013",
+            "category": "infrastructure",
+            "question": "How is the Azure federated identity credential structured in Terraform to authenticate GitHub Actions CI/CD workflows using OIDC rather than static secrets?",
+            "expected_sources": [
+                "terraform/env/dev/oidc.tf"
+            ],
+            "expected_layers": [
+                "artifact"
+            ],
+            "reason": "This file configures the azurerm_federated_identity_credential resource pointing to the AzureADTokenExchange audience and GitHub actions issuer, scoped to the repository and branch."
+        },
+        {
+            "id": "N8N-014",
+            "category": "documentation",
+            "question": "Which inter-service paths are explicitly blocked by the NetworkPolicy architecture, and what architectural reasons justify preventing workers from communicating directly with the main API or webhooks?",
+            "expected_sources": [
+                "docs/architecture/component-communication.md",
+                "README.md"
+            ],
+            "expected_layers": [
+                "design",
+                "artifact"
+            ],
+            "reason": "The documentation defines the allowed/denied communication matrix, showing that n8n-worker is blocked from communicating with n8n-main or n8n-webhook because jobs are passed asynchronously via Redis."
+        },
+        {
+            "id": "N8N-015",
+            "category": "documentation",
+            "question": "How was compliance with named ServiceAccounts and resource limits verified across all running n8n pods in the cluster, as documented in the verification ledger?",
+            "expected_sources": [
+                "docs/verification_ledger.md"
+            ],
+            "expected_layers": [
+                "artifact"
+            ],
+            "reason": "The verification ledger records the precise kubectl custom-columns command query and corresponding terminal output used to validate ServiceAccounts and resource limits of live pods."
+        }
+    ]
+}

@@ -585,6 +585,21 @@ The Retrieval Debugger enables:
 
 Most importantly, it allows retrieval improvements to be measured objectively rather than assumed.
 
+#### Source Diversity@K
+
+Average number of unique source files across the Top-K retrieved results, measured per question and averaged across the evaluation set.
+
+**Why it matters:** Dense vector search frequently returns multiple chunks from the same file, crowding out other relevant sources and reducing contextual coverage for the LLM. This metric surfaces that failure mode quantitatively.
+
+**Example:**
+
+| Question | Top-5 Sources | Diversity@5 |
+| -------- | ------------- | ----------- |
+| A | README.md, README.md, README.md, worker.py, worker.py | 2 |
+| B | README.md, worker.py, service.py, schema.py, values.yaml | 5 |
+
+**Target:** Average Source Diversity@5 ≥ 3.5 after RRF and source diversification are applied.
+
 
 ### 4.6 LLM Layer
 
@@ -640,12 +655,13 @@ _Moves from "working" to "accurate and fast."_
 | --- | ---------------------------------------------------------------------------------- |
 | 8   | BM25 keyword search — run in parallel with vector search                           |
 | 9   | Reciprocal Rank Fusion — merge and re-rank BM25 + vector results                   |
-| 10  | Project-scoped filtering — detect project mentions, narrow retrieval before search |
-| 11  | Citations — every response shows source file + layer for each chunk used           |
-| 12  | Retrieval grader — score chunks for relevance, filter weak context                 |
-| 13  | Query rewriter — rephrase and re-retrieve on low-confidence retrievals             |
-| 14  | **Redis response cache** — `hash(query + chunk_ids)`, 24h TTL                      |
-| 15  | Redis embedding cache — avoid re-embedding identical text, 7d TTL                  |
+| 10  | Source diversification — after RRF, keep highest-scoring chunk per source, return top-K diversified results |
+| 11  | Project-scoped filtering — detect project mentions, narrow retrieval before search |
+| 12  | Citations — every response shows source file + layer for each chunk used           |
+| 13  | Retrieval grader — score chunks for relevance, filter weak context                 |
+| 14  | Query rewriter — rephrase and re-retrieve on low-confidence retrievals             |
+| 15  | **Redis response cache** — `hash(query + chunk_ids)`, 24h TTL                      |
+| 16  | Redis embedding cache — avoid re-embedding identical text, 7d TTL                  |
 
 ---
 
@@ -1060,6 +1076,7 @@ The following features are explicitly excluded from this version due to time con
 - GraphRAG — build a knowledge graph over projects and skills; retrieve by entity relationships rather than text similarity alone. Answers _"which projects demonstrate distributed systems experience?"_ far better than vector search.
 - Cross-encoder reranker — replace the LLM-based retrieval grader with a dedicated cross-encoder model (e.g. `ms-marco-MiniLM`) for faster, cheaper, more accurate chunk scoring.
 - Query expansion — generate multiple rephrasings of each query before retrieval, merge all result sets via RRF.
+- Source diversification — post-RRF stage that caps chunks per source file (configurable max 1–2 per source), preventing a single file from dominating Top-K and improving contextual coverage passed to the LLM.
 
 **Evaluation Infrastructure**
 
