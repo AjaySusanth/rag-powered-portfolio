@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 async def init_db() -> None:
     """
     Sets up the database by ensuring the vector extension is loaded,
-    creating the `document_chunks` table, and establishing the HNSW index.
+    creating the `chunks` table, and establishing the HNSW index.
     
     Why: A separate standalone connection is used here to avoid bootstrapping issues
     with connection pooling (since pgvector type registration requires the extension
@@ -37,27 +37,31 @@ async def init_db() -> None:
         await conn.execute("CREATE EXTENSION IF NOT EXISTS vector;")
         
         # Create table for chunks
-        logger.info("Creating document_chunks table...")
+        logger.info("Creating chunks table...")
         await conn.execute("""
-            CREATE TABLE IF NOT EXISTS document_chunks (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            CREATE TABLE IF NOT EXISTS chunks (
+                chunk_id TEXT PRIMARY KEY,
+                parent_document_id TEXT NOT NULL,
                 project VARCHAR(255) NOT NULL,
-                layer INTEGER NOT NULL,
+                layer VARCHAR(50) NOT NULL,
+                source_type VARCHAR(50) NOT NULL,
                 source_file VARCHAR(1024) NOT NULL,
-                heading VARCHAR(1024),
                 chunk_index INTEGER NOT NULL,
                 content TEXT NOT NULL,
+                content_hash TEXT NOT NULL,
+                token_count INTEGER NOT NULL,
+                char_count INTEGER NOT NULL,
+                metadata JSONB NOT NULL DEFAULT '{}',
                 embedding vector(1536) NOT NULL,
-                ingested_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                CONSTRAINT unique_project_file_chunk UNIQUE (project, source_file, chunk_index)
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
         """)
         
         # Create HNSW index using cosine operators
-        logger.info("Creating HNSW index on document_chunks.embedding...")
+        logger.info("Creating HNSW index on chunks.embedding...")
         await conn.execute("""
-            CREATE INDEX IF NOT EXISTS document_chunks_embedding_hnsw_idx 
-            ON document_chunks USING hnsw (embedding vector_cosine_ops);
+            CREATE INDEX IF NOT EXISTS idx_chunks_embedding
+            ON chunks USING hnsw (embedding vector_cosine_ops);
         """)
         logger.info("Database schema initialized successfully.")
     except Exception as e:
@@ -65,3 +69,4 @@ async def init_db() -> None:
         raise RuntimeError(f"Database initialization failed: {e}") from e
     finally:
         await conn.close()
+

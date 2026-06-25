@@ -4,18 +4,14 @@ This script orchestrates the full end-to-end RAG retrieval loop. It enables test
 entire pipeline (User Query -> Embedding -> pgvector HNSW Retrieval -> Gemini Generation)
 via a command-line interface.
 
-Why this script:
-  To avoid coupling retrieval validation with the FastAPI server or streaming architectures
-  (which are Block 3 requirements), this CLI script serves as a lightweight, end-to-end
-  integration test bench. It handles on-demand database ingestion of resume.md and decisions.md
-  to ensure we have actual grounded data to query.
+It has been updated to use the canonical Document, Chunk, Chunker, and pgvector_store
+modules.
 """
 
 import sys
 import asyncio
 import argparse
 from pathlib import Path
-from typing import List
 
 # Add backend directory to sys.path to resolve src imports
 BACKEND_DIR = Path(__file__).resolve().parent.parent
@@ -25,14 +21,23 @@ if str(BACKEND_DIR) not in sys.path:
 from src.config import settings
 from src.db.init_db import init_db
 from src.db.core import close_db_pool
-from src.db.vector_store import (
-    upsert_document_chunks,
-    search_similar_chunks,
-    delete_project_chunks
+from src.models.document import Document
+from src.chunking.chunker import chunk_document
+from src.embedding.azure_openai_embedder import embed_chunks
+from src.vectorstore.pgvector_store import (
+    upsert_chunks,
+    similarity_search,
+    delete_project
 )
-from src.ingestion.chunker import chunk_text, DocumentLayer
-from src.ingestion.embedder import embed_texts, embed_query
-from src.llm.gemini_client import generate_answer, LLMError
+from src.ingestion.embedder import embed_query
+
+
+# We stub LLM generation imports to be robust if google library is missing
+try:
+    from src.llm.gemini_client import generate_answer, LLMError
+    HAS_GEMINI = True
+except ImportError:
+    HAS_GEMINI = False
 
 
 async def ingest_test_documents(force: bool = False) -> None:
@@ -43,8 +48,8 @@ async def ingest_test_documents(force: bool = False) -> None:
     await init_db()
 
     # Check if we already have chunks for portfolio or talentforge
-    existing_resume = await search_similar_chunks([0.0] * 1536, limit=1, project_filter="portfolio")
-    existing_decisions = await search_similar_chunks([0.0] * 1536, limit=1, project_filter="talentforge")
+    existing_resume = await similarity_search([0.0] * 1536, limit=1, project_filter="portfolio")
+    existing_decisions = await similarity_search([0.0] * 1536, limit=1, project_filter="talentforge")
 
     if existing_resume and existing_decisions and not force:
         print("[Ingestion] Test documents already present in database. Skipping ingestion.")
@@ -62,29 +67,35 @@ async def ingest_test_documents(force: bool = False) -> None:
     # 1. Ingest Resume
     print("[Ingestion] Processing resume.md...")
     resume_text = resume_path.read_text(encoding="utf-8")
-    resume_chunks = chunk_text(resume_text, DocumentLayer.IDENTITY)
-    resume_embeddings = await embed_texts([c.content for c in resume_chunks])
-    await upsert_document_chunks(
+    resume_doc = Document(
+        content=resume_text,
         project="portfolio",
-        layer=DocumentLayer.IDENTITY,
-        source_file="resume.md",
-        chunks=resume_chunks,
-        embeddings=resume_embeddings
+        layer="identity",
+        source_type="manual",
+        source_file="resume.md"
     )
+    resume_chunks = chunk_document(resume_doc)
+    resume_embeddings = await embed_chunks(resume_chunks)
+    
+    await delete_project("portfolio")
+    await upsert_chunks(resume_chunks, resume_embeddings)
     print(f"[Ingestion] Saved {len(resume_chunks)} chunks for portfolio (resume.md)")
 
     # 2. Ingest Decisions
     print("[Ingestion] Processing decisions.md...")
     decisions_text = decisions_path.read_text(encoding="utf-8")
-    decisions_chunks = chunk_text(decisions_text, DocumentLayer.DESIGN)
-    decisions_embeddings = await embed_texts([c.content for c in decisions_chunks])
-    await upsert_document_chunks(
+    decisions_doc = Document(
+        content=decisions_text,
         project="talentforge",
-        layer=DocumentLayer.DESIGN,
-        source_file="decisions.md",
-        chunks=decisions_chunks,
-        embeddings=decisions_embeddings
+        layer="design",
+        source_type="manual",
+        source_file="decisions.md"
     )
+    decisions_chunks = chunk_document(decisions_doc)
+    decisions_embeddings = await embed_chunks(decisions_chunks)
+    
+    await delete_project("talentforge")
+    await upsert_chunks(decisions_chunks, decisions_embeddings)
     print(f"[Ingestion] Saved {len(decisions_chunks)} chunks for talentforge (decisions.md)")
 
 
@@ -103,7 +114,7 @@ async def run_rag_pipeline(query: str, project_filter: str = None) -> None:
 
     # 2. Retrieve similar chunks
     print("[RAG Pipeline] Searching pgvector database...")
-    retrieved_chunks = await search_similar_chunks(
+    retrieved_chunks = await similarity_search(
         query_embedding=query_vector,
         limit=4,
         project_filter=project_filter
@@ -113,10 +124,14 @@ async def run_rag_pipeline(query: str, project_filter: str = None) -> None:
     for i, chunk in enumerate(retrieved_chunks):
         score = chunk.get("similarity", 0.0)
         source = chunk.get("source_file", "unknown")
-        heading = chunk.get("heading") or "No Heading"
+        heading = chunk.get("metadata", {}).get("heading") or "No Heading"
         print(f"  {i+1}. [Similarity: {score:.4f}] {source} > {heading}")
 
     # 3. Generate answer
+    if not HAS_GEMINI:
+        print("[RAG Pipeline] Gemini LLM Client is not available (missing google-genai library). Skipping generation.")
+        return
+
     print(f"[RAG Pipeline] Contacting {settings.GEMINI_MODEL_NAME}...")
     try:
         answer = await generate_answer(query, retrieved_chunks)
@@ -137,9 +152,6 @@ async def main() -> None:
     # Verify settings are present
     if not settings.AZURE_OPENAI_API_KEY:
         print("[Error] AZURE_OPENAI_KEY / AZURE_OPENAI_API_KEY is not configured in .env")
-        sys.exit(1)
-    if not settings.GEMINI_API_KEY:
-        print("[Error] GEMINI_API_KEY is not configured in .env")
         sys.exit(1)
 
     try:

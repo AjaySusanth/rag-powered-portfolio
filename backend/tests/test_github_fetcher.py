@@ -141,13 +141,24 @@ async def test_fetch_github_repository_success(mock_client_class):
     }
     
     # 3. Mock blob content calls
+    import base64
+    readme_b64 = base64.b64encode(b"My Readme Content").decode("utf-8")
+    main_b64 = base64.b64encode(b"print('Hello')").decode("utf-8")
+
     mock_readme_resp = MagicMock()
     mock_readme_resp.status_code = 200
-    mock_readme_resp.content = b"My Readme Content"
+    mock_readme_resp.json.return_value = {
+        "encoding": "base64",
+        "content": readme_b64
+    }
     
     mock_main_resp = MagicMock()
     mock_main_resp.status_code = 200
-    mock_main_resp.content = b"print('Hello')"
+    mock_main_resp.json.return_value = {
+        "encoding": "base64",
+        "content": main_b64
+    }
+
     
     mock_client.get.side_effect = [
         mock_repo_resp,
