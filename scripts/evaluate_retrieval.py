@@ -147,7 +147,7 @@ def print_console_summary(result: EvaluationResult) -> None:
         print("-" * 40)
 
 
-async def evaluate_file(evaluator: RetrievalEvaluator, file_path: Path, top_k: int) -> None:
+async def evaluate_file(evaluator: RetrievalEvaluator, file_path: Path, top_k: int, run_type: str) -> None:
     """Evaluates a single JSON dataset file and generates reports."""
     print(f"\nEvaluating dataset: {file_path.name} ...")
     try:
@@ -166,10 +166,10 @@ async def evaluate_file(evaluator: RetrievalEvaluator, file_path: Path, top_k: i
     # Print summary
     print_console_summary(result)
 
-    # Save reports
+    # Save reports to dedicated folders
     project_slug = result.project
-    json_path = ROOT_DIR / "evaluation" / "results" / f"{project_slug}_result.json"
-    md_path = ROOT_DIR / "evaluation" / "reports" / f"{project_slug}_report.md"
+    json_path = ROOT_DIR / "evaluation" / "results" / run_type / f"{project_slug}_result.json"
+    md_path = ROOT_DIR / "evaluation" / "reports" / run_type / f"{project_slug}_report.md"
 
     save_json_report(result, json_path)
     save_markdown_report(result, md_path)
@@ -190,6 +190,13 @@ async def main() -> None:
         default=5, 
         help="Top-K retrieve parameter to evaluate (default: 5)."
     )
+    parser.add_argument(
+        "--run-type",
+        type=str,
+        choices=["vector", "manual-docs", "bm25", "hybrid", "rrf", "grader"],
+        default="vector",
+        help="The evaluation run type folder (e.g. vector, manual-docs)."
+    )
     args = parser.parse_args()
 
     target_path = Path(args.target).resolve()
@@ -201,14 +208,14 @@ async def main() -> None:
 
     try:
         if target_path.is_file():
-            await evaluate_file(evaluator, target_path, args.top_k)
+            await evaluate_file(evaluator, target_path, args.top_k, args.run_type)
         elif target_path.is_dir():
             json_files = sorted(list(target_path.glob("*.json")))
             if not json_files:
                 print(f"[Warning] No JSON files found in directory: {target_path}")
                 return
             for f in json_files:
-                await evaluate_file(evaluator, f, args.top_k)
+                await evaluate_file(evaluator, f, args.top_k, args.run_type)
     finally:
         await close_db_pool()
 
@@ -217,3 +224,4 @@ if __name__ == "__main__":
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     asyncio.run(main())
+

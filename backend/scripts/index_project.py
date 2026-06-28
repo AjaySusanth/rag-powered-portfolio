@@ -24,6 +24,7 @@ sys.path.insert(0, str(BACKEND_DIR))
 sys.path.insert(0, str(BACKEND_DIR / "src"))
 
 from src.ingestion.github_fetcher import fetch_github_repository
+from src.ingestion.manual_loader import load_manual_documents
 from src.chunking.chunker import chunk_document
 from src.embedding.azure_openai_embedder import embed_chunks
 from src.db.init_db import init_db
@@ -38,6 +39,7 @@ async def main() -> None:
 
     project_name = sys.argv[1].strip().lower()
     yaml_path = PROJECT_ROOT / "knowledge" / project_name / "ingest.yml"
+    knowledge_dir = PROJECT_ROOT / "knowledge"
 
     if not yaml_path.exists():
         print(f"Error: ingest.yml not found at {yaml_path}")
@@ -45,19 +47,32 @@ async def main() -> None:
 
     print(f"Project: {project_name}\n")
 
-    # 1. Fetch documents
+    # 1. Fetch documents from GitHub
+    print("Fetching documents from GitHub...")
     try:
-        documents = await fetch_github_repository(str(yaml_path))
+        github_documents = await fetch_github_repository(str(yaml_path))
     except Exception as e:
         print(f"Failed to fetch documents from GitHub: {e}")
         sys.exit(1)
 
+    # 2. Load manual documents
+    print("Loading manual documents...")
+    try:
+        manual_documents = load_manual_documents(project_name, knowledge_dir)
+    except Exception as e:
+        print(f"Failed to load manual documents: {e}")
+        sys.exit(1)
+
+    # 3. Merge documents
+    documents = github_documents + manual_documents
     num_docs = len(documents)
     if num_docs == 0:
         print("No documents found to ingest.")
         sys.exit(0)
 
-    # 2. Chunk documents
+    print(f"Total documents to index: {num_docs} (GitHub: {len(github_documents)}, Manual: {len(manual_documents)})")
+
+    # 4. Chunk documents
     all_chunks = []
     for doc in documents:
         all_chunks.extend(chunk_document(doc))
@@ -67,7 +82,7 @@ async def main() -> None:
         print("No chunks produced from documents.")
         sys.exit(0)
 
-    # 3. Generate embeddings
+    # 5. Generate embeddings
     try:
         embeddings = await embed_chunks(all_chunks)
     except Exception as e:
@@ -76,27 +91,30 @@ async def main() -> None:
 
     num_embeddings = len(embeddings)
 
-    # 4. Initialize Database
+    # 6. Initialize Database
     try:
         await init_db()
     except Exception as e:
         print(f"Failed to initialize database: {e}")
         sys.exit(1)
 
-    # 5. Delete existing chunks for this project (clean re-index)
+    # 7. Delete existing chunks (clean re-index)
     try:
+        print(f"Clearing existing chunks for project '{project_name}' and '__global__'...")
         await delete_project(project_name)
+        await delete_project("__global__")
     except Exception as e:
-        print(f"Failed to clear existing project chunks: {e}")
+        print(f"Failed to clear existing chunks: {e}")
         sys.exit(1)
 
-    # 6. Store in pgvector
+    # 8. Store in pgvector
     try:
         await upsert_chunks(all_chunks, embeddings)
     except Exception as e:
         print(f"Failed to store chunks in database: {e}")
         sys.exit(1)
 
+    print(f"\nIndexing complete:")
     print(f"Documents: {num_docs}")
     print(f"Chunks: {num_chunks}")
     print(f"Embeddings Generated: {num_embeddings}")
@@ -105,3 +123,4 @@ async def main() -> None:
 
 if __name__ == "__main__":
     asyncio.run(main())
+
