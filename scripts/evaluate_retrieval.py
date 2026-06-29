@@ -22,6 +22,7 @@ if str(BACKEND_DIR) not in sys.path:
 
 from src.retrieval.vector_retriever import retrieve as vector_retrieve
 from src.retrieval.bm25_retriever import retrieve as bm25_retrieve
+from src.retrieval.hybrid_retriever import retrieve as hybrid_retrieve
 from src.models.retrieval_result import RetrievalResult
 from src.evaluation.retrieval_evaluator import RetrievalEvaluator, Retriever
 from src.models.evaluation_result import EvaluationResult
@@ -38,6 +39,12 @@ class BM25RetrieverAdapter(Retriever):
     """Adapter to map the BM25 retrieval retrieve function to the Retriever Protocol."""
     async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
         return await bm25_retrieve(query=query, top_k=top_k, project=project)
+
+
+class HybridRetrieverAdapter(Retriever):
+    """Adapter to map the Hybrid RRF retrieval retrieve function to the Retriever Protocol."""
+    async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
+        return await hybrid_retrieve(query=query, top_k=top_k, project=project)
 
 
 def save_json_report(result: EvaluationResult, output_path: Path) -> None:
@@ -214,6 +221,8 @@ async def main() -> None:
     # Select appropriate retriever adapter based on run-type
     if args.run_type == "bm25":
         retriever_adapter = BM25RetrieverAdapter()
+    elif args.run_type == "hybrid":
+        retriever_adapter = HybridRetrieverAdapter()
     else:
         retriever_adapter = VectorRetrieverAdapter()
 

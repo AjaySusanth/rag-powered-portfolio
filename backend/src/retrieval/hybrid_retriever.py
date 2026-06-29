@@ -1,0 +1,50 @@
+"""
+WHY THIS WAS CHOSEN:
+This module orchestrates hybrid retrieval by executing semantic vector search and lexical BM25 search
+concurrently. Combining both approaches compensates for the weaknesses of each: vector search retrieves 
+conceptually relevant chunks that lack exact query keywords, while BM25 retrieves exact technical matching 
+identifiers (such as function names or configuration lines) that might otherwise get lost in the embedding space.
+"""
+
+import asyncio
+import logging
+from typing import List, Optional
+
+from src.models.retrieval_result import RetrievalResult
+from src.retrieval import vector_retriever
+from src.retrieval import bm25_retriever
+from src.retrieval.rrf import RRFFuser
+
+logger = logging.getLogger(__name__)
+
+async def retrieve(
+    query: str,
+    top_k: int = 5,
+    project: Optional[str] = None
+) -> List[RetrievalResult]:
+    """
+    Executes a hybrid search query using both Vector and BM25 retrievers concurrently.
+    Fuses the outputs using Reciprocal Rank Fusion (RRF) and returns the top_k results.
+    """
+    if not query or not query.strip():
+        logger.warning("Empty query provided to hybrid retrieve. Returning empty results.")
+        return []
+
+    try:
+        # Run both retrievers concurrently to reduce overall search latency.
+        # Vector retriever makes network hops, while BM25 retriever runs in-memory.
+        vector_task = vector_retriever.retrieve(query=query, top_k=top_k, project=project)
+        bm25_task = bm25_retriever.retrieve(query=query, top_k=top_k, project=project)
+        
+        vector_results, bm25_results = await asyncio.gather(vector_task, bm25_task)
+        
+        # Fuse and rank results using RRFFuser
+        fuser = RRFFuser(k=60)
+        fused_results = fuser.fuse(vector_results, bm25_results)
+        
+        # Return only the requested number of top results
+        return fused_results[:top_k]
+
+    except Exception as e:
+        logger.error(f"Hybrid retrieval failed for query '{query}': {e}")
+        raise

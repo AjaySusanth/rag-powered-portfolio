@@ -1,0 +1,658 @@
+{
+    "project": "n8n-aks-platform",
+    "generated_at": "2026-06-25T16:33:02Z",
+    "top_k": 5,
+    "total_questions": 15,
+    "recall": 0.6,
+    "hit_rate": 0.6666666666666666,
+    "mrr": 0.45555555555555555,
+    "average_similarity": 0.03209025534002398,
+    "category_metrics": [
+        {
+            "category": "core_logic",
+            "total_questions": 5,
+            "hit_rate": 0.8,
+            "recall": 0.8,
+            "mrr": 0.36666666666666664,
+            "average_similarity": 0.03188204650393968
+        },
+        {
+            "category": "data_models",
+            "total_questions": 3,
+            "hit_rate": 0.6666666666666666,
+            "recall": 0.6666666666666666,
+            "mrr": 0.6666666666666666,
+            "average_similarity": 0.032654680063458494
+        },
+        {
+            "category": "documentation",
+            "total_questions": 2,
+            "hit_rate": 1.0,
+            "recall": 0.75,
+            "mrr": 0.75,
+            "average_similarity": 0.03239446668849102
+        },
+        {
+            "category": "infrastructure",
+            "total_questions": 2,
+            "hit_rate": 0.5,
+            "recall": 0.5,
+            "mrr": 0.5,
+            "average_similarity": 0.03177805800756621
+        },
+        {
+            "category": "pipeline",
+            "total_questions": 3,
+            "hit_rate": 0.3333333333333333,
+            "recall": 0.16666666666666666,
+            "mrr": 0.16666666666666666,
+            "average_similarity": 0.03149801587301587
+        }
+    ],
+    "layer_metrics": [
+        {
+            "layer": "design",
+            "total_questions": 7,
+            "hit_rate": 0.5714285714285714,
+            "recall": 0.5714285714285714,
+            "mrr": 0.2619047619047619,
+            "average_similarity": 0.03188204650393968
+        },
+        {
+            "layer": "artifact",
+            "total_questions": 11,
+            "hit_rate": 0.5454545454545454,
+            "recall": 0.5,
+            "mrr": 0.45454545454545453,
+            "average_similarity": 0.03222906123074685
+        }
+    ],
+    "failures": [
+        {
+            "question_id": "N8N-005",
+            "question": "How does the Helm chart configure container security settings and privilege constraints for n8n application pods to conform to zero-trust standards?",
+            "category": "core_logic",
+            "expected_sources": [
+                "helm/n8n/templates/main.yaml",
+                "helm/n8n/templates/serviceaccounts.yaml"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/lessons-learned.md",
+                "docs/verification_ledger.md",
+                "README.md"
+            ],
+            "similarity_scores": [
+                0.03278688524590164,
+                0.031746031746031744,
+                0.0315136476426799,
+                0.016129032258064516,
+                0.015625
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "artifact",
+                "artifact"
+            ],
+            "failure_reason": "No expected sources retrieved."
+        },
+        {
+            "question_id": "N8N-007",
+            "question": "How do the n8n application pods securely retrieve database passwords and encryption keys from Azure Key Vault without storing credentials in the git repository or Kubernetes Secret manifests?",
+            "category": "pipeline",
+            "expected_sources": [
+                "helm/n8n/templates/secretproviderclass.yaml",
+                "helm/n8n/templates/main.yaml"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/decisions.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/lessons-learned.md",
+                "n8n-aks-platform/challenges.md",
+                "n8n-aks-platform/challenges.md"
+            ],
+            "similarity_scores": [
+                0.03278688524590164,
+                0.03225806451612903,
+                0.03125763125763126,
+                0.015873015873015872,
+                0.015625
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "artifact",
+                "artifact"
+            ],
+            "failure_reason": "No expected sources retrieved."
+        },
+        {
+            "question_id": "N8N-008",
+            "question": "How does the KEDA autoscaling loop coordinate with the Redis message broker and the n8n-worker deployment to dynamically manage worker replica counts?",
+            "category": "pipeline",
+            "expected_sources": [
+                "helm/n8n/templates/hpa-worker.yaml",
+                "helm/n8n/templates/worker.yaml"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/challenges.md",
+                "README.md",
+                "docs/verification_ledger.md"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.03149801587301587,
+                0.01639344262295082,
+                0.016129032258064516,
+                0.015873015873015872
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "design",
+                "artifact"
+            ],
+            "failure_reason": "No expected sources retrieved."
+        },
+        {
+            "question_id": "N8N-009",
+            "question": "How is the default resource request and limit configuration structured for the n8n components and database instances within the Helm values schema?",
+            "category": "data_models",
+            "expected_sources": [
+                "helm/n8n/values.yaml"
+            ],
+            "retrieved_sources": [
+                "helm/n8n/Chart.yaml",
+                "n8n-aks-platform/lessons-learned.md",
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/architecture.md",
+                "docs/verification_ledger.md"
+            ],
+            "similarity_scores": [
+                0.01639344262295082,
+                0.01639344262295082,
+                0.016129032258064516,
+                0.016129032258064516,
+                0.015873015873015872
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "artifact"
+            ],
+            "failure_reason": "No expected sources retrieved."
+        },
+        {
+            "question_id": "N8N-012",
+            "question": "How is the user-assigned or system-assigned kubelet identity in AKS configured in Terraform to allow read access to Azure Key Vault secrets?",
+            "category": "infrastructure",
+            "expected_sources": [
+                "terraform/env/dev/main.tf",
+                "terraform/modules/keyvault/main.tf"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/challenges.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/architecture.md",
+                "docs/verification_ledger.md"
+            ],
+            "similarity_scores": [
+                0.031754032258064516,
+                0.03149801587301587,
+                0.01639344262295082,
+                0.01639344262295082,
+                0.016129032258064516
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "artifact",
+                "design"
+            ],
+            "failure_reason": "No expected sources retrieved."
+        }
+    ],
+    "question_results": [
+        {
+            "question_id": "N8N-001",
+            "question": "How does the OPA Gatekeeper constraint template evaluate and prevent pods from running without specified container image tags or with the 'latest' tag in the dev namespace?",
+            "category": "core_logic",
+            "expected_sources": [
+                "gitops/argocd/gatekeeper/templates/disallowed-tags-template.yaml",
+                "gitops/argocd/gatekeeper/constraints/disallowed-tags-constraints.yaml"
+            ],
+            "retrieved_sources": [
+                "docs/verification_ledger.md",
+                "gitops/argocd/gatekeeper/templates/disallowed-tags-template.yaml",
+                "gitops/argocd/gatekeeper/constraints/disallowed-tags-constraints.yaml",
+                "gitops/argocd/gatekeeper/templates/disallowed-tags-template.yaml",
+                "docs/verification_ledger.md"
+            ],
+            "similarity_scores": [
+                0.03278688524590164,
+                0.03200204813108039,
+                0.031754032258064516,
+                0.015873015873015872,
+                0.015625
+            ],
+            "is_hit": true,
+            "rank": 2,
+            "expected_layers": [
+                "design",
+                "design"
+            ],
+            "failure_reason": null
+        },
+        {
+            "question_id": "N8N-002",
+            "question": "How does the OPA Gatekeeper policy ensure that every container and initContainer in a pod defines CPU and Memory requests and limits prior to scheduler placement?",
+            "category": "core_logic",
+            "expected_sources": [
+                "gitops/argocd/gatekeeper/templates/required-resources-template.yaml",
+                "gitops/argocd/gatekeeper/constraints/required-resources-constraint.yaml"
+            ],
+            "retrieved_sources": [
+                "docs/verification_ledger.md",
+                "docs/verification_ledger.md",
+                "gitops/argocd/gatekeeper/constraints/required-resources-constraint.yaml",
+                "gitops/argocd/gatekeeper/templates/required-resources-template.yaml",
+                "n8n-aks-platform/lessons-learned.md"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.03200204813108039,
+                0.03125763125763126,
+                0.01639344262295082,
+                0.015625
+            ],
+            "is_hit": true,
+            "rank": 3,
+            "expected_layers": [
+                "design",
+                "design"
+            ],
+            "failure_reason": null
+        },
+        {
+            "question_id": "N8N-003",
+            "question": "How does the NetworkPolicy configuration isolate inter-pod communication for the database layer (Postgres and Redis) while allowing necessary metrics collection and operator polling?",
+            "category": "core_logic",
+            "expected_sources": [
+                "helm/n8n/templates/networkpolicies.yaml"
+            ],
+            "retrieved_sources": [
+                "README.md",
+                "helm/n8n/templates/networkpolicies.yaml",
+                "docs/architecture/component-communication.md",
+                "helm/n8n/templates/networkpolicies.yaml",
+                "n8n-aks-platform/architecture.md"
+            ],
+            "similarity_scores": [
+                0.03278688524590164,
+                0.03200204813108039,
+                0.03149801587301587,
+                0.03076923076923077,
+                0.016129032258064516
+            ],
+            "is_hit": true,
+            "rank": 2,
+            "expected_layers": [
+                "design"
+            ],
+            "failure_reason": null
+        },
+        {
+            "question_id": "N8N-004",
+            "question": "Why and how does the n8n egress NetworkPolicy permit outbound traffic to the public internet while strictly blocking lateral access to internal private IP ranges?",
+            "category": "core_logic",
+            "expected_sources": [
+                "helm/n8n/templates/networkpolicies.yaml"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/challenges.md",
+                "helm/n8n/templates/networkpolicies.yaml",
+                "README.md",
+                "n8n-aks-platform/lessons-learned.md",
+                "helm/n8n/templates/networkpolicies.yaml"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.032266458495966696,
+                0.03125763125763126,
+                0.016129032258064516,
+                0.015625
+            ],
+            "is_hit": true,
+            "rank": 2,
+            "expected_layers": [
+                "design"
+            ],
+            "failure_reason": null
+        },
+        {
+            "question_id": "N8N-005",
+            "question": "How does the Helm chart configure container security settings and privilege constraints for n8n application pods to conform to zero-trust standards?",
+            "category": "core_logic",
+            "expected_sources": [
+                "helm/n8n/templates/main.yaml",
+                "helm/n8n/templates/serviceaccounts.yaml"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/lessons-learned.md",
+                "docs/verification_ledger.md",
+                "README.md"
+            ],
+            "similarity_scores": [
+                0.03278688524590164,
+                0.031746031746031744,
+                0.0315136476426799,
+                0.016129032258064516,
+                0.015625
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "artifact",
+                "artifact"
+            ],
+            "failure_reason": "No expected sources retrieved."
+        },
+        {
+            "question_id": "N8N-006",
+            "question": "How does the Helm Chart CI pipeline automate chart version promotion and synchronize state changes with ArgoCD upon a git commit to the Helm directory?",
+            "category": "pipeline",
+            "expected_sources": [
+                ".github/workflows/ci.yaml",
+                "gitops/argocd/application.yaml"
+            ],
+            "retrieved_sources": [
+                "docs/verification_ledger.md",
+                ".github/workflows/ci.yaml",
+                ".github/workflows/ci.yaml",
+                "n8n-aks-platform/decisions.md",
+                "docs/verification_ledger.md"
+            ],
+            "similarity_scores": [
+                0.031754032258064516,
+                0.03149801587301587,
+                0.01639344262295082,
+                0.01639344262295082,
+                0.016129032258064516
+            ],
+            "is_hit": true,
+            "rank": 2,
+            "expected_layers": [
+                "artifact",
+                "artifact"
+            ],
+            "failure_reason": null
+        },
+        {
+            "question_id": "N8N-007",
+            "question": "How do the n8n application pods securely retrieve database passwords and encryption keys from Azure Key Vault without storing credentials in the git repository or Kubernetes Secret manifests?",
+            "category": "pipeline",
+            "expected_sources": [
+                "helm/n8n/templates/secretproviderclass.yaml",
+                "helm/n8n/templates/main.yaml"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/decisions.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/lessons-learned.md",
+                "n8n-aks-platform/challenges.md",
+                "n8n-aks-platform/challenges.md"
+            ],
+            "similarity_scores": [
+                0.03278688524590164,
+                0.03225806451612903,
+                0.03125763125763126,
+                0.015873015873015872,
+                0.015625
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "artifact",
+                "artifact"
+            ],
+            "failure_reason": "No expected sources retrieved."
+        },
+        {
+            "question_id": "N8N-008",
+            "question": "How does the KEDA autoscaling loop coordinate with the Redis message broker and the n8n-worker deployment to dynamically manage worker replica counts?",
+            "category": "pipeline",
+            "expected_sources": [
+                "helm/n8n/templates/hpa-worker.yaml",
+                "helm/n8n/templates/worker.yaml"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/challenges.md",
+                "README.md",
+                "docs/verification_ledger.md"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.03149801587301587,
+                0.01639344262295082,
+                0.016129032258064516,
+                0.015873015873015872
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "design",
+                "artifact"
+            ],
+            "failure_reason": "No expected sources retrieved."
+        },
+        {
+            "question_id": "N8N-009",
+            "question": "How is the default resource request and limit configuration structured for the n8n components and database instances within the Helm values schema?",
+            "category": "data_models",
+            "expected_sources": [
+                "helm/n8n/values.yaml"
+            ],
+            "retrieved_sources": [
+                "helm/n8n/Chart.yaml",
+                "n8n-aks-platform/lessons-learned.md",
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/architecture.md",
+                "docs/verification_ledger.md"
+            ],
+            "similarity_scores": [
+                0.01639344262295082,
+                0.01639344262295082,
+                0.016129032258064516,
+                0.016129032258064516,
+                0.015873015873015872
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "artifact"
+            ],
+            "failure_reason": "No expected sources retrieved."
+        },
+        {
+            "question_id": "N8N-010",
+            "question": "How are Azure Key Vault secret objects mapped to specific environment variable keys inside the SecretProviderClass definition?",
+            "category": "data_models",
+            "expected_sources": [
+                "helm/n8n/templates/secretproviderclass.yaml"
+            ],
+            "retrieved_sources": [
+                "helm/n8n/templates/secretproviderclass.yaml",
+                "docs/verification_ledger.md",
+                "terraform/modules/keyvault/variables.tf",
+                "n8n-aks-platform/decisions.md",
+                "terraform/modules/keyvault/outputs.tf"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.032018442622950824,
+                0.031754032258064516,
+                0.031746031746031744,
+                0.015384615384615385
+            ],
+            "is_hit": true,
+            "rank": 1,
+            "expected_layers": [
+                "artifact"
+            ],
+            "failure_reason": null
+        },
+        {
+            "question_id": "N8N-011",
+            "question": "How is the PrometheusRule alerting expression for high workflow failure rates calculated using metrics from n8n queue execution?",
+            "category": "data_models",
+            "expected_sources": [
+                "monitoring/alerts/n8n-rules.yaml"
+            ],
+            "retrieved_sources": [
+                "monitoring/alerts/n8n-rules.yaml",
+                "helm/n8n/templates/prometheusrule.yaml",
+                "README.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/challenges.md"
+            ],
+            "similarity_scores": [
+                0.03278688524590164,
+                0.03225806451612903,
+                0.03149801587301587,
+                0.015873015873015872,
+                0.015625
+            ],
+            "is_hit": true,
+            "rank": 1,
+            "expected_layers": [
+                "artifact"
+            ],
+            "failure_reason": null
+        },
+        {
+            "question_id": "N8N-012",
+            "question": "How is the user-assigned or system-assigned kubelet identity in AKS configured in Terraform to allow read access to Azure Key Vault secrets?",
+            "category": "infrastructure",
+            "expected_sources": [
+                "terraform/env/dev/main.tf",
+                "terraform/modules/keyvault/main.tf"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/challenges.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/architecture.md",
+                "docs/verification_ledger.md"
+            ],
+            "similarity_scores": [
+                0.031754032258064516,
+                0.03149801587301587,
+                0.01639344262295082,
+                0.01639344262295082,
+                0.016129032258064516
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "artifact",
+                "design"
+            ],
+            "failure_reason": "No expected sources retrieved."
+        },
+        {
+            "question_id": "N8N-013",
+            "question": "How is the Azure federated identity credential structured in Terraform to authenticate GitHub Actions CI/CD workflows using OIDC rather than static secrets?",
+            "category": "infrastructure",
+            "expected_sources": [
+                "terraform/env/dev/oidc.tf"
+            ],
+            "retrieved_sources": [
+                "terraform/env/dev/oidc.tf",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/architecture.md",
+                ".github/workflows/infra.yaml",
+                "terraform/env/dev/oidc.tf"
+            ],
+            "similarity_scores": [
+                0.03177805800756621,
+                0.031754032258064516,
+                0.01639344262295082,
+                0.016129032258064516,
+                0.015873015873015872
+            ],
+            "is_hit": true,
+            "rank": 1,
+            "expected_layers": [
+                "artifact"
+            ],
+            "failure_reason": null
+        },
+        {
+            "question_id": "N8N-014",
+            "question": "Which inter-service paths are explicitly blocked by the NetworkPolicy architecture, and what architectural reasons justify preventing workers from communicating directly with the main API or webhooks?",
+            "category": "documentation",
+            "expected_sources": [
+                "docs/architecture/component-communication.md",
+                "README.md"
+            ],
+            "retrieved_sources": [
+                "README.md",
+                "docs/verification_ledger.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/challenges.md"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.032266458495966696,
+                0.0315136476426799,
+                0.015873015873015872,
+                0.015625
+            ],
+            "is_hit": true,
+            "rank": 1,
+            "expected_layers": [
+                "design",
+                "artifact"
+            ],
+            "failure_reason": null
+        },
+        {
+            "question_id": "N8N-015",
+            "question": "How was compliance with named ServiceAccounts and resource limits verified across all running n8n pods in the cluster, as documented in the verification ledger?",
+            "category": "documentation",
+            "expected_sources": [
+                "docs/verification_ledger.md"
+            ],
+            "retrieved_sources": [
+                "README.md",
+                "docs/verification_ledger.md",
+                "docs/verification_ledger.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/architecture.md"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.032266458495966696,
+                0.016129032258064516,
+                0.015873015873015872,
+                0.015625
+            ],
+            "is_hit": true,
+            "rank": 2,
+            "expected_layers": [
+                "artifact"
+            ],
+            "failure_reason": null
+        }
+    ]
+}
