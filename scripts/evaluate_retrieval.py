@@ -22,10 +22,12 @@ if str(BACKEND_DIR) not in sys.path:
 
 from src.retrieval.vector_retriever import retrieve as vector_retrieve
 from src.retrieval.bm25_retriever import retrieve as bm25_retrieve
+from src.retrieval.hybrid_retriever import retrieve as hybrid_retrieve
 from src.models.retrieval_result import RetrievalResult
 from src.evaluation.retrieval_evaluator import RetrievalEvaluator, Retriever
 from src.models.evaluation_result import EvaluationResult
 from src.db.core import close_db_pool
+from src.evaluation.retrieval_diagnostics import RetrievalDiagnostics, DiagnosticsSummary
 
 
 class VectorRetrieverAdapter(Retriever):
@@ -38,6 +40,12 @@ class BM25RetrieverAdapter(Retriever):
     """Adapter to map the BM25 retrieval retrieve function to the Retriever Protocol."""
     async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
         return await bm25_retrieve(query=query, top_k=top_k, project=project)
+
+
+class HybridRetrieverAdapter(Retriever):
+    """Adapter to map the Hybrid RRF retrieval retrieve function to the Retriever Protocol."""
+    async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
+        return await hybrid_retrieve(query=query, top_k=top_k, project=project)
 
 
 def save_json_report(result: EvaluationResult, output_path: Path) -> None:
@@ -184,6 +192,122 @@ async def evaluate_file(evaluator: RetrievalEvaluator, file_path: Path, top_k: i
     print(f"Saved Markdown report to: {md_path}")
 
 
+def save_diagnostics_json(summary: DiagnosticsSummary, output_path: Path) -> None:
+    """Serializes the DiagnosticsSummary dataclass and saves it as a JSON file."""
+    data = dataclasses.asdict(summary)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
+
+
+def save_diagnostics_markdown(summary: DiagnosticsSummary, output_path: Path) -> None:
+    """Generates a human-readable Markdown diagnostics report with failure analysis."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    lines = [
+        f"# Retrieval Diagnostics Report: {summary.project}",
+        f"- **Total Queries:** {summary.total_queries}",
+        f"- **Failed Queries:** {summary.failed_queries}",
+        "",
+        "## Summary of Diagnostic Metrics",
+        f"- **Average Candidate Overlap Count (Top 20):** {summary.avg_overlap_count:.2f}",
+        f"- **Average Jaccard Overlap (Top 20):** {summary.avg_jaccard_overlap:.4f}",
+        f"- **Average Duplicate Chunk Density (Top 5):** {summary.avg_duplicate_density:.2f} (chunks per unique source file)",
+        "",
+        "## Failure Category Breakdown",
+        "| Failure Category | Count | Recommended Optimization |",
+        "| --- | :---: | --- |"
+    ]
+    
+    recs = {
+        "Missing from both retrievers": "Improve retrieval quality, chunking, or indexing.",
+        "Candidate starvation": "Increase retrieval candidate pool before fusion.",
+        "Fusion ordering": "Tune RRF parameters or investigate fusion strategy.",
+        "Duplicate source domination": "Implement Source Diversification."
+    }
+    
+    for category, count in summary.failure_category_counts.items():
+        lines.append(f"| {category} | {count} | {recs.get(category, '')} |")
+        
+    lines.extend([
+        "",
+        "### Next Recommended Step",
+        f"**{summary.top_recommendation}**",
+        "",
+        "## Detailed Failure Analysis"
+    ])
+    
+    failed_details = [qd for qd in summary.query_details if not qd.is_hit]
+    
+    if not failed_details:
+        lines.append("All queries succeeded! No failures to analyze. 🎉")
+    else:
+        for qd in failed_details:
+            lines.extend([
+                f"### Query {qd.question_id}",
+                f"- **Question:** {qd.question}",
+                f"- **Top-5 Fused Sources:** {', '.join(qd.top_5_sources) if qd.top_5_sources else 'None'}",
+                "- **Unretrieved Expected Sources Analysis:**"
+            ])
+            for f in qd.failures:
+                lines.extend([
+                    f"  - **Source File:** `{f.source_file}`",
+                    f"    - **Failure Category:** {f.category}",
+                    f"    - **Vector Rank (Top 20):** {f.vector_rank if f.vector_rank is not None else 'Not present'}",
+                    f"    - **BM25 Rank (Top 20):** {f.bm25_rank if f.bm25_rank is not None else 'Not present'}",
+                    f"    - **RRF Fused Rank (Top 20):** {f.rrf_rank if f.rrf_rank is not None else 'Not present'}",
+                    f"    - **Explanation:** {f.explanation}",
+                    f"    - **Engineering Recommendation:** {f.recommendation}"
+                ])
+            lines.append("")
+            
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+
+async def run_diagnostics_file(file_path: Path) -> None:
+    """Runs diagnostics analysis over a single JSON dataset file and generates reports."""
+    print(f"\nRunning retrieval diagnostics for dataset: {file_path.name} ...")
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            dataset = json.load(f)
+    except Exception as e:
+        print(f"[Error] Failed to load JSON file {file_path}: {e}")
+        return
+
+    try:
+        diagnostics = RetrievalDiagnostics(k=60)
+        summary = await diagnostics.analyze_dataset(dataset)
+    except Exception as e:
+        print(f"[Error] Diagnostics failed for {file_path.name}: {e}")
+        return
+
+    # Print summary to console
+    print("========================================")
+    print(f"Project: {summary.project} (Diagnostics)")
+    print(f"Total Queries: {summary.total_queries}")
+    print(f"Failed Queries: {summary.failed_queries}")
+    print("----------------------------------------")
+    print("Failure Category Counts:")
+    for category, count in summary.failure_category_counts.items():
+        print(f"  {category}: {count}")
+    print("----------------------------------------")
+    print(f"Avg Overlap Count (Top 20): {summary.avg_overlap_count:.2f}")
+    print(f"Avg Duplicate Chunk Density (Top 5): {summary.avg_duplicate_density:.2f}")
+    print(f"Top Recommendation: {summary.top_recommendation}")
+    print("========================================")
+
+    # Save reports to dedicated diagnostics folders
+    project_slug = summary.project
+    json_path = ROOT_DIR / "evaluation" / "results" / "diagnostics" / f"{project_slug}_diagnostics.json"
+    md_path = ROOT_DIR / "evaluation" / "reports" / "diagnostics" / f"{project_slug}_diagnostics.md"
+
+    save_diagnostics_json(summary, json_path)
+    save_diagnostics_markdown(summary, md_path)
+    print(f"Saved JSON diagnostics to: {json_path}")
+    print(f"Saved Markdown diagnostics to: {md_path}")
+
+
 async def main() -> None:
     parser = argparse.ArgumentParser(description="Evaluate RAG Retrieval quality against golden datasets.")
     parser.add_argument(
@@ -204,6 +328,11 @@ async def main() -> None:
         default="vector",
         help="The evaluation run type folder (e.g. vector, manual-docs)."
     )
+    parser.add_argument(
+        "--diagnostics",
+        action="store_true",
+        help="Run in retrieval diagnostics mode to analyze failures."
+    )
     args = parser.parse_args()
 
     target_path = Path(args.target).resolve()
@@ -211,24 +340,37 @@ async def main() -> None:
         print(f"[Error] Target path does not exist: {target_path}")
         sys.exit(1)
 
-    # Select appropriate retriever adapter based on run-type
-    if args.run_type == "bm25":
-        retriever_adapter = BM25RetrieverAdapter()
-    else:
-        retriever_adapter = VectorRetrieverAdapter()
-
-    evaluator = RetrievalEvaluator(retriever_adapter)
-
     try:
-        if target_path.is_file():
-            await evaluate_file(evaluator, target_path, args.top_k, args.run_type)
-        elif target_path.is_dir():
-            json_files = sorted(list(target_path.glob("*.json")))
-            if not json_files:
-                print(f"[Warning] No JSON files found in directory: {target_path}")
-                return
-            for f in json_files:
-                await evaluate_file(evaluator, f, args.top_k, args.run_type)
+        if args.diagnostics:
+            if target_path.is_file():
+                await run_diagnostics_file(target_path)
+            elif target_path.is_dir():
+                json_files = sorted(list(target_path.glob("*.json")))
+                if not json_files:
+                    print(f"[Warning] No JSON files found in directory: {target_path}")
+                    return
+                for f in json_files:
+                    await run_diagnostics_file(f)
+        else:
+            # Select appropriate retriever adapter based on run-type
+            if args.run_type == "bm25":
+                retriever_adapter = BM25RetrieverAdapter()
+            elif args.run_type == "hybrid":
+                retriever_adapter = HybridRetrieverAdapter()
+            else:
+                retriever_adapter = VectorRetrieverAdapter()
+
+            evaluator = RetrievalEvaluator(retriever_adapter)
+
+            if target_path.is_file():
+                await evaluate_file(evaluator, target_path, args.top_k, args.run_type)
+            elif target_path.is_dir():
+                json_files = sorted(list(target_path.glob("*.json")))
+                if not json_files:
+                    print(f"[Warning] No JSON files found in directory: {target_path}")
+                    return
+                for f in json_files:
+                    await evaluate_file(evaluator, f, args.top_k, args.run_type)
     finally:
         await close_db_pool()
 
