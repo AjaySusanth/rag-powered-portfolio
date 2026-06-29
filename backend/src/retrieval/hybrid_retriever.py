@@ -20,11 +20,13 @@ logger = logging.getLogger(__name__)
 async def retrieve(
     query: str,
     top_k: int = 5,
-    project: Optional[str] = None
+    project: Optional[str] = None,
+    candidate_k: int = 20
 ) -> List[RetrievalResult]:
     """
     Executes a hybrid search query using both Vector and BM25 retrievers concurrently.
-    Fuses the outputs using Reciprocal Rank Fusion (RRF) and returns the top_k results.
+    Fetches candidate_k items from both retrievers to prevent candidate starvation,
+    fuses the outputs using Reciprocal Rank Fusion (RRF), and returns the final top_k results.
     """
     if not query or not query.strip():
         logger.warning("Empty query provided to hybrid retrieve. Returning empty results.")
@@ -33,8 +35,10 @@ async def retrieve(
     try:
         # Run both retrievers concurrently to reduce overall search latency.
         # Vector retriever makes network hops, while BM25 retriever runs in-memory.
-        vector_task = vector_retriever.retrieve(query=query, top_k=top_k, project=project)
-        bm25_task = bm25_retriever.retrieve(query=query, top_k=top_k, project=project)
+        # Fetching candidate_k ensures documents pushed down by one retriever 
+        # can still enter the fusion pool.
+        vector_task = vector_retriever.retrieve(query=query, top_k=candidate_k, project=project)
+        bm25_task = bm25_retriever.retrieve(query=query, top_k=candidate_k, project=project)
         
         vector_results, bm25_results = await asyncio.gather(vector_task, bm25_task)
         

@@ -35,8 +35,8 @@
   - `n8n-aks-platform/architecture.md` (Similarity: 0.033)
   - `n8n-aks-platform/decisions.md` (Similarity: 0.032)
   - `n8n-aks-platform/lessons-learned.md` (Similarity: 0.032)
-  - `docs/verification_ledger.md` (Similarity: 0.016)
-  - `README.md` (Similarity: 0.016)
+  - `docs/verification_ledger.md` (Similarity: 0.030)
+  - `n8n-aks-platform/lessons-learned.md` (Similarity: 0.030)
 - **Failure Reason:** No expected sources retrieved.
 
 ### N8N-007
@@ -49,8 +49,8 @@
   - `n8n-aks-platform/decisions.md` (Similarity: 0.033)
   - `docs/verification_ledger.md` (Similarity: 0.032)
   - `n8n-aks-platform/lessons-learned.md` (Similarity: 0.031)
-  - `n8n-aks-platform/challenges.md` (Similarity: 0.016)
-  - `n8n-aks-platform/challenges.md` (Similarity: 0.016)
+  - `n8n-aks-platform/challenges.md` (Similarity: 0.030)
+  - `n8n-aks-platform/architecture.md` (Similarity: 0.029)
 - **Failure Reason:** No expected sources retrieved.
 
 ### N8N-008
@@ -61,10 +61,10 @@
   - `helm/n8n/templates/worker.yaml`
 - **Retrieved Sources (Top-K):**
   - `n8n-aks-platform/architecture.md` (Similarity: 0.033)
+  - `n8n-aks-platform/challenges.md` (Similarity: 0.032)
   - `n8n-aks-platform/decisions.md` (Similarity: 0.031)
-  - `n8n-aks-platform/challenges.md` (Similarity: 0.016)
-  - `README.md` (Similarity: 0.016)
-  - `docs/verification_ledger.md` (Similarity: 0.016)
+  - `README.md` (Similarity: 0.031)
+  - `docs/verification_ledger.md` (Similarity: 0.031)
 - **Failure Reason:** No expected sources retrieved.
 
 ### N8N-009
@@ -73,11 +73,11 @@
 - **Expected Sources:**
   - `helm/n8n/values.yaml`
 - **Retrieved Sources (Top-K):**
+  - `n8n-aks-platform/decisions.md` (Similarity: 0.030)
+  - `n8n-aks-platform/architecture.md` (Similarity: 0.029)
+  - `docs/verification_ledger.md` (Similarity: 0.029)
+  - `.github/workflows/ci.yaml` (Similarity: 0.028)
   - `helm/n8n/Chart.yaml` (Similarity: 0.016)
-  - `n8n-aks-platform/lessons-learned.md` (Similarity: 0.016)
-  - `n8n-aks-platform/decisions.md` (Similarity: 0.016)
-  - `n8n-aks-platform/architecture.md` (Similarity: 0.016)
-  - `docs/verification_ledger.md` (Similarity: 0.016)
 - **Failure Reason:** No expected sources retrieved.
 
 ### N8N-012
@@ -88,28 +88,8 @@
   - `terraform/modules/keyvault/main.tf`
 - **Retrieved Sources (Top-K):**
   - `n8n-aks-platform/decisions.md` (Similarity: 0.032)
+  - `n8n-aks-platform/architecture.md` (Similarity: 0.032)
   - `n8n-aks-platform/challenges.md` (Similarity: 0.031)
-  - `docs/verification_ledger.md` (Similarity: 0.016)
-  - `n8n-aks-platform/architecture.md` (Similarity: 0.016)
-  - `docs/verification_ledger.md` (Similarity: 0.016)
+  - `docs/verification_ledger.md` (Similarity: 0.031)
+  - `docs/verification_ledger.md` (Similarity: 0.031)
 - **Failure Reason:** No expected sources retrieved.
-
-## Comparison with Vector and BM25 Baselines
-
-The table below presents a comparative analysis of the three retrieval strategies evaluated against the same golden dataset under identical conditions (`Top-K = 5`):
-
-| Retrieval Strategy | Hit Rate@5 | Recall@5 | MRR |
-| :--- | :---: | :---: | :---: |
-| **Vector Baseline** | **86.7%** | **70.0%** | **0.574** |
-| **BM25 Retriever** | 73.3% | 63.3% | 0.361 |
-| **Hybrid (RRF)** | 66.7% | 60.0% | 0.456 |
-
-### Performance Analysis
-
-1. **Why Hybrid (RRF) Scores Lower Overall on Small Retrieve Limits**:
-   In this implementation, the `hybrid_retriever` requests exactly `top_k=5` results from both `vector` and `bm25` before fusion. This severe constraint results in a maximum union size of 10 documents.
-   When the correct document is located at rank 4 or 5 of the Vector search, but does not appear in the BM25 results, its RRF score is $\frac{1}{60 + 5} \approx 0.01538$. A noise document ranked 1st in the BM25 list (with no Vector presence) gets an RRF score of $\frac{1}{60 + 1} \approx 0.01639$.
-   Consequently, the higher-ranking noise from one list pushes down correct results from the tail of the other list, starving them out of the final Top-5 hybrid slice.
-
-2. **Recommendation for Optimization**:
-   To address this starvation effect, we should query a larger candidate pool (e.g. `top_k = 20`) from the underlying retrievers, execute RRF fusion over this wider set, and then slice the finalized, fused list down to the user's requested `top_k` (e.g. 5). This allows RRF's rank-consensus benefits to surface without top-5 cutoff starvation.
