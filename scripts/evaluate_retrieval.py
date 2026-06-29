@@ -21,6 +21,7 @@ if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
 from src.retrieval.vector_retriever import retrieve as vector_retrieve
+from src.retrieval.bm25_retriever import retrieve as bm25_retrieve
 from src.models.retrieval_result import RetrievalResult
 from src.evaluation.retrieval_evaluator import RetrievalEvaluator, Retriever
 from src.models.evaluation_result import EvaluationResult
@@ -31,6 +32,12 @@ class VectorRetrieverAdapter(Retriever):
     """Adapter to map the vector retrieval retrieve function to the Retriever Protocol."""
     async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
         return await vector_retrieve(query=query, top_k=top_k, project=project)
+
+
+class BM25RetrieverAdapter(Retriever):
+    """Adapter to map the BM25 retrieval retrieve function to the Retriever Protocol."""
+    async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
+        return await bm25_retrieve(query=query, top_k=top_k, project=project)
 
 
 def save_json_report(result: EvaluationResult, output_path: Path) -> None:
@@ -204,7 +211,13 @@ async def main() -> None:
         print(f"[Error] Target path does not exist: {target_path}")
         sys.exit(1)
 
-    evaluator = RetrievalEvaluator(VectorRetrieverAdapter())
+    # Select appropriate retriever adapter based on run-type
+    if args.run_type == "bm25":
+        retriever_adapter = BM25RetrieverAdapter()
+    else:
+        retriever_adapter = VectorRetrieverAdapter()
+
+    evaluator = RetrievalEvaluator(retriever_adapter)
 
     try:
         if target_path.is_file():
