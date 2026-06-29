@@ -165,3 +165,30 @@ async def count_chunks() -> int:
     except Exception as e:
         logger.error(f"Failed to count chunks: {e}")
         raise DatabaseError(f"Count failed: {e}") from e
+
+async def get_all_chunks() -> List[Dict[str, Any]]:
+    """
+    Retrieves all chunks from the database (without embeddings).
+    Useful for building in-memory retrieval indices like BM25.
+    """
+    query = """
+        SELECT chunk_id, parent_document_id, project, layer, source_type,
+               source_file, chunk_index, content, content_hash, token_count,
+               char_count, metadata
+        FROM chunks;
+    """
+    try:
+        pool = await get_db_pool()
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(query)
+            
+            results = []
+            for row in rows:
+                row_dict = dict(row)
+                if isinstance(row_dict["metadata"], str):
+                    row_dict["metadata"] = json.loads(row_dict["metadata"])
+                results.append(row_dict)
+            return results
+    except Exception as e:
+        logger.error(f"Failed to retrieve all chunks: {e}")
+        raise DatabaseError(f"Retrieval of all chunks failed: {e}") from e

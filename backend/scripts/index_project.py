@@ -29,6 +29,7 @@ from src.chunking.chunker import chunk_document
 from src.embedding.azure_openai_embedder import embed_chunks
 from src.db.init_db import init_db
 from src.vectorstore.pgvector_store import upsert_chunks, delete_project, count_chunks
+from src.retrieval.bm25_retriever import index_instance
 
 
 async def main() -> None:
@@ -112,6 +113,14 @@ async def main() -> None:
         await upsert_chunks(all_chunks, embeddings)
     except Exception as e:
         print(f"Failed to store chunks in database: {e}")
+        sys.exit(1)
+
+    # 9. Refresh BM25 Index in-memory
+    try:
+        print("Refreshing BM25 index in-memory...")
+        await index_instance.refresh_index()
+    except Exception as e:
+        print(f"Failed to refresh BM25 index: {e}")
         sys.exit(1)
 
     print(f"\nIndexing complete:")
