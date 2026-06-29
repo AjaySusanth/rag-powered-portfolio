@@ -1,0 +1,343 @@
+{
+    "project": "n8n-aks-platform",
+    "total_queries": 15,
+    "failed_queries": 5,
+    "failure_category_counts": {
+        "Missing from both retrievers": 1,
+        "Candidate starvation": 6,
+        "Fusion ordering": 2,
+        "Duplicate source domination": 0
+    },
+    "avg_overlap_count": 12.8,
+    "avg_jaccard_overlap": 0.48718235103042695,
+    "avg_duplicate_density": 1.1611111111111112,
+    "top_recommendation": "Larger candidate pool (increase retrieval candidate pool size before fusion).",
+    "query_details": [
+        {
+            "question_id": "N8N-001",
+            "question": "How does the OPA Gatekeeper constraint template evaluate and prevent pods from running without specified container image tags or with the 'latest' tag in the dev namespace?",
+            "is_hit": true,
+            "overlap_count": 12,
+            "jaccard_overlap": 0.42857142857142855,
+            "duplicate_density": 1.25,
+            "failures": [],
+            "top_5_sources": [
+                "docs/verification_ledger.md",
+                "gitops/argocd/gatekeeper/templates/disallowed-tags-template.yaml",
+                "gitops/argocd/gatekeeper/constraints/disallowed-tags-constraints.yaml",
+                "gitops/argocd/gatekeeper/templates/disallowed-tags-template.yaml",
+                "gitops/argocd/gatekeeper/templates/required-resources-template.yaml"
+            ]
+        },
+        {
+            "question_id": "N8N-002",
+            "question": "How does the OPA Gatekeeper policy ensure that every container and initContainer in a pod defines CPU and Memory requests and limits prior to scheduler placement?",
+            "is_hit": true,
+            "overlap_count": 11,
+            "jaccard_overlap": 0.3793103448275862,
+            "duplicate_density": 1.25,
+            "failures": [],
+            "top_5_sources": [
+                "docs/verification_ledger.md",
+                "docs/verification_ledger.md",
+                "gitops/argocd/gatekeeper/constraints/required-resources-constraint.yaml",
+                "gitops/argocd/gatekeeper/templates/required-resources-template.yaml",
+                "n8n-aks-platform/architecture.md"
+            ]
+        },
+        {
+            "question_id": "N8N-003",
+            "question": "How does the NetworkPolicy configuration isolate inter-pod communication for the database layer (Postgres and Redis) while allowing necessary metrics collection and operator polling?",
+            "is_hit": true,
+            "overlap_count": 14,
+            "jaccard_overlap": 0.5384615384615384,
+            "duplicate_density": 1.25,
+            "failures": [],
+            "top_5_sources": [
+                "README.md",
+                "helm/n8n/templates/networkpolicies.yaml",
+                "docs/architecture/component-communication.md",
+                "n8n-aks-platform/architecture.md",
+                "helm/n8n/templates/networkpolicies.yaml"
+            ]
+        },
+        {
+            "question_id": "N8N-004",
+            "question": "Why and how does the n8n egress NetworkPolicy permit outbound traffic to the public internet while strictly blocking lateral access to internal private IP ranges?",
+            "is_hit": true,
+            "overlap_count": 16,
+            "jaccard_overlap": 0.6666666666666666,
+            "duplicate_density": 1.0,
+            "failures": [],
+            "top_5_sources": [
+                "n8n-aks-platform/challenges.md",
+                "helm/n8n/templates/networkpolicies.yaml",
+                "README.md",
+                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/lessons-learned.md"
+            ]
+        },
+        {
+            "question_id": "N8N-005",
+            "question": "How does the Helm chart configure container security settings and privilege constraints for n8n application pods to conform to zero-trust standards?",
+            "is_hit": false,
+            "overlap_count": 11,
+            "jaccard_overlap": 0.3793103448275862,
+            "duplicate_density": 1.25,
+            "failures": [
+                {
+                    "source_file": "helm/n8n/templates/main.yaml",
+                    "category": "Candidate starvation",
+                    "explanation": "The expected file was retrieved (fused rank: 22) but both Vector rank (15) and BM25 rank (None) were > 5, preventing it from entering the fusion candidate pool under top-5 limits.",
+                    "recommendation": "Increase retrieval candidate pool before fusion.",
+                    "vector_rank": 15,
+                    "bm25_rank": null,
+                    "rrf_rank": 22
+                },
+                {
+                    "source_file": "helm/n8n/templates/serviceaccounts.yaml",
+                    "category": "Missing from both retrievers",
+                    "explanation": "The expected file 'helm/n8n/templates/serviceaccounts.yaml' did not appear in the top-20 candidates of either Vector or BM25 search.",
+                    "recommendation": "Improve retrieval quality, chunking, or indexing.",
+                    "vector_rank": null,
+                    "bm25_rank": null,
+                    "rrf_rank": null
+                }
+            ],
+            "top_5_sources": [
+                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/lessons-learned.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/lessons-learned.md"
+            ]
+        },
+        {
+            "question_id": "N8N-006",
+            "question": "How does the Helm Chart CI pipeline automate chart version promotion and synchronize state changes with ArgoCD upon a git commit to the Helm directory?",
+            "is_hit": true,
+            "overlap_count": 17,
+            "jaccard_overlap": 0.7391304347826086,
+            "duplicate_density": 1.25,
+            "failures": [],
+            "top_5_sources": [
+                "docs/verification_ledger.md",
+                ".github/workflows/ci.yaml",
+                ".github/workflows/ci.yaml",
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/architecture.md"
+            ]
+        },
+        {
+            "question_id": "N8N-007",
+            "question": "How do the n8n application pods securely retrieve database passwords and encryption keys from Azure Key Vault without storing credentials in the git repository or Kubernetes Secret manifests?",
+            "is_hit": false,
+            "overlap_count": 11,
+            "jaccard_overlap": 0.3793103448275862,
+            "duplicate_density": 1.0,
+            "failures": [
+                {
+                    "source_file": "helm/n8n/templates/secretproviderclass.yaml",
+                    "category": "Candidate starvation",
+                    "explanation": "The expected file was retrieved (fused rank: 12) but both Vector rank (6) and BM25 rank (None) were > 5, preventing it from entering the fusion candidate pool under top-5 limits.",
+                    "recommendation": "Increase retrieval candidate pool before fusion.",
+                    "vector_rank": 6,
+                    "bm25_rank": null,
+                    "rrf_rank": 12
+                },
+                {
+                    "source_file": "helm/n8n/templates/main.yaml",
+                    "category": "Candidate starvation",
+                    "explanation": "The expected file was retrieved (fused rank: 13) but both Vector rank (None) and BM25 rank (6) were > 5, preventing it from entering the fusion candidate pool under top-5 limits.",
+                    "recommendation": "Increase retrieval candidate pool before fusion.",
+                    "vector_rank": null,
+                    "bm25_rank": 6,
+                    "rrf_rank": 13
+                }
+            ],
+            "top_5_sources": [
+                "n8n-aks-platform/decisions.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/lessons-learned.md",
+                "n8n-aks-platform/challenges.md",
+                "n8n-aks-platform/architecture.md"
+            ]
+        },
+        {
+            "question_id": "N8N-008",
+            "question": "How does the KEDA autoscaling loop coordinate with the Redis message broker and the n8n-worker deployment to dynamically manage worker replica counts?",
+            "is_hit": false,
+            "overlap_count": 13,
+            "jaccard_overlap": 0.48148148148148145,
+            "duplicate_density": 1.0,
+            "failures": [
+                {
+                    "source_file": "helm/n8n/templates/hpa-worker.yaml",
+                    "category": "Fusion ordering",
+                    "explanation": "The expected file entered the RRF pool but was ranked poorly (fused rank: 6, deduplicated rank: 6) due to weak scores in both retrievers.",
+                    "recommendation": "Tune RRF parameters or investigate fusion strategy.",
+                    "vector_rank": 8,
+                    "bm25_rank": 4,
+                    "rrf_rank": 6
+                },
+                {
+                    "source_file": "helm/n8n/templates/worker.yaml",
+                    "category": "Candidate starvation",
+                    "explanation": "The expected file was retrieved (fused rank: 14) but both Vector rank (None) and BM25 rank (11) were > 5, preventing it from entering the fusion candidate pool under top-5 limits.",
+                    "recommendation": "Increase retrieval candidate pool before fusion.",
+                    "vector_rank": null,
+                    "bm25_rank": 11,
+                    "rrf_rank": 14
+                }
+            ],
+            "top_5_sources": [
+                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/challenges.md",
+                "n8n-aks-platform/decisions.md",
+                "README.md",
+                "docs/verification_ledger.md"
+            ]
+        },
+        {
+            "question_id": "N8N-009",
+            "question": "How is the default resource request and limit configuration structured for the n8n components and database instances within the Helm values schema?",
+            "is_hit": false,
+            "overlap_count": 4,
+            "jaccard_overlap": 0.1111111111111111,
+            "duplicate_density": 1.0,
+            "failures": [
+                {
+                    "source_file": "helm/n8n/values.yaml",
+                    "category": "Candidate starvation",
+                    "explanation": "The expected file was retrieved (fused rank: 12) but both Vector rank (6) and BM25 rank (None) were > 5, preventing it from entering the fusion candidate pool under top-5 limits.",
+                    "recommendation": "Increase retrieval candidate pool before fusion.",
+                    "vector_rank": 6,
+                    "bm25_rank": null,
+                    "rrf_rank": 12
+                }
+            ],
+            "top_5_sources": [
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/architecture.md",
+                "docs/verification_ledger.md",
+                ".github/workflows/ci.yaml",
+                "helm/n8n/Chart.yaml"
+            ]
+        },
+        {
+            "question_id": "N8N-010",
+            "question": "How are Azure Key Vault secret objects mapped to specific environment variable keys inside the SecretProviderClass definition?",
+            "is_hit": true,
+            "overlap_count": 14,
+            "jaccard_overlap": 0.5384615384615384,
+            "duplicate_density": 1.0,
+            "failures": [],
+            "top_5_sources": [
+                "helm/n8n/templates/secretproviderclass.yaml",
+                "docs/verification_ledger.md",
+                "terraform/modules/keyvault/variables.tf",
+                "n8n-aks-platform/decisions.md",
+                "terraform/modules/keyvault/main.tf"
+            ]
+        },
+        {
+            "question_id": "N8N-011",
+            "question": "How is the PrometheusRule alerting expression for high workflow failure rates calculated using metrics from n8n queue execution?",
+            "is_hit": true,
+            "overlap_count": 14,
+            "jaccard_overlap": 0.5384615384615384,
+            "duplicate_density": 1.0,
+            "failures": [],
+            "top_5_sources": [
+                "monitoring/alerts/n8n-rules.yaml",
+                "helm/n8n/templates/prometheusrule.yaml",
+                "README.md",
+                "n8n-aks-platform/challenges.md",
+                "docs/verification_ledger.md"
+            ]
+        },
+        {
+            "question_id": "N8N-012",
+            "question": "How is the user-assigned or system-assigned kubelet identity in AKS configured in Terraform to allow read access to Azure Key Vault secrets?",
+            "is_hit": false,
+            "overlap_count": 16,
+            "jaccard_overlap": 0.6666666666666666,
+            "duplicate_density": 1.25,
+            "failures": [
+                {
+                    "source_file": "terraform/env/dev/main.tf",
+                    "category": "Candidate starvation",
+                    "explanation": "The expected file was retrieved (fused rank: 16) but both Vector rank (19) and BM25 rank (18) were > 5, preventing it from entering the fusion candidate pool under top-5 limits.",
+                    "recommendation": "Increase retrieval candidate pool before fusion.",
+                    "vector_rank": 19,
+                    "bm25_rank": 18,
+                    "rrf_rank": 16
+                },
+                {
+                    "source_file": "terraform/modules/keyvault/main.tf",
+                    "category": "Fusion ordering",
+                    "explanation": "The expected file entered the RRF pool but was ranked poorly (fused rank: 10, deduplicated rank: 8) due to weak scores in both retrievers.",
+                    "recommendation": "Tune RRF parameters or investigate fusion strategy.",
+                    "vector_rank": 5,
+                    "bm25_rank": 19,
+                    "rrf_rank": 10
+                }
+            ],
+            "top_5_sources": [
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/challenges.md",
+                "docs/verification_ledger.md",
+                "docs/verification_ledger.md"
+            ]
+        },
+        {
+            "question_id": "N8N-013",
+            "question": "How is the Azure federated identity credential structured in Terraform to authenticate GitHub Actions CI/CD workflows using OIDC rather than static secrets?",
+            "is_hit": true,
+            "overlap_count": 13,
+            "jaccard_overlap": 0.48148148148148145,
+            "duplicate_density": 1.0,
+            "failures": [],
+            "top_5_sources": [
+                "terraform/env/dev/oidc.tf",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/decisions.md",
+                ".github/workflows/infra.yaml"
+            ]
+        },
+        {
+            "question_id": "N8N-014",
+            "question": "Which inter-service paths are explicitly blocked by the NetworkPolicy architecture, and what architectural reasons justify preventing workers from communicating directly with the main API or webhooks?",
+            "is_hit": true,
+            "overlap_count": 11,
+            "jaccard_overlap": 0.3793103448275862,
+            "duplicate_density": 1.25,
+            "failures": [],
+            "top_5_sources": [
+                "README.md",
+                "docs/verification_ledger.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/challenges.md",
+                "n8n-aks-platform/lessons-learned.md"
+            ]
+        },
+        {
+            "question_id": "N8N-015",
+            "question": "How was compliance with named ServiceAccounts and resource limits verified across all running n8n pods in the cluster, as documented in the verification ledger?",
+            "is_hit": true,
+            "overlap_count": 15,
+            "jaccard_overlap": 0.6,
+            "duplicate_density": 1.6666666666666667,
+            "failures": [],
+            "top_5_sources": [
+                "README.md",
+                "docs/verification_ledger.md",
+                "docs/verification_ledger.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/architecture.md"
+            ]
+        }
+    ]
+}
