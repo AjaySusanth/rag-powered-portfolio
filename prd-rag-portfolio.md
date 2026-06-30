@@ -337,6 +337,81 @@ Metadata tagging per chunk:
 
 ### 4.3 Retrieval Pipeline (Hybrid)
 
+### Current Implementation (June 2026)
+
+The retrieval pipeline has evolved beyond the initial design and now follows a production-oriented modular architecture.
+
+```
+User Query
+      │
+      ▼
+Project Detection (deterministic alias routing)
+      │
+      ▼
+Query Rewriter (LLM, optional)
+      │
+      ▼
+Query Embedding
+      │
+      ▼
+Vector Search (pgvector)
+          ╲
+           ╲
+            ╲
+             BM25 Search
+                 │
+                 ▼
+         Reciprocal Rank Fusion (RRF)
+                 │
+                 ▼
+      Source Diversification
+                 │
+                 ▼
+        Retrieval Grader
+                 │
+                 ▼
+       Final Retrieved Context
+```
+
+Current retrieval flow:
+
+1. **Project Detection**
+   - Deterministically detects project aliases from the query.
+   - Narrows retrieval to a single project when possible.
+   - Falls back to global search if no project or multiple projects are detected.
+
+2. **Query Rewriter**
+   - Uses an LLM to determine whether rewriting improves retrieval.
+   - Returns structured output containing:
+     - rewritten query
+     - rewrite decision
+     - explanation
+   - Original query is preserved for answer generation.
+
+3. **Hybrid Retrieval**
+   - Vector Search (pgvector HNSW)
+   - BM25 keyword retrieval
+   - Executed concurrently.
+
+4. **Reciprocal Rank Fusion**
+   - Combines vector and BM25 rankings.
+
+5. **Source Diversification**
+   - Removes duplicate chunks originating from the same source file.
+   - Preserves only the highest-ranked chunk per file.
+
+6. **Retrieval Grader**
+   - Batched LLM grading.
+   - Filters irrelevant chunks.
+   - Falls back to the diversified results if fewer than the configured minimum remain.
+
+7. **Context Assembly**
+   - Highest-ranked graded chunks are assembled into the final prompt.
+
+---
+
+### Original Design
+
 On each user query:
 
 1. **Project detection** — if query mentions a specific project, filter retrieval to that project's chunks before searching
@@ -353,24 +428,67 @@ On each user query:
 
 ### 4.4 Self-Healing Layer
 
-Triggered when retrieval confidence is below threshold:
+### Current Implementation (June 2026)
+
+The original self-healing concept has been partially realized.
+
+Implemented:
+
+- Query Rewriter
+- Retrieval Grader
+- Project Detection
+- Source Diversification
+
+Current execution order:
 
 ```
-Low-confidence retrieval (no chunk > 0.5)
-    ↓
-Step 1: LLM rewrites the query with different phrasing
-    ↓
-Step 2: Re-retrieve with rewritten query
-    ↓
-Step 3a: If confidence now acceptable → proceed to generation
-Step 3b: If still low → graceful fallback response:
-         "I don't have specific details on that. Here's what I do know: ..."
-    ↓
-Step 4: Log correction event to PostgreSQL
-        { original_query, rewritten_query, outcome, timestamp }
+Project Detection
+      ↓
+Query Rewriter
+      ↓
+Hybrid Retrieval
+      ↓
+Source Diversification
+      ↓
+Retrieval Grader
 ```
+
+The original "retry retrieval only when confidence is low" strategy has intentionally been superseded.
+
+Instead, every query passes through the Query Rewriter once. The rewriter itself decides whether rewriting is necessary and may simply return the original query unchanged.
+
+This architecture reduces orchestration complexity while maintaining retrieval quality.
+
+### Future Enhancement
+
+Confidence-based retry routing may still be introduced later if production evaluation demonstrates measurable gains.
 
 ## 4.5 Retrieval Debugger *(Admin Only)*
+
+### Current Implementation (June 2026)
+
+The Retrieval Debugger has been substantially expanded beyond the original proposal.
+
+Implemented capabilities include:
+
+- Vector retrieval evaluation
+- BM25 evaluation
+- Hybrid retrieval evaluation
+- Retrieval Diagnostics
+- Candidate overlap analysis
+- Jaccard overlap analysis
+- Source Diversity metrics
+- Duplicate Chunk Density
+- Failure classification:
+  - Missing from both retrievers
+  - Candidate starvation
+  - Fusion ordering
+  - Duplicate source domination
+- Retrieval evaluation reports
+- Markdown engineering reports
+- JSON machine-readable reports
+
+The debugger now serves as an offline engineering evaluation framework capable of quantitatively validating retrieval improvements before deployment.
 
 ### Purpose
 
@@ -603,11 +721,15 @@ Average number of unique source files across the Top-K retrieved results, measur
 
 ### 4.6 LLM Layer
 
-| Role              | Model (Configurable)            | Fallback           |
-| ----------------- | ------------------------------- | ------------------ |
-| Answer generation | Gemini 2.5 Flash-Lite           | Groq llama-3.1-70b |
-| Query rewriting   | Gemini 2.5 Flash-Lite           | Groq               |
-| Retrieval grading | Gemini 2.5 Flash-Lite           | Rule-based scorer  |
+| Role | Current Default | Configurable |
+|------|-----------------|--------------|
+| Answer Generation | Gemini 3.1 Flash Lite | Yes |
+| Query Rewriter | Gemini 3.1 Flash Lite | Yes |
+| Retrieval Grader | Gemini 3.1 Flash Lite | Yes |
+
+Model selection is provider-agnostic and configured through environment variables.
+
+Future providers (OpenAI, OSS models, Groq, etc.) can be added without modifying retrieval logic.
 
 > **Note on Free-Tier Model Configuration:** While Gemini 2.0 Flash was initially specified, API quota availability on the Google AI Studio free tier led to adopting `gemini-2.5-flash-lite` (1500 RPM, 1M TPM, 15 RPM limits) as the sensible default. The model name is fully configurable via the `GEMINI_MODEL_NAME` setting (loaded from `.env`) to easily absorb future changes in the Gemini catalog and quota offerings without codebase edits.
 
@@ -657,11 +779,8 @@ _Moves from "working" to "accurate and fast."_
 | 9   | Reciprocal Rank Fusion — merge and re-rank BM25 + vector results                   |
 | 10  | Source diversification — after RRF, keep highest-scoring chunk per source, return top-K diversified results |
 | 11  | Project-scoped filtering — detect project mentions, narrow retrieval before search |
-| 12  | Citations — every response shows source file + layer for each chunk used           |
-| 13  | Retrieval grader — score chunks for relevance, filter weak context                 |
-| 14  | Query rewriter — rephrase and re-retrieve on low-confidence retrievals             |
-| 15  | **Redis response cache** — `hash(query + chunk_ids)`, 24h TTL                      |
-| 16  | Redis embedding cache — avoid re-embedding identical text, 7d TTL                  |
+| 12  | Retrieval grader — score chunks for relevance, filter weak context                 |
+| 13  | Query rewriter — rephrase and re-retrieve on low-confidence retrievals             |
 
 ---
 
@@ -671,13 +790,16 @@ _The public-facing interface layer._
 
 | #   | Feature                                                                        |
 | --- | ------------------------------------------------------------------------------ |
-| 16  | FastAPI `/chat` endpoint — SSE streaming, session ID, project filter           |
-| 17  | Prompt injection protection — input sanitization + system prompt hardening     |
-| 18  | Rate limiting — 10 requests per IP per minute                                  |
-| 19  | `/hire` endpoint — capture email + company, trigger Telegram notification      |
-| 20  | `/ingest` admin endpoint — bearer token protected, flushes Redis on completion |
-| 21  | `/resume` command — returns PDF download link                                  |
-| 22  | `/stack` command — returns grouped technology list from resume.md              |
+| 14  | FastAPI `/chat` endpoint — SSE streaming, session ID, project filter           |
+| 15  | Citations — every response shows source file + layer for each chunk used      |
+| 16  | Prompt injection protection — input sanitization + system prompt hardening     |
+| 17  | Rate limiting — 10 requests per IP per minute                                  |
+| 18  | **Redis response cache** — `hash(query + chunk_ids)`, 24h TTL                      |
+| 19  | Redis embedding cache — avoid re-embedding identical text, 7d TTL             |
+| 20  | `/hire` endpoint — capture email + company, trigger Telegram notification      |
+| 21  | `/ingest` admin endpoint — bearer token protected, flushes Redis on completion |
+| 22  | `/resume` command — returns PDF download link                                  |
+| 23  | `/stack` command — returns grouped technology list from resume.md              |
 
 ---
 
@@ -1051,7 +1173,34 @@ CREATE TABLE query_logs (
   created_at      TIMESTAMPTZ DEFAULT now()
 );
 ```
+---
 
+## 8.6 Retrieval Evaluation Framework
+
+### Current Implementation (June 2026)
+
+A complete offline evaluation framework has been implemented to measure retrieval quality independently of answer generation.
+
+Implemented metrics include:
+
+- Hit Rate@K
+- Recall@K
+- Mean Reciprocal Rank (MRR)
+- Source Diversity@K
+- Candidate Overlap
+- Jaccard Overlap
+- Duplicate Chunk Density
+
+Supported evaluation modes:
+
+- Vector Retrieval
+- BM25 Retrieval
+- Hybrid Retrieval
+- Hybrid + Source Diversification
+- Hybrid + Retrieval Grader
+- Hybrid + Query Rewriter
+
+Engineering reports are generated automatically in both Markdown and JSON formats, enabling quantitative comparison between retrieval strategies.
 ---
 
 ## 9. Out of Scope for v1
@@ -1075,8 +1224,8 @@ The following features are explicitly excluded from this version due to time con
 
 - GraphRAG — build a knowledge graph over projects and skills; retrieve by entity relationships rather than text similarity alone. Answers _"which projects demonstrate distributed systems experience?"_ far better than vector search.
 - Cross-encoder reranker — replace the LLM-based retrieval grader with a dedicated cross-encoder model (e.g. `ms-marco-MiniLM`) for faster, cheaper, more accurate chunk scoring.
-- Query expansion — generate multiple rephrasings of each query before retrieval, merge all result sets via RRF.
-- Source diversification — post-RRF stage that caps chunks per source file (configurable max 1–2 per source), preventing a single file from dominating Top-K and improving contextual coverage passed to the LLM.
+
+
 
 **Evaluation Infrastructure**
 
@@ -1095,6 +1244,18 @@ The following features are explicitly excluded from this version due to time con
 - Session memory (lightweight) — within a single session, track what the recruiter has already asked to avoid repetition in follow-up answers.
 - Visitor analytics — track which companies are visiting, what they searched, and surface this in the admin dashboard.
 
+### Already Implemented (June 2026)
+
+The following features were originally planned as future work and have now been completed:
+
+- Hybrid Retrieval (Vector + BM25)
+- Reciprocal Rank Fusion
+- Retrieval Diagnostics Framework
+- Source Diversification
+- Project Detection
+- Retrieval Grader
+- Query Rewriter
+
 ---
 
 ## 10. Resume Bullets (Target Output)
@@ -1102,9 +1263,50 @@ The following features are explicitly excluded from this version due to time con
 > **ASK AJAY — RAG-POWERED PORTFOLIO ENGINE** | FastAPI, pgvector, Gemini, Redis, Docker, Terraform
 >
 > - Engineered a three-layer knowledge base (identity docs, per-project design docs, auto-ingested GitHub artifacts) with a per-project `ingest.yml` config that whitelists high-signal files per project type — backend (controllers, services, middleware, Prisma schema), DevOps (Terraform, Helm, GitHub Actions), and full-stack (API specs, DB schema).
-> - Built a hybrid retrieval pipeline combining BM25 keyword search and pgvector HNSW cosine similarity, merged via Reciprocal Rank Fusion, with a retrieval grader and automatic query rewriter for self-correcting low-confidence retrievals — with citations on every response.
+> - Built a production-grade hybrid retrieval engine combining pgvector, BM25, Reciprocal Rank Fusion (RRF), deterministic project routing, source diversification, batched LLM retrieval grading, and LLM-based query rewriting, supported by an offline evaluation framework measuring Hit Rate, Recall, MRR, Source Diversity, and retrieval diagnostics.
 > - Implemented SSE-streaming FastAPI backend with Redis response caching (24h TTL), prompt injection protection, rate limiting, and a `/hire` command that captures recruiter leads and triggers real-time Telegram notifications.
 > - Containerized with Docker Compose (FastAPI + PostgreSQL + Redis + NGINX) for local development; deployed to Azure Container Apps via Terraform with GitHub Actions CI/CD and a Prometheus observability stack tracking retrieval latency, cache hit rate, and self-healing correction rate.
+
+---
+
+
+
+# Appendix A — Current Implementation Status (June 2026)
+
+## Completed
+
+- Three-layer Knowledge Base
+- GitHub Ingestion Pipeline
+- Heading-aware Chunking
+- pgvector Integration
+- BM25 Retrieval
+- Hybrid Retrieval
+- Reciprocal Rank Fusion
+- Retrieval Evaluation Framework
+- Retrieval Diagnostics
+- Source Diversification
+- Retrieval Grader
+- Project Detection
+- Query Rewriter
+
+## In Progress
+
+- FastAPI Chat API
+- SSE Streaming
+- Structured Citations
+
+## Remaining
+
+- Redis Response Cache
+- Redis Embedding Cache
+- Prompt Injection Protection
+- Rate Limiting
+- Analytics API
+- Prometheus Metrics
+- Docker Production Stack
+- Azure Deployment
+- Terraform
+- GitHub Actions CI/CD
 
 ---
 

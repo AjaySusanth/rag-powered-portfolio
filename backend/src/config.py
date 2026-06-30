@@ -60,11 +60,11 @@ class Settings(BaseSettings):
         description="Google Gemini API Key"
     )
     GEMINI_MODEL_NAME: str = Field(
-        default="gemini-2.5-flash-lite",
+        default="gemini-3.1-flash-lite",
         description="The Gemini model name to use for answer generation"
     )
     MODEL_GRADER: str = Field(
-        default="gemini-2.5-flash-lite",
+        default="gemini-3.1-flash-lite",
         description="The model name to use for retrieval chunk grading"
     )
     GRADER_PROVIDER: str = Field(
@@ -74,6 +74,18 @@ class Settings(BaseSettings):
     GRADER_MIN_CHUNKS: int = Field(
         default=3,
         description="Minimum number of chunks to return from grader. If relevant chunks are less than this, fallback to original list."
+    )
+    ENABLE_QUERY_REWRITER: bool = Field(
+        default=False,
+        description="Whether to enable the query rewriter preprocessing step"
+    )
+    MODEL_REWRITER: str = Field(
+        default="gemini-3.1-flash-lite",
+        description="The Gemini model name to use for query rewriting"
+    )
+    REWRITER_PROVIDER: str = Field(
+        default="gemini",
+        description="The provider for the query rewriter (e.g., gemini, mock)"
     )
 
     GITHUB_TOKEN: Optional[str] = Field(

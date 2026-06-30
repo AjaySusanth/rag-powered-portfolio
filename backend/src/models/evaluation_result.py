@@ -19,6 +19,10 @@ class QuestionResult:
     rank: Optional[int]
     expected_layers: List[str] = field(default_factory=list)
     failure_reason: Optional[str] = None
+    rewritten_query: Optional[str] = None
+    rewritten: Optional[bool] = None
+    rewrite_explanation: Optional[str] = None
+    rewrite_latency: Optional[float] = None
 
 @dataclass
 class CategoryMetrics:

@@ -1,0 +1,638 @@
+{
+    "project": "n8n-aks-platform",
+    "generated_at": "2026-06-25T16:33:02Z",
+    "top_k": 5,
+    "total_questions": 15,
+    "recall": 0.7666666666666667,
+    "hit_rate": 0.8666666666666667,
+    "mrr": 0.5944444444444444,
+    "average_similarity": 0.031870007464480224,
+    "category_metrics": [
+        {
+            "category": "core_logic",
+            "total_questions": 5,
+            "hit_rate": 0.8,
+            "recall": 0.8,
+            "mrr": 0.5666666666666667,
+            "average_similarity": 0.032078255782645
+        },
+        {
+            "category": "data_models",
+            "total_questions": 3,
+            "hit_rate": 1.0,
+            "recall": 1.0,
+            "mrr": 0.75,
+            "average_similarity": 0.03104273921106705
+        },
+        {
+            "category": "documentation",
+            "total_questions": 2,
+            "hit_rate": 1.0,
+            "recall": 1.0,
+            "mrr": 0.75,
+            "average_similarity": 0.032266458495966696
+        },
+        {
+            "category": "infrastructure",
+            "total_questions": 2,
+            "hit_rate": 0.5,
+            "recall": 0.5,
+            "mrr": 0.5,
+            "average_similarity": 0.03278688524590164
+        },
+        {
+            "category": "pipeline",
+            "total_questions": 3,
+            "hit_rate": 1.0,
+            "recall": 0.5,
+            "mrr": 0.4444444444444444,
+            "average_similarity": 0.031849684678875584
+        }
+    ],
+    "layer_metrics": [
+        {
+            "layer": "design",
+            "total_questions": 7,
+            "hit_rate": 0.8571428571428571,
+            "recall": 0.8571428571428571,
+            "mrr": 0.48095238095238096,
+            "average_similarity": 0.031459280152104634
+        },
+        {
+            "layer": "artifact",
+            "total_questions": 11,
+            "hit_rate": 0.7272727272727273,
+            "recall": 0.6363636363636364,
+            "mrr": 0.5227272727272727,
+            "average_similarity": 0.03187156786039149
+        }
+    ],
+    "failures": [
+        {
+            "question_id": "N8N-005",
+            "question": "How does the Helm chart configure container security settings and privilege constraints for n8n application pods to conform to zero-trust standards?",
+            "category": "core_logic",
+            "expected_sources": [
+                "helm/n8n/templates/main.yaml",
+                "helm/n8n/templates/serviceaccounts.yaml"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/architecture.md",
+                "docs/verification_ledger.md",
+                "helm/n8n/templates/webhook.yaml",
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/lessons-learned.md"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.03252247488101534,
+                0.030776515151515152,
+                0.030117753623188408,
+                0.029211087420042643
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "artifact",
+                "artifact"
+            ],
+            "failure_reason": "No expected sources retrieved.",
+            "rewritten_query": "n8n-aks-platform Helm chart securityContext podSecurityContext allowPrivilegeEscalation readOnlyRootFilesystem runAsNonRoot zero-trust configuration",
+            "rewritten": true,
+            "rewrite_explanation": "Expanded the query to include specific Kubernetes security fields (securityContext, allowPrivilegeEscalation, etc.) relevant to zero-trust standards within the n8n-aks-platform Helm chart context to improve retrieval precision.",
+            "rewrite_latency": 1.2448867000639439
+        },
+        {
+            "question_id": "N8N-012",
+            "question": "How is the user-assigned or system-assigned kubelet identity in AKS configured in Terraform to allow read access to Azure Key Vault secrets?",
+            "category": "infrastructure",
+            "expected_sources": [
+                "terraform/env/dev/main.tf",
+                "terraform/modules/keyvault/main.tf"
+            ],
+            "retrieved_sources": [
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/architecture.md",
+                "terraform/modules/aks/outputs.tf",
+                "n8n-aks-platform/challenges.md",
+                "helm/n8n/templates/secretproviderclass.yaml"
+            ],
+            "similarity_scores": [
+                0.032018442622950824,
+                0.031009615384615385,
+                0.030886196246139225,
+                0.03057889822595705,
+                0.0304147465437788
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "artifact",
+                "design"
+            ],
+            "failure_reason": "No expected sources retrieved.",
+            "rewritten_query": "AKS Terraform configuration for kubelet identity user-assigned vs system-assigned managed identity Azure Key Vault secret provider class access",
+            "rewritten": true,
+            "rewrite_explanation": "Expanded the query to include specific technical keywords like 'managed identity', 'secret provider class', and 'AKS Terraform configuration' to ensure retrieval of relevant infrastructure-as-code documentation and examples.",
+            "rewrite_latency": 1.2186132001224905
+        }
+    ],
+    "question_results": [
+        {
+            "question_id": "N8N-001",
+            "question": "How does the OPA Gatekeeper constraint template evaluate and prevent pods from running without specified container image tags or with the 'latest' tag in the dev namespace?",
+            "category": "core_logic",
+            "expected_sources": [
+                "gitops/argocd/gatekeeper/templates/disallowed-tags-template.yaml",
+                "gitops/argocd/gatekeeper/constraints/disallowed-tags-constraints.yaml"
+            ],
+            "retrieved_sources": [
+                "docs/verification_ledger.md",
+                "gitops/argocd/gatekeeper/constraints/disallowed-tags-constraints.yaml",
+                "gitops/argocd/gatekeeper/templates/disallowed-tags-template.yaml",
+                "n8n-aks-platform/lessons-learned.md",
+                "gitops/argocd/gatekeeper-constraints.yaml"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.032266458495966696,
+                0.03200204813108039,
+                0.030776515151515152,
+                0.030330882352941176
+            ],
+            "is_hit": true,
+            "rank": 2,
+            "expected_layers": [
+                "design",
+                "design"
+            ],
+            "failure_reason": null,
+            "rewritten_query": "n8n-aks-platform OPA Gatekeeper ConstraintTemplate policy for container image tag validation, prevent 'latest' tag or missing tags in dev namespace",
+            "rewritten": true,
+            "rewrite_explanation": "Expanded the query to include the specific project context and technical keywords like 'ConstraintTemplate' and 'policy' to ensure the retrieval system targets the OPA policy definitions and Rego logic within the n8n-aks-platform repository.",
+            "rewrite_latency": 1.9574366000015289
+        },
+        {
+            "question_id": "N8N-002",
+            "question": "How does the OPA Gatekeeper policy ensure that every container and initContainer in a pod defines CPU and Memory requests and limits prior to scheduler placement?",
+            "category": "core_logic",
+            "expected_sources": [
+                "gitops/argocd/gatekeeper/templates/required-resources-template.yaml",
+                "gitops/argocd/gatekeeper/constraints/required-resources-constraint.yaml"
+            ],
+            "retrieved_sources": [
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/lessons-learned.md",
+                "gitops/argocd/gatekeeper/constraints/required-resources-constraint.yaml",
+                "gitops/argocd/gatekeeper/templates/required-resources-template.yaml",
+                "n8n-aks-platform/architecture.md"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.03149801587301587,
+                0.03125763125763126,
+                0.031009615384615385,
+                0.029236022193768675
+            ],
+            "is_hit": true,
+            "rank": 3,
+            "expected_layers": [
+                "design",
+                "design"
+            ],
+            "failure_reason": null,
+            "rewritten_query": "OPA Gatekeeper constraint template for Kubernetes Pod CPU and Memory resource requests and limits validation in n8n-aks-platform",
+            "rewritten": true,
+            "rewrite_explanation": "The original query was conversational. I expanded it to include specific technical terms like 'constraint template' and 'resource requests and limits validation' to better target the OPA Gatekeeper policy definitions within the n8n-aks-platform context.",
+            "rewrite_latency": 1.0860864999704063
+        },
+        {
+            "question_id": "N8N-003",
+            "question": "How does the NetworkPolicy configuration isolate inter-pod communication for the database layer (Postgres and Redis) while allowing necessary metrics collection and operator polling?",
+            "category": "core_logic",
+            "expected_sources": [
+                "helm/n8n/templates/networkpolicies.yaml"
+            ],
+            "retrieved_sources": [
+                "helm/n8n/templates/networkpolicies.yaml",
+                "README.md",
+                "n8n-aks-platform/architecture.md",
+                "helm/n8n/templates/webhook.yaml",
+                "n8n-aks-platform/challenges.md"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.03252247488101534,
+                0.031009615384615385,
+                0.028850145288501453,
+                0.02871794871794872
+            ],
+            "is_hit": true,
+            "rank": 1,
+            "expected_layers": [
+                "design"
+            ],
+            "failure_reason": null,
+            "rewritten_query": "n8n-aks-platform Kubernetes NetworkPolicy configuration for Postgres and Redis database layer isolation, allowing metrics collection and operator polling traffic",
+            "rewritten": true,
+            "rewrite_explanation": "Expanded the query to include the project context and specific technical requirements (NetworkPolicy, database isolation, metrics, and operator polling) to ensure the retrieval system targets the relevant Kubernetes manifests and security policies.",
+            "rewrite_latency": 1.0958678000606596
+        },
+        {
+            "question_id": "N8N-004",
+            "question": "Why and how does the n8n egress NetworkPolicy permit outbound traffic to the public internet while strictly blocking lateral access to internal private IP ranges?",
+            "category": "core_logic",
+            "expected_sources": [
+                "helm/n8n/templates/networkpolicies.yaml"
+            ],
+            "retrieved_sources": [
+                "helm/n8n/templates/networkpolicies.yaml",
+                "n8n-aks-platform/challenges.md",
+                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/lessons-learned.md",
+                "README.md"
+            ],
+            "similarity_scores": [
+                0.032266458495966696,
+                0.03225806451612903,
+                0.031009615384615385,
+                0.030679156908665108,
+                0.029957522915269395
+            ],
+            "is_hit": true,
+            "rank": 1,
+            "expected_layers": [
+                "design"
+            ],
+            "failure_reason": null,
+            "rewritten_query": "n8n-aks-platform Kubernetes NetworkPolicy egress configuration public internet access vs internal private IP range restriction",
+            "rewritten": true,
+            "rewrite_explanation": "Expanded the query to include specific technical context (Kubernetes NetworkPolicy, egress configuration) to ensure the retrieval system focuses on the relevant infrastructure-as-code files and security policies within the n8n-aks-platform project.",
+            "rewrite_latency": 1.042706600157544
+        },
+        {
+            "question_id": "N8N-005",
+            "question": "How does the Helm chart configure container security settings and privilege constraints for n8n application pods to conform to zero-trust standards?",
+            "category": "core_logic",
+            "expected_sources": [
+                "helm/n8n/templates/main.yaml",
+                "helm/n8n/templates/serviceaccounts.yaml"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/architecture.md",
+                "docs/verification_ledger.md",
+                "helm/n8n/templates/webhook.yaml",
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/lessons-learned.md"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.03252247488101534,
+                0.030776515151515152,
+                0.030117753623188408,
+                0.029211087420042643
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "artifact",
+                "artifact"
+            ],
+            "failure_reason": "No expected sources retrieved.",
+            "rewritten_query": "n8n-aks-platform Helm chart securityContext podSecurityContext allowPrivilegeEscalation readOnlyRootFilesystem runAsNonRoot zero-trust configuration",
+            "rewritten": true,
+            "rewrite_explanation": "Expanded the query to include specific Kubernetes security fields (securityContext, allowPrivilegeEscalation, etc.) relevant to zero-trust standards within the n8n-aks-platform Helm chart context to improve retrieval precision.",
+            "rewrite_latency": 1.2448867000639439
+        },
+        {
+            "question_id": "N8N-006",
+            "question": "How does the Helm Chart CI pipeline automate chart version promotion and synchronize state changes with ArgoCD upon a git commit to the Helm directory?",
+            "category": "pipeline",
+            "expected_sources": [
+                ".github/workflows/ci.yaml",
+                "gitops/argocd/application.yaml"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/architecture.md",
+                ".github/workflows/ci.yaml",
+                "n8n-aks-platform/decisions.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/lessons-learned.md"
+            ],
+            "similarity_scores": [
+                0.032018442622950824,
+                0.03200204813108039,
+                0.031544957774465976,
+                0.031009615384615385,
+                0.02964426877470356
+            ],
+            "is_hit": true,
+            "rank": 2,
+            "expected_layers": [
+                "artifact",
+                "artifact"
+            ],
+            "failure_reason": null,
+            "rewritten_query": "n8n-aks-platform Helm Chart CI pipeline automation chart version promotion ArgoCD synchronization git commit workflow",
+            "rewritten": true,
+            "rewrite_explanation": "Expanded the query to include the project context and key technical terms to ensure the retrieval system focuses on the specific CI/CD integration between Helm, Git, and ArgoCD within the n8n-aks-platform repository.",
+            "rewrite_latency": 1.1201936001889408
+        },
+        {
+            "question_id": "N8N-007",
+            "question": "How do the n8n application pods securely retrieve database passwords and encryption keys from Azure Key Vault without storing credentials in the git repository or Kubernetes Secret manifests?",
+            "category": "pipeline",
+            "expected_sources": [
+                "helm/n8n/templates/secretproviderclass.yaml",
+                "helm/n8n/templates/main.yaml"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/decisions.md",
+                "helm/n8n/templates/secretproviderclass.yaml",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/lessons-learned.md",
+                "n8n-aks-platform/challenges.md"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.03252247488101534,
+                0.031746031746031744,
+                0.03125,
+                0.03076923076923077
+            ],
+            "is_hit": true,
+            "rank": 2,
+            "expected_layers": [
+                "artifact",
+                "artifact"
+            ],
+            "failure_reason": null,
+            "rewritten_query": "n8n-aks-platform Azure Key Vault integration SecretProviderClass CSI driver pod identity managed identity database password encryption key retrieval",
+            "rewritten": true,
+            "rewrite_explanation": "Expanded the query to include specific Kubernetes and Azure integration technologies (CSI driver, SecretProviderClass, managed identity) relevant to the n8n-aks-platform context to ensure retrieval of documentation regarding secure secret injection.",
+            "rewrite_latency": 1.107263599988073
+        },
+        {
+            "question_id": "N8N-008",
+            "question": "How does the KEDA autoscaling loop coordinate with the Redis message broker and the n8n-worker deployment to dynamically manage worker replica counts?",
+            "category": "pipeline",
+            "expected_sources": [
+                "helm/n8n/templates/hpa-worker.yaml",
+                "helm/n8n/templates/worker.yaml"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/architecture.md",
+                "README.md",
+                "helm/n8n/templates/hpa-worker.yaml",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/decisions.md"
+            ],
+            "similarity_scores": [
+                0.03278688524590164,
+                0.03225806451612903,
+                0.031024531024531024,
+                0.031024531024531024,
+                0.03076923076923077
+            ],
+            "is_hit": true,
+            "rank": 3,
+            "expected_layers": [
+                "design",
+                "artifact"
+            ],
+            "failure_reason": null,
+            "rewritten_query": "KEDA ScaledObject Redis trigger configuration n8n-worker deployment autoscaling mechanism architecture",
+            "rewritten": true,
+            "rewrite_explanation": "Expanded the query to include specific KEDA components like ScaledObject and Redis triggers to ensure the retrieval system focuses on the technical implementation of the autoscaling loop within the n8n-aks-platform context.",
+            "rewrite_latency": 1.3773407998960465
+        },
+        {
+            "question_id": "N8N-009",
+            "question": "How is the default resource request and limit configuration structured for the n8n components and database instances within the Helm values schema?",
+            "category": "data_models",
+            "expected_sources": [
+                "helm/n8n/values.yaml"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/lessons-learned.md",
+                "docs/architecture/component-communication.md",
+                "docs/verification_ledger.md",
+                "helm/n8n/values.yaml",
+                "n8n-aks-platform/architecture.md"
+            ],
+            "similarity_scores": [
+                0.030679156908665108,
+                0.03007688828584351,
+                0.028381642512077296,
+                0.028083267871170464,
+                0.02804284323271665
+            ],
+            "is_hit": true,
+            "rank": 4,
+            "expected_layers": [
+                "artifact"
+            ],
+            "failure_reason": null,
+            "rewritten_query": "n8n-aks-platform Helm values.yaml resource requests and limits configuration for n8n components and database instances",
+            "rewritten": true,
+            "rewrite_explanation": "Expanded the query to include specific configuration file references (values.yaml) and project context to ensure the retrieval system targets the Helm chart definitions for resource management.",
+            "rewrite_latency": 1.2077025000471622
+        },
+        {
+            "question_id": "N8N-010",
+            "question": "How are Azure Key Vault secret objects mapped to specific environment variable keys inside the SecretProviderClass definition?",
+            "category": "data_models",
+            "expected_sources": [
+                "helm/n8n/templates/secretproviderclass.yaml"
+            ],
+            "retrieved_sources": [
+                "helm/n8n/templates/secretproviderclass.yaml",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/decisions.md",
+                "helm/n8n/templates/worker.yaml",
+                "n8n-aks-platform/architecture.md"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.032018442622950824,
+                0.0315136476426799,
+                0.029631255487269532,
+                0.029437229437229435
+            ],
+            "is_hit": true,
+            "rank": 1,
+            "expected_layers": [
+                "artifact"
+            ],
+            "failure_reason": null,
+            "rewritten_query": "n8n-aks-platform SecretProviderClass Azure Key Vault secret object mapping to environment variables configuration syntax",
+            "rewritten": true,
+            "rewrite_explanation": "Expanded the query to include the project context and specific technical keywords related to the Secret Store CSI driver configuration to improve retrieval of relevant YAML definitions.",
+            "rewrite_latency": 1.231937900185585
+        },
+        {
+            "question_id": "N8N-011",
+            "question": "How is the PrometheusRule alerting expression for high workflow failure rates calculated using metrics from n8n queue execution?",
+            "category": "data_models",
+            "expected_sources": [
+                "monitoring/alerts/n8n-rules.yaml"
+            ],
+            "retrieved_sources": [
+                "monitoring/alerts/n8n-rules.yaml",
+                "helm/n8n/templates/prometheusrule.yaml",
+                "README.md",
+                "n8n-aks-platform/challenges.md",
+                "docs/verification_ledger.md"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.03252247488101534,
+                0.031746031746031744,
+                0.030303030303030304,
+                0.029910714285714284
+            ],
+            "is_hit": true,
+            "rank": 1,
+            "expected_layers": [
+                "artifact"
+            ],
+            "failure_reason": null,
+            "rewritten_query": "n8n-aks-platform PrometheusRule alerting expression high workflow failure rate calculation n8n queue execution metrics",
+            "rewritten": true,
+            "rewrite_explanation": "The query was expanded to include the project context and specific technical keywords to ensure the retrieval system focuses on Prometheus alerting rules and n8n queue metrics within the AKS platform context.",
+            "rewrite_latency": 0.9330724999308586
+        },
+        {
+            "question_id": "N8N-012",
+            "question": "How is the user-assigned or system-assigned kubelet identity in AKS configured in Terraform to allow read access to Azure Key Vault secrets?",
+            "category": "infrastructure",
+            "expected_sources": [
+                "terraform/env/dev/main.tf",
+                "terraform/modules/keyvault/main.tf"
+            ],
+            "retrieved_sources": [
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/architecture.md",
+                "terraform/modules/aks/outputs.tf",
+                "n8n-aks-platform/challenges.md",
+                "helm/n8n/templates/secretproviderclass.yaml"
+            ],
+            "similarity_scores": [
+                0.032018442622950824,
+                0.031009615384615385,
+                0.030886196246139225,
+                0.03057889822595705,
+                0.0304147465437788
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "artifact",
+                "design"
+            ],
+            "failure_reason": "No expected sources retrieved.",
+            "rewritten_query": "AKS Terraform configuration for kubelet identity user-assigned vs system-assigned managed identity Azure Key Vault secret provider class access",
+            "rewritten": true,
+            "rewrite_explanation": "Expanded the query to include specific technical keywords like 'managed identity', 'secret provider class', and 'AKS Terraform configuration' to ensure retrieval of relevant infrastructure-as-code documentation and examples.",
+            "rewrite_latency": 1.2186132001224905
+        },
+        {
+            "question_id": "N8N-013",
+            "question": "How is the Azure federated identity credential structured in Terraform to authenticate GitHub Actions CI/CD workflows using OIDC rather than static secrets?",
+            "category": "infrastructure",
+            "expected_sources": [
+                "terraform/env/dev/oidc.tf"
+            ],
+            "retrieved_sources": [
+                "terraform/env/dev/oidc.tf",
+                "n8n-aks-platform/architecture.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/challenges.md",
+                "terraform/env/dev/backend.tf"
+            ],
+            "similarity_scores": [
+                0.03278688524590164,
+                0.03149801587301587,
+                0.030536130536130537,
+                0.029631255487269532,
+                0.029386529386529386
+            ],
+            "is_hit": true,
+            "rank": 1,
+            "expected_layers": [
+                "artifact"
+            ],
+            "failure_reason": null,
+            "rewritten_query": "Terraform azurerm_federated_identity_credential configuration for GitHub Actions OIDC authentication in n8n-aks-platform",
+            "rewritten": true,
+            "rewrite_explanation": "Expanded the query to include the specific Terraform resource type (azurerm_federated_identity_credential) and the context of OIDC authentication to ensure retrieval of relevant infrastructure-as-code documentation.",
+            "rewrite_latency": 1.1059832000173628
+        },
+        {
+            "question_id": "N8N-014",
+            "question": "Which inter-service paths are explicitly blocked by the NetworkPolicy architecture, and what architectural reasons justify preventing workers from communicating directly with the main API or webhooks?",
+            "category": "documentation",
+            "expected_sources": [
+                "docs/architecture/component-communication.md",
+                "README.md"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/challenges.md",
+                "README.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/architecture.md",
+                "docs/architecture/component-communication.md"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.032266458495966696,
+                0.031754032258064516,
+                0.031024531024531024,
+                0.029418126757516764
+            ],
+            "is_hit": true,
+            "rank": 2,
+            "expected_layers": [
+                "design",
+                "artifact"
+            ],
+            "failure_reason": null,
+            "rewritten_query": "n8n-aks-platform NetworkPolicy inter-service communication restrictions, architectural justification for blocking worker to API and webhook direct traffic",
+            "rewritten": true,
+            "rewrite_explanation": "The query was expanded to include the project context and specific technical terms to ensure the retrieval system focuses on the Kubernetes NetworkPolicy implementation and the security rationale for the n8n architecture.",
+            "rewrite_latency": 1.0163275999948382
+        },
+        {
+            "question_id": "N8N-015",
+            "question": "How was compliance with named ServiceAccounts and resource limits verified across all running n8n pods in the cluster, as documented in the verification ledger?",
+            "category": "documentation",
+            "expected_sources": [
+                "docs/verification_ledger.md"
+            ],
+            "retrieved_sources": [
+                "docs/verification_ledger.md",
+                "README.md",
+                "helm/n8n/templates/serviceaccounts.yaml",
+                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/lessons-learned.md"
+            ],
+            "similarity_scores": [
+                0.032266458495966696,
+                0.032018442622950824,
+                0.031054405392392875,
+                0.03036576949620428,
+                0.029083245521601686
+            ],
+            "is_hit": true,
+            "rank": 1,
+            "expected_layers": [
+                "artifact"
+            ],
+            "failure_reason": null,
+            "rewritten_query": "n8n-aks-platform verification ledger compliance ServiceAccount resource limits pods",
+            "rewritten": true,
+            "rewrite_explanation": "The query was rewritten to prioritize key technical terms and project context, removing conversational filler to improve vector search relevance for the verification ledger documentation.",
+            "rewrite_latency": 0.9466142999008298
+        }
+    ]
+}

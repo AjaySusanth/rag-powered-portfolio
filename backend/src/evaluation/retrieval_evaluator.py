@@ -84,6 +84,19 @@ class RetrievalEvaluator:
                         f"which is less than minimum_match={minimum_match}."
                     )
 
+            # Extract rewrite details if the retriever supports it
+            rewritten_query = None
+            rewritten = None
+            rewrite_explanation = None
+            rewrite_latency = None
+            if hasattr(self.retriever, "get_rewrite_details"):
+                details = self.retriever.get_rewrite_details(question_text)
+                if details:
+                    rewritten_query = details.get("rewritten_query")
+                    rewritten = details.get("rewritten")
+                    rewrite_explanation = details.get("explanation")
+                    rewrite_latency = details.get("latency")
+
             question_results.append(QuestionResult(
                 question_id=q_id,
                 question=question_text,
@@ -94,7 +107,11 @@ class RetrievalEvaluator:
                 is_hit=is_hit,
                 rank=first_match_rank,
                 expected_layers=expected_layers,
-                failure_reason=failure_reason
+                failure_reason=failure_reason,
+                rewritten_query=rewritten_query,
+                rewritten=rewritten,
+                rewrite_explanation=rewrite_explanation,
+                rewrite_latency=rewrite_latency
             ))
 
         total_questions = len(question_results)
