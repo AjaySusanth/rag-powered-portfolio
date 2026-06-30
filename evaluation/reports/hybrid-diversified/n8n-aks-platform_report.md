@@ -6,14 +6,14 @@
 ## Global Metrics
 - **Hit Rate@5:** 66.7%
 - **Recall@5:** 60.0%
-- **Mean Reciprocal Rank (MRR):** 0.456
+- **Mean Reciprocal Rank (MRR):** 0.467
 - **Average Similarity (Hits):** 0.032
-- **Unique Sources@5:** 4.40
+- **Unique Sources@5:** 5.00
 
 ## Category Metrics
 | Category | Total Questions | Hit Rate | Recall | MRR | Avg Similarity |
 | --- | --- | --- | --- | --- | --- |
-| Core Logic | 5 | 80.0% | 80.0% | 0.367 | 0.032 |
+| Core Logic | 5 | 80.0% | 80.0% | 0.400 | 0.032 |
 | Data Models | 3 | 66.7% | 66.7% | 0.667 | 0.033 |
 | Documentation | 2 | 100.0% | 75.0% | 0.750 | 0.032 |
 | Infrastructure | 2 | 50.0% | 50.0% | 0.500 | 0.032 |
@@ -22,7 +22,7 @@
 ## Layer Metrics
 | Layer | Total Questions | Hit Rate | Recall | MRR | Avg Similarity |
 | --- | --- | --- | --- | --- | --- |
-| Design | 7 | 57.1% | 57.1% | 0.262 | 0.032 |
+| Design | 7 | 57.1% | 57.1% | 0.286 | 0.032 |
 | Artifact | 11 | 54.5% | 50.0% | 0.455 | 0.032 |
 
 ## Failure Analysis
@@ -37,7 +37,7 @@
   - `n8n-aks-platform/decisions.md` (Similarity: 0.032)
   - `n8n-aks-platform/lessons-learned.md` (Similarity: 0.032)
   - `docs/verification_ledger.md` (Similarity: 0.030)
-  - `n8n-aks-platform/lessons-learned.md` (Similarity: 0.030)
+  - `n8n-aks-platform/challenges.md` (Similarity: 0.028)
 - **Failure Reason:** No expected sources retrieved.
 
 ### N8N-007
@@ -92,5 +92,5 @@
   - `n8n-aks-platform/architecture.md` (Similarity: 0.032)
   - `n8n-aks-platform/challenges.md` (Similarity: 0.031)
   - `docs/verification_ledger.md` (Similarity: 0.031)
-  - `docs/verification_ledger.md` (Similarity: 0.031)
+  - `terraform/modules/aks/outputs.tf` (Similarity: 0.030)
 - **Failure Reason:** No expected sources retrieved.

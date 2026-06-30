@@ -3,10 +3,10 @@
     "generated_at": "2026-06-25T16:33:02Z",
     "top_k": 5,
     "total_questions": 15,
-    "recall": 0.7,
-    "hit_rate": 0.8666666666666667,
-    "mrr": 0.5744444444444444,
-    "average_similarity": 0.6200714353949042,
+    "recall": 0.6,
+    "hit_rate": 0.7333333333333333,
+    "mrr": 0.5688888888888889,
+    "average_similarity": 0.6296933334092836,
     "category_metrics": [
         {
             "category": "core_logic",
@@ -14,7 +14,7 @@
             "hit_rate": 0.8,
             "recall": 0.7,
             "mrr": 0.4666666666666667,
-            "average_similarity": 0.6061375821770516
+            "average_similarity": 0.6061547721209434
         },
         {
             "category": "data_models",
@@ -22,15 +22,15 @@
             "hit_rate": 0.6666666666666666,
             "recall": 0.6666666666666666,
             "mrr": 0.6666666666666666,
-            "average_similarity": 0.6680903194478309
+            "average_similarity": 0.6681506525094221
         },
         {
             "category": "documentation",
             "total_questions": 2,
             "hit_rate": 1.0,
-            "recall": 1.0,
+            "recall": 0.75,
             "mrr": 1.0,
-            "average_similarity": 0.6183681166631515
+            "average_similarity": 0.6184000792308345
         },
         {
             "category": "infrastructure",
@@ -38,33 +38,33 @@
             "hit_rate": 1.0,
             "recall": 0.75,
             "mrr": 0.6,
-            "average_similarity": 0.6238519615400713
+            "average_similarity": 0.623837180355086
         },
         {
             "category": "pipeline",
             "total_questions": 3,
-            "hit_rate": 1.0,
-            "recall": 0.5,
-            "mrr": 0.3611111111111111,
-            "average_similarity": 0.6052525120411466
+            "hit_rate": 0.3333333333333333,
+            "recall": 0.16666666666666666,
+            "mrr": 0.3333333333333333,
+            "average_similarity": 0.6812317548276605
         }
     ],
     "layer_metrics": [
         {
             "layer": "design",
             "total_questions": 7,
-            "hit_rate": 1.0,
-            "recall": 0.9285714285714286,
-            "mrr": 0.43809523809523804,
-            "average_similarity": 0.5807149590467573
+            "hit_rate": 0.7142857142857143,
+            "recall": 0.6428571428571429,
+            "mrr": 0.3619047619047619,
+            "average_similarity": 0.602210309084637
         },
         {
             "layer": "artifact",
             "total_questions": 11,
-            "hit_rate": 0.6363636363636364,
-            "recall": 0.5454545454545454,
-            "mrr": 0.5227272727272727,
-            "average_similarity": 0.6378434344773318
+            "hit_rate": 0.5454545454545454,
+            "recall": 0.5,
+            "mrr": 0.5454545454545454,
+            "average_similarity": 0.6525958536798223
         }
     ],
     "failures": [
@@ -77,23 +77,83 @@
                 "helm/n8n/templates/serviceaccounts.yaml"
             ],
             "retrieved_sources": [
+                "n8n-aks-platform/architecture.md",
                 "docs/verification_ledger.md",
+                "n8n-aks-platform/decisions.md",
                 "README.md",
-                "README.md",
-                "README.md",
-                "helm/n8n/templates/webhook.yaml"
+                "n8n-aks-platform/lessons-learned.md"
             ],
             "similarity_scores": [
+                0.6676996741549501,
                 0.5811386810188578,
+                0.5606118187029846,
                 0.5442880538263835,
-                0.53839939808907,
-                0.5319404911194756,
-                0.5292055039431027
+                0.5379379130050903
             ],
             "is_hit": false,
             "rank": null,
             "expected_layers": [
                 "artifact",
+                "artifact"
+            ],
+            "failure_reason": "No expected sources retrieved."
+        },
+        {
+            "question_id": "N8N-007",
+            "question": "How do the n8n application pods securely retrieve database passwords and encryption keys from Azure Key Vault without storing credentials in the git repository or Kubernetes Secret manifests?",
+            "category": "pipeline",
+            "expected_sources": [
+                "helm/n8n/templates/secretproviderclass.yaml",
+                "helm/n8n/templates/main.yaml"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/decisions.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/lessons-learned.md",
+                "n8n-aks-platform/challenges.md",
+                "n8n-aks-platform/architecture.md"
+            ],
+            "similarity_scores": [
+                0.6986346349166993,
+                0.6135396490202031,
+                0.5982400550535985,
+                0.5978315215978898,
+                0.5770684605112772
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "artifact",
+                "artifact"
+            ],
+            "failure_reason": "No expected sources retrieved."
+        },
+        {
+            "question_id": "N8N-008",
+            "question": "How does the KEDA autoscaling loop coordinate with the Redis message broker and the n8n-worker deployment to dynamically manage worker replica counts?",
+            "category": "pipeline",
+            "expected_sources": [
+                "helm/n8n/templates/hpa-worker.yaml",
+                "helm/n8n/templates/worker.yaml"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/architecture.md",
+                "README.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/lessons-learned.md"
+            ],
+            "similarity_scores": [
+                0.7527608387058761,
+                0.7146493613961505,
+                0.7069204582626818,
+                0.6673408630846346,
+                0.6427003948678472
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "design",
                 "artifact"
             ],
             "failure_reason": "No expected sources retrieved."
@@ -106,18 +166,18 @@
                 "helm/n8n/values.yaml"
             ],
             "retrieved_sources": [
-                "README.md",
-                "README.md",
                 "helm/n8n/Chart.yaml",
-                "README.md",
-                "docs/verification_ledger.md"
+                "n8n-aks-platform/decisions.md",
+                "docs/verification_ledger.md",
+                "docs/architecture/component-communication.md",
+                "n8n-aks-platform/architecture.md"
             ],
             "similarity_scores": [
-                0.5552088828111413,
-                0.46716096772370563,
-                0.4635201667893596,
-                0.4500051529463619,
-                0.4427606325789524
+                0.4634814361422357,
+                0.4475883184988172,
+                0.4427098004277332,
+                0.4421131946271646,
+                0.43306702569580025
             ],
             "is_hit": false,
             "rank": null,
@@ -141,14 +201,14 @@
                 "gitops/argocd/gatekeeper/constraints/disallowed-tags-constraints.yaml",
                 "gitops/argocd/gatekeeper/templates/disallowed-tags-template.yaml",
                 "docs/verification_ledger.md",
-                "gitops/argocd/gatekeeper/templates/disallowed-tags-template.yaml"
+                "gitops/argocd/gatekeeper/templates/required-resources-template.yaml"
             ],
             "similarity_scores": [
-                0.6589093500764596,
-                0.61031679256234,
-                0.5782176943824191,
-                0.5722564592499851,
-                0.5509101280264755
+                0.6589409084607165,
+                0.6104053125495569,
+                0.5781642570381358,
+                0.5723635588792773,
+                0.5509187215508586
             ],
             "is_hit": true,
             "rank": 2,
@@ -170,15 +230,15 @@
                 "docs/verification_ledger.md",
                 "docs/verification_ledger.md",
                 "gitops/argocd/gatekeeper/constraints/required-resources-constraint.yaml",
-                "docs/verification_ledger.md",
-                "README.md"
+                "n8n-aks-platform/lessons-learned.md",
+                "n8n-aks-platform/architecture.md"
             ],
             "similarity_scores": [
-                0.6829138429362915,
-                0.594832188900197,
-                0.53471691680656,
-                0.45835816301763277,
-                0.4380130591341814
+                0.6829670462430745,
+                0.5949120164526941,
+                0.5346623854113385,
+                0.5170147202131586,
+                0.4897892658824883
             ],
             "is_hit": true,
             "rank": 3,
@@ -204,10 +264,10 @@
             ],
             "similarity_scores": [
                 0.6522802861435291,
-                0.5976751370841007,
+                0.5976919988908377,
                 0.5520358025311164,
-                0.5512942467933006,
-                0.5432751802865261
+                0.5513209599521546,
+                0.543263777018895
             ],
             "is_hit": true,
             "rank": 2,
@@ -225,17 +285,17 @@
             ],
             "retrieved_sources": [
                 "helm/n8n/templates/networkpolicies.yaml",
+                "n8n-aks-platform/challenges.md",
                 "README.md",
                 "helm/n8n/templates/networkpolicies.yaml",
-                "helm/n8n/templates/networkpolicies.yaml",
-                "docs/verification_ledger.md"
+                "helm/n8n/templates/networkpolicies.yaml"
             ],
             "similarity_scores": [
-                0.681841482255206,
-                0.660302502442475,
-                0.6131442031718242,
-                0.5736062871694187,
-                0.5583834440055263
+                0.6818593916320405,
+                0.6691867421008872,
+                0.6603354731517673,
+                0.6130479599657509,
+                0.5736238084057383
             ],
             "is_hit": true,
             "rank": 1,
@@ -253,18 +313,18 @@
                 "helm/n8n/templates/serviceaccounts.yaml"
             ],
             "retrieved_sources": [
+                "n8n-aks-platform/architecture.md",
                 "docs/verification_ledger.md",
+                "n8n-aks-platform/decisions.md",
                 "README.md",
-                "README.md",
-                "README.md",
-                "helm/n8n/templates/webhook.yaml"
+                "n8n-aks-platform/lessons-learned.md"
             ],
             "similarity_scores": [
+                0.6676996741549501,
                 0.5811386810188578,
+                0.5606118187029846,
                 0.5442880538263835,
-                0.53839939808907,
-                0.5319404911194756,
-                0.5292055039431027
+                0.5379379130050903
             ],
             "is_hit": false,
             "rank": null,
@@ -283,21 +343,21 @@
                 "gitops/argocd/application.yaml"
             ],
             "retrieved_sources": [
-                "README.md",
                 ".github/workflows/ci.yaml",
                 "docs/verification_ledger.md",
                 ".github/workflows/ci.yaml",
-                "docs/verification_ledger.md"
+                "docs/verification_ledger.md",
+                ".github/workflows/ci.yaml"
             ],
             "similarity_scores": [
-                0.6990981551827706,
                 0.6812317548276605,
-                0.66190813267729,
+                0.6619647712292143,
                 0.6512417083747124,
-                0.6493807686539377
+                0.6497330150551859,
+                0.6468840372403641
             ],
             "is_hit": true,
-            "rank": 2,
+            "rank": 1,
             "expected_layers": [
                 "artifact",
                 "artifact"
@@ -313,26 +373,26 @@
                 "helm/n8n/templates/main.yaml"
             ],
             "retrieved_sources": [
-                "README.md",
+                "n8n-aks-platform/decisions.md",
                 "docs/verification_ledger.md",
-                "README.md",
-                "helm/n8n/templates/secretproviderclass.yaml",
-                "helm/n8n/templates/secretproviderclass.yaml"
+                "n8n-aks-platform/lessons-learned.md",
+                "n8n-aks-platform/challenges.md",
+                "n8n-aks-platform/architecture.md"
             ],
             "similarity_scores": [
-                0.7082078504224867,
-                0.6142582146585395,
-                0.5519453152386679,
-                0.5495135105209372,
-                0.5218012346235847
+                0.6986346349166993,
+                0.6135396490202031,
+                0.5982400550535985,
+                0.5978315215978898,
+                0.5770684605112772
             ],
-            "is_hit": true,
-            "rank": 4,
+            "is_hit": false,
+            "rank": null,
             "expected_layers": [
                 "artifact",
                 "artifact"
             ],
-            "failure_reason": null
+            "failure_reason": "No expected sources retrieved."
         },
         {
             "question_id": "N8N-008",
@@ -343,26 +403,26 @@
                 "helm/n8n/templates/worker.yaml"
             ],
             "retrieved_sources": [
+                "n8n-aks-platform/architecture.md",
                 "README.md",
                 "docs/verification_ledger.md",
-                "helm/n8n/templates/hpa-worker.yaml",
-                "helm/n8n/templates/hpa-worker.yaml",
-                "docs/architecture/component-communication.md"
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/lessons-learned.md"
             ],
             "similarity_scores": [
-                0.7146881283867788,
-                0.7060977220979677,
-                0.585012270774842,
-                0.5572089129988524,
-                0.5326003790800183
+                0.7527608387058761,
+                0.7146493613961505,
+                0.7069204582626818,
+                0.6673408630846346,
+                0.6427003948678472
             ],
-            "is_hit": true,
-            "rank": 3,
+            "is_hit": false,
+            "rank": null,
             "expected_layers": [
                 "design",
                 "artifact"
             ],
-            "failure_reason": null
+            "failure_reason": "No expected sources retrieved."
         },
         {
             "question_id": "N8N-009",
@@ -372,18 +432,18 @@
                 "helm/n8n/values.yaml"
             ],
             "retrieved_sources": [
-                "README.md",
-                "README.md",
                 "helm/n8n/Chart.yaml",
-                "README.md",
-                "docs/verification_ledger.md"
+                "n8n-aks-platform/decisions.md",
+                "docs/verification_ledger.md",
+                "docs/architecture/component-communication.md",
+                "n8n-aks-platform/architecture.md"
             ],
             "similarity_scores": [
-                0.5552088828111413,
-                0.46716096772370563,
-                0.4635201667893596,
-                0.4500051529463619,
-                0.4427606325789524
+                0.4634814361422357,
+                0.4475883184988172,
+                0.4427098004277332,
+                0.4421131946271646,
+                0.43306702569580025
             ],
             "is_hit": false,
             "rank": null,
@@ -401,17 +461,17 @@
             ],
             "retrieved_sources": [
                 "helm/n8n/templates/secretproviderclass.yaml",
-                "README.md",
                 "terraform/modules/keyvault/variables.tf",
+                "n8n-aks-platform/decisions.md",
                 "docs/verification_ledger.md",
                 "terraform/modules/keyvault/outputs.tf"
             ],
             "similarity_scores": [
-                0.6181112416834825,
-                0.5490527534521619,
-                0.5207011341390717,
-                0.47636411220273955,
-                0.4729470899862981
+                0.6181390115858411,
+                0.5207196777401736,
+                0.480619492238318,
+                0.47568440048081573,
+                0.47293587772363344
             ],
             "is_hit": true,
             "rank": 1,
@@ -431,15 +491,15 @@
                 "monitoring/alerts/n8n-rules.yaml",
                 "helm/n8n/templates/prometheusrule.yaml",
                 "README.md",
-                "docs/verification_ledger.md",
-                "helm/n8n/templates/prometheusrule.yaml"
+                "n8n-aks-platform/challenges.md",
+                "docs/verification_ledger.md"
             ],
             "similarity_scores": [
-                0.7180693972121794,
-                0.7125775535309085,
-                0.6137346510558931,
-                0.5558984555132654,
-                0.5474799404767144
+                0.7181622934330031,
+                0.7125793141772245,
+                0.6137360759769592,
+                0.563135272347855,
+                0.5564787130551639
             ],
             "is_hit": true,
             "rank": 1,
@@ -459,16 +519,16 @@
             "retrieved_sources": [
                 "docs/verification_ledger.md",
                 "docs/verification_ledger.md",
-                "README.md",
-                "README.md",
+                "n8n-aks-platform/challenges.md",
+                "n8n-aks-platform/decisions.md",
                 "terraform/modules/keyvault/main.tf"
             ],
             "similarity_scores": [
-                0.6839741414143519,
-                0.6708171505355996,
-                0.6428812480608597,
-                0.6084061764191515,
-                0.5864620193093824
+                0.6838992454325388,
+                0.6707430816439499,
+                0.6201362159989802,
+                0.5962080634465442,
+                0.5864324569394116
             ],
             "is_hit": true,
             "rank": 5,
@@ -487,17 +547,17 @@
             ],
             "retrieved_sources": [
                 "terraform/env/dev/oidc.tf",
-                "README.md",
                 ".github/workflows/infra.yaml",
                 "terraform/env/dev/oidc.tf",
-                "docs/verification_ledger.md"
+                "docs/verification_ledger.md",
+                ".github/workflows/ci.yaml"
             ],
             "similarity_scores": [
                 0.6612419037707603,
-                0.6509861371078828,
                 0.5990900127027855,
                 0.5350396508266726,
-                0.5211928128958576
+                0.5211713872459275,
+                0.4891313139021318
             ],
             "is_hit": true,
             "rank": 1,
@@ -518,15 +578,15 @@
                 "README.md",
                 "docs/verification_ledger.md",
                 "docs/verification_ledger.md",
-                "helm/n8n/templates/networkpolicies.yaml",
-                "docs/architecture/component-communication.md"
+                "n8n-aks-platform/challenges.md",
+                "helm/n8n/templates/networkpolicies.yaml"
             ],
             "similarity_scores": [
                 0.5822454233569805,
-                0.5772613549210164,
-                0.5771419202301704,
-                0.4775466716057304,
-                0.46898009453487055
+                0.5775140641620636,
+                0.5771619463874275,
+                0.5594885154768647,
+                0.47756250895846253
             ],
             "is_hit": true,
             "rank": 1,
@@ -547,15 +607,15 @@
                 "docs/verification_ledger.md",
                 "README.md",
                 "docs/verification_ledger.md",
-                "helm/n8n/templates/serviceaccounts.yaml",
-                "docs/verification_ledger.md"
+                "n8n-aks-platform/architecture.md",
+                "helm/n8n/templates/serviceaccounts.yaml"
             ],
             "similarity_scores": [
-                0.6544908099693225,
+                0.6545547351046885,
                 0.5760950897699273,
-                0.5484707231540367,
-                0.49482313306521974,
-                0.49396997192753767
+                0.548460490332064,
+                0.5163512418229151,
+                0.49478810177054755
             ],
             "is_hit": true,
             "rank": 1,

@@ -42,10 +42,17 @@ class BM25RetrieverAdapter(Retriever):
         return await bm25_retrieve(query=query, top_k=top_k, project=project)
 
 
-class HybridRetrieverAdapter(Retriever):
-    """Adapter to map the Hybrid RRF retrieval retrieve function to the Retriever Protocol."""
+class HybridRRFRetrieverAdapter(Retriever):
+    """Adapter to map the Hybrid RRF retrieval retrieve function without diversification to the Retriever Protocol."""
     async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
-        return await hybrid_retrieve(query=query, top_k=top_k, project=project)
+        return await hybrid_retrieve(query=query, top_k=top_k, project=project, diversify=False)
+
+
+class HybridDiversifiedRetrieverAdapter(Retriever):
+    """Adapter to map the Hybrid RRF retrieval retrieve function with diversification to the Retriever Protocol."""
+    async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
+        return await hybrid_retrieve(query=query, top_k=top_k, project=project, diversify=True)
+
 
 
 def save_json_report(result: EvaluationResult, output_path: Path) -> None:
@@ -60,6 +67,8 @@ def save_markdown_report(result: EvaluationResult, output_path: Path) -> None:
     """Generates a human-readable Markdown report summarizing the evaluation."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
+    avg_unique_sources = sum(len(set(r.retrieved_sources)) for r in result.question_results) / result.total_questions if result.total_questions > 0 else 0.0
+    
     lines = [
         f"# Retrieval Evaluation Report: {result.project}",
         f"- **Date Generated:** {result.generated_at}",
@@ -71,6 +80,7 @@ def save_markdown_report(result: EvaluationResult, output_path: Path) -> None:
         f"- **Recall@{result.top_k}:** {result.recall * 100:.1f}%",
         f"- **Mean Reciprocal Rank (MRR):** {result.mrr:.3f}",
         f"- **Average Similarity (Hits):** {result.average_similarity:.3f}",
+        f"- **Unique Sources@{result.top_k}:** {avg_unique_sources:.2f}",
         "",
         "## Category Metrics",
         "| Category | Total Questions | Hit Rate | Recall | MRR | Avg Similarity |",
@@ -134,6 +144,7 @@ def save_markdown_report(result: EvaluationResult, output_path: Path) -> None:
 
 def print_console_summary(result: EvaluationResult) -> None:
     """Prints a clear console summary of the evaluation results."""
+    avg_unique_sources = sum(len(set(r.retrieved_sources)) for r in result.question_results) / result.total_questions if result.total_questions > 0 else 0.0
     print("=" * 40)
     print(f"Project: {result.project}")
     print(f"Questions: {result.total_questions}")
@@ -142,6 +153,7 @@ def print_console_summary(result: EvaluationResult) -> None:
     print(f"Hit Rate@{result.top_k}: {result.hit_rate * 100:.1f}%")
     print(f"MRR: {result.mrr:.3f}")
     print(f"Average Similarity: {result.average_similarity:.3f}")
+    print(f"Unique Sources@{result.top_k}: {avg_unique_sources:.2f}")
     print("-" * 40)
     print("Category Accuracy:")
     for cm in result.category_metrics:
@@ -324,7 +336,7 @@ async def main() -> None:
     parser.add_argument(
         "--run-type",
         type=str,
-        choices=["vector", "manual-docs", "bm25", "hybrid", "rrf", "grader"],
+        choices=["vector", "manual-docs", "bm25", "hybrid", "hybrid-diversified", "rrf", "grader"],
         default="vector",
         help="The evaluation run type folder (e.g. vector, manual-docs)."
     )
@@ -356,7 +368,11 @@ async def main() -> None:
             if args.run_type == "bm25":
                 retriever_adapter = BM25RetrieverAdapter()
             elif args.run_type == "hybrid":
-                retriever_adapter = HybridRetrieverAdapter()
+                retriever_adapter = HybridRRFRetrieverAdapter()
+            elif args.run_type == "hybrid-diversified":
+                retriever_adapter = HybridDiversifiedRetrieverAdapter()
+            elif args.run_type == "rrf":
+                retriever_adapter = HybridRRFRetrieverAdapter()
             else:
                 retriever_adapter = VectorRetrieverAdapter()
 
