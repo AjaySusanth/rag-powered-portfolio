@@ -28,36 +28,42 @@ from src.evaluation.retrieval_evaluator import RetrievalEvaluator, Retriever
 from src.models.evaluation_result import EvaluationResult
 from src.db.core import close_db_pool
 from src.evaluation.retrieval_diagnostics import RetrievalDiagnostics, DiagnosticsSummary
+from src.retrieval.project_detector import detect_project
 
 
 class VectorRetrieverAdapter(Retriever):
     """Adapter to map the vector retrieval retrieve function to the Retriever Protocol."""
     async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
-        return await vector_retrieve(query=query, top_k=top_k, project=project)
+        resolved_project = project if project is not None else detect_project(query)
+        return await vector_retrieve(query=query, top_k=top_k, project=resolved_project)
 
 
 class BM25RetrieverAdapter(Retriever):
     """Adapter to map the BM25 retrieval retrieve function to the Retriever Protocol."""
     async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
-        return await bm25_retrieve(query=query, top_k=top_k, project=project)
+        resolved_project = project if project is not None else detect_project(query)
+        return await bm25_retrieve(query=query, top_k=top_k, project=resolved_project)
 
 
 class HybridRRFRetrieverAdapter(Retriever):
     """Adapter to map the Hybrid RRF retrieval retrieve function without diversification to the Retriever Protocol."""
     async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
-        return await hybrid_retrieve(query=query, top_k=top_k, project=project, diversify=False)
+        resolved_project = project if project is not None else detect_project(query)
+        return await hybrid_retrieve(query=query, top_k=top_k, project=resolved_project, diversify=False)
 
 
 class HybridDiversifiedRetrieverAdapter(Retriever):
     """Adapter to map the Hybrid RRF retrieval retrieve function with diversification to the Retriever Protocol."""
     async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
-        return await hybrid_retrieve(query=query, top_k=top_k, project=project, diversify=True)
+        resolved_project = project if project is not None else detect_project(query)
+        return await hybrid_retrieve(query=query, top_k=top_k, project=resolved_project, diversify=True)
 
 
 class HybridGradedRetrieverAdapter(Retriever):
     """Adapter to map the Hybrid retrieval retrieve function with diversification and grading to the Retriever Protocol."""
     async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
-        return await hybrid_retrieve(query=query, top_k=top_k, project=project, diversify=True, grade=True, min_chunks=3)
+        resolved_project = project if project is not None else detect_project(query)
+        return await hybrid_retrieve(query=query, top_k=top_k, project=resolved_project, diversify=True, grade=True, min_chunks=3)
 
 
 
