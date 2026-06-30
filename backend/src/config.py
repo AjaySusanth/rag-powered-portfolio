@@ -63,6 +63,18 @@ class Settings(BaseSettings):
         default="gemini-2.5-flash-lite",
         description="The Gemini model name to use for answer generation"
     )
+    MODEL_GRADER: str = Field(
+        default="gemini-2.5-flash-lite",
+        description="The model name to use for retrieval chunk grading"
+    )
+    GRADER_PROVIDER: str = Field(
+        default="gemini",
+        description="The provider for the retrieval grader (e.g., gemini, mock)"
+    )
+    GRADER_MIN_CHUNKS: int = Field(
+        default=3,
+        description="Minimum number of chunks to return from grader. If relevant chunks are less than this, fallback to original list."
+    )
 
     GITHUB_TOKEN: Optional[str] = Field(
         default=None,

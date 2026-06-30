@@ -1,0 +1,51 @@
+"""
+WHY THIS WAS CHOSEN:
+We define base interfaces for all LLM interactions in a centralized interfaces file.
+This decouples our higher-level pipelines (like retrieval grading or answer generation)
+from specific API vendors (like Google Gemini, OpenAI, or local Llama instances),
+enabling easy testing and provider swapping.
+"""
+
+from abc import ABC, abstractmethod
+from typing import List, Optional, Literal
+from pydantic import BaseModel, Field
+from src.models.retrieval_result import RetrievalResult
+
+
+class ChunkGrade(BaseModel):
+    chunk_index: int = Field(description="The 0-based index of the chunk in the input list.")
+    is_relevant: bool = Field(description="True if the chunk contains information relevant to the user query, False otherwise.")
+    rejection_reason: Optional[Literal[
+        "answers_question",
+        "background_only",
+        "duplicate_information",
+        "off_topic",
+        "insufficient_information"
+    ]] = Field(
+        default=None,
+        description="The category that describes the relevance status. If relevant, this is usually 'answers_question'."
+    )
+    explanation: Optional[str] = Field(
+        default=None,
+        description="A brief explanation for debugging why the chunk is relevant or irrelevant."
+    )
+
+
+class BaseGrader(ABC):
+    """
+    Abstract interface for a Retrieval Grader provider.
+    All grading providers must implement this interface.
+    """
+    @abstractmethod
+    async def grade(self, query: str, results: List[RetrievalResult]) -> List[ChunkGrade]:
+        """
+        Batch grade an ordered list of retrieved chunks against a query.
+        
+        Args:
+            query: The user query string.
+            results: The list of RetrievalResult objects to grade.
+            
+        Returns:
+            A list of ChunkGrade results, one for each input chunk.
+        """
+        pass
