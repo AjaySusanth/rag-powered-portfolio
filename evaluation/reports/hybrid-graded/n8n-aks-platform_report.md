@@ -8,7 +8,7 @@
 - **Recall@5:** 60.0%
 - **Mean Reciprocal Rank (MRR):** 0.467
 - **Average Similarity (Hits):** 0.032
-- **Unique Sources@5:** 5.00
+- **Unique Sources@5:** 4.40
 
 ## Category Metrics
 | Category | Total Questions | Hit Rate | Recall | MRR | Avg Similarity |
@@ -62,7 +62,6 @@
   - `helm/n8n/templates/worker.yaml`
 - **Retrieved Sources (Top-K):**
   - `n8n-aks-platform/architecture.md` (Similarity: 0.033)
-  - `n8n-aks-platform/challenges.md` (Similarity: 0.032)
   - `n8n-aks-platform/decisions.md` (Similarity: 0.031)
   - `README.md` (Similarity: 0.031)
   - `docs/verification_ledger.md` (Similarity: 0.031)

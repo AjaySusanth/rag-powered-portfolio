@@ -96,7 +96,11 @@
                 "artifact",
                 "artifact"
             ],
-            "failure_reason": "No expected sources retrieved."
+            "failure_reason": "No expected sources retrieved.",
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-007",
@@ -126,7 +130,11 @@
                 "artifact",
                 "artifact"
             ],
-            "failure_reason": "No expected sources retrieved."
+            "failure_reason": "No expected sources retrieved.",
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-008",
@@ -138,14 +146,12 @@
             ],
             "retrieved_sources": [
                 "n8n-aks-platform/architecture.md",
-                "n8n-aks-platform/challenges.md",
                 "n8n-aks-platform/decisions.md",
                 "README.md",
                 "docs/verification_ledger.md"
             ],
             "similarity_scores": [
                 0.03252247488101534,
-                0.031544957774465976,
                 0.03149801587301587,
                 0.031054405392392875,
                 0.03057889822595705
@@ -156,7 +162,11 @@
                 "design",
                 "artifact"
             ],
-            "failure_reason": "No expected sources retrieved."
+            "failure_reason": "No expected sources retrieved.",
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-009",
@@ -184,7 +194,11 @@
             "expected_layers": [
                 "artifact"
             ],
-            "failure_reason": "No expected sources retrieved."
+            "failure_reason": "No expected sources retrieved.",
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-012",
@@ -214,7 +228,11 @@
                 "artifact",
                 "design"
             ],
-            "failure_reason": "No expected sources retrieved."
+            "failure_reason": "No expected sources retrieved.",
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         }
     ],
     "question_results": [
@@ -229,16 +247,12 @@
             "retrieved_sources": [
                 "docs/verification_ledger.md",
                 "gitops/argocd/gatekeeper/templates/disallowed-tags-template.yaml",
-                "gitops/argocd/gatekeeper/constraints/disallowed-tags-constraints.yaml",
-                "gitops/argocd/gatekeeper/templates/required-resources-template.yaml",
-                "n8n-aks-platform/lessons-learned.md"
+                "gitops/argocd/gatekeeper/constraints/disallowed-tags-constraints.yaml"
             ],
             "similarity_scores": [
                 0.03278688524590164,
                 0.03200204813108039,
-                0.031754032258064516,
-                0.030536130536130537,
-                0.029850746268656716
+                0.031754032258064516
             ],
             "is_hit": true,
             "rank": 2,
@@ -246,7 +260,11 @@
                 "design",
                 "design"
             ],
-            "failure_reason": null
+            "failure_reason": null,
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-002",
@@ -259,16 +277,12 @@
             "retrieved_sources": [
                 "docs/verification_ledger.md",
                 "gitops/argocd/gatekeeper/constraints/required-resources-constraint.yaml",
-                "gitops/argocd/gatekeeper/templates/required-resources-template.yaml",
-                "n8n-aks-platform/architecture.md",
-                "n8n-aks-platform/lessons-learned.md"
+                "gitops/argocd/gatekeeper/templates/required-resources-template.yaml"
             ],
             "similarity_scores": [
                 0.03252247488101534,
                 0.03125763125763126,
-                0.030679156908665108,
-                0.030536130536130537,
-                0.029709507042253523
+                0.030679156908665108
             ],
             "is_hit": true,
             "rank": 2,
@@ -276,7 +290,11 @@
                 "design",
                 "design"
             ],
-            "failure_reason": null
+            "failure_reason": null,
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-003",
@@ -289,22 +307,24 @@
                 "README.md",
                 "helm/n8n/templates/networkpolicies.yaml",
                 "docs/architecture/component-communication.md",
-                "n8n-aks-platform/architecture.md",
-                "docs/verification_ledger.md"
+                "n8n-aks-platform/architecture.md"
             ],
             "similarity_scores": [
                 0.03278688524590164,
                 0.03200204813108039,
                 0.03149801587301587,
-                0.031054405392392875,
-                0.029709507042253523
+                0.031054405392392875
             ],
             "is_hit": true,
             "rank": 2,
             "expected_layers": [
                 "design"
             ],
-            "failure_reason": null
+            "failure_reason": null,
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-004",
@@ -332,7 +352,11 @@
             "expected_layers": [
                 "design"
             ],
-            "failure_reason": null
+            "failure_reason": null,
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-005",
@@ -362,7 +386,11 @@
                 "artifact",
                 "artifact"
             ],
-            "failure_reason": "No expected sources retrieved."
+            "failure_reason": "No expected sources retrieved.",
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-006",
@@ -376,15 +404,13 @@
                 "docs/verification_ledger.md",
                 ".github/workflows/ci.yaml",
                 "n8n-aks-platform/decisions.md",
-                "n8n-aks-platform/architecture.md",
-                "n8n-aks-platform/lessons-learned.md"
+                "n8n-aks-platform/architecture.md"
             ],
             "similarity_scores": [
                 0.031754032258064516,
                 0.03149801587301587,
                 0.03131881575727918,
-                0.031024531024531024,
-                0.028381642512077296
+                0.031024531024531024
             ],
             "is_hit": true,
             "rank": 2,
@@ -392,7 +418,11 @@
                 "artifact",
                 "artifact"
             ],
-            "failure_reason": null
+            "failure_reason": null,
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-007",
@@ -422,7 +452,11 @@
                 "artifact",
                 "artifact"
             ],
-            "failure_reason": "No expected sources retrieved."
+            "failure_reason": "No expected sources retrieved.",
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-008",
@@ -434,14 +468,12 @@
             ],
             "retrieved_sources": [
                 "n8n-aks-platform/architecture.md",
-                "n8n-aks-platform/challenges.md",
                 "n8n-aks-platform/decisions.md",
                 "README.md",
                 "docs/verification_ledger.md"
             ],
             "similarity_scores": [
                 0.03252247488101534,
-                0.031544957774465976,
                 0.03149801587301587,
                 0.031054405392392875,
                 0.03057889822595705
@@ -452,7 +484,11 @@
                 "design",
                 "artifact"
             ],
-            "failure_reason": "No expected sources retrieved."
+            "failure_reason": "No expected sources retrieved.",
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-009",
@@ -480,7 +516,11 @@
             "expected_layers": [
                 "artifact"
             ],
-            "failure_reason": "No expected sources retrieved."
+            "failure_reason": "No expected sources retrieved.",
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-010",
@@ -508,7 +548,11 @@
             "expected_layers": [
                 "artifact"
             ],
-            "failure_reason": null
+            "failure_reason": null,
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-011",
@@ -536,7 +580,11 @@
             "expected_layers": [
                 "artifact"
             ],
-            "failure_reason": null
+            "failure_reason": null,
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-012",
@@ -566,7 +614,11 @@
                 "artifact",
                 "design"
             ],
-            "failure_reason": "No expected sources retrieved."
+            "failure_reason": "No expected sources retrieved.",
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-013",
@@ -594,7 +646,11 @@
             "expected_layers": [
                 "artifact"
             ],
-            "failure_reason": null
+            "failure_reason": null,
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-014",
@@ -607,15 +663,11 @@
             "retrieved_sources": [
                 "README.md",
                 "docs/verification_ledger.md",
-                "n8n-aks-platform/challenges.md",
-                "n8n-aks-platform/lessons-learned.md",
                 "n8n-aks-platform/architecture.md"
             ],
             "similarity_scores": [
                 0.03252247488101534,
                 0.032266458495966696,
-                0.030776515151515152,
-                0.030330882352941176,
                 0.02976190476190476
             ],
             "is_hit": true,
@@ -624,7 +676,11 @@
                 "design",
                 "artifact"
             ],
-            "failure_reason": null
+            "failure_reason": null,
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         },
         {
             "question_id": "N8N-015",
@@ -652,7 +708,11 @@
             "expected_layers": [
                 "artifact"
             ],
-            "failure_reason": null
+            "failure_reason": null,
+            "rewritten_query": null,
+            "rewritten": null,
+            "rewrite_explanation": null,
+            "rewrite_latency": null
         }
     ]
 }

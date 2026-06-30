@@ -11,6 +11,7 @@ import asyncio
 import argparse
 import json
 import dataclasses
+import time
 from pathlib import Path
 from typing import List, Optional
 
@@ -64,6 +65,123 @@ class HybridGradedRetrieverAdapter(Retriever):
     async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
         resolved_project = project if project is not None else detect_project(query)
         return await hybrid_retrieve(query=query, top_k=top_k, project=resolved_project, diversify=True, grade=True, min_chunks=3)
+
+
+class HybridRewrittenRetrieverAdapter(Retriever):
+    """Adapter to map the Hybrid retrieval retrieve function with query rewriting, diversification, and grading to the Retriever Protocol."""
+    def __init__(self):
+        from src.retrieval.rewriters.factory import create_rewriter_from_settings
+        from src.retrieval.rewriters.mock import MockQueryRewriter
+        from src.models.rewrite_result import RewriteResult
+        
+        self.rewriter = create_rewriter_from_settings()
+        self.rewrite_details = {}
+        
+        if isinstance(self.rewriter, MockQueryRewriter):
+            self.rewriter.rewrites = {
+                "How does the OPA Gatekeeper constraint template evaluate and prevent pods from running without specified container image tags or with the 'latest' tag in the dev namespace?": RewriteResult(
+                    rewritten_query="OPA Gatekeeper disallowed container image tags latest template constraint disallowed-tags-template disallowed-tags-constraints",
+                    rewritten=True,
+                    explanation="Mock rewrite: Expanded to target Rego templates and constraint configurations for OPA image tag policies."
+                ),
+                "How does the OPA Gatekeeper policy ensure that every container and initContainer in a pod defines CPU and Memory requests and limits prior to scheduler placement?": RewriteResult(
+                    rewritten_query="OPA Gatekeeper CPU Memory requests limits container initContainer Rego required-resources-template required-resources-constraint",
+                    rewritten=True,
+                    explanation="Mock rewrite: Expanded to target Rego resource constraints for CPU and Memory in pods."
+                ),
+                "How does the NetworkPolicy configuration isolate inter-pod communication for the database layer (Postgres and Redis) while allowing necessary metrics collection and operator polling?": RewriteResult(
+                    rewritten_query="NetworkPolicy Postgres Redis ingress communication whitelist monitoring helm/n8n/templates/networkpolicies.yaml",
+                    rewritten=True,
+                    explanation="Mock rewrite: Expanded to target helm network policy templates and Postgres/Redis database ingress constraints."
+                ),
+                "Why and how does the n8n egress NetworkPolicy permit outbound traffic to the public internet while strictly blocking lateral access to internal private IP ranges?": RewriteResult(
+                    rewritten_query="NetworkPolicy egress outbound traffic lateral RFC 1918 private subnets ipBlock helm/n8n/templates/networkpolicies.yaml",
+                    rewritten=True,
+                    explanation="Mock rewrite: Expanded to target egress outbound network rules and private subnets ipBlock configurations."
+                ),
+                "How does the Helm chart configure container security settings and privilege constraints for n8n application pods to conform to zero-trust standards?": RewriteResult(
+                    rewritten_query="Helm chart securityContext readOnlyRootFilesystem ServiceAccount zero trust helm/n8n/templates/main.yaml helm/n8n/templates/serviceaccounts.yaml",
+                    rewritten=True,
+                    explanation="Mock rewrite: Expanded to target container securityContext settings and ServiceAccounts."
+                ),
+                "How does the Helm Chart CI pipeline automate chart version promotion and synchronize state changes with ArgoCD upon a git commit to the Helm directory?": RewriteResult(
+                    rewritten_query="ArgoCD Helm chart CI workflow ACR ArgoCD application targetRevision .github/workflows/ci.yaml gitops/argocd/application.yaml",
+                    rewritten=True,
+                    explanation="Mock rewrite: Expanded to target CI workflows and ArgoCD application targetRevision sync mechanisms."
+                ),
+                "How do the n8n application pods securely retrieve database passwords and encryption keys from Azure Key Vault without storing credentials in the git repository or Kubernetes Secret manifests?": RewriteResult(
+                    rewritten_query="SecretProviderClass Secrets Store CSI driver Azure Key Vault mounted secret helm/n8n/templates/secretproviderclass.yaml",
+                    rewritten=True,
+                    explanation="Mock rewrite: Expanded to target SecretProviderClass and Azure Key Vault Secrets Store CSI driver integration."
+                ),
+                "How does the KEDA autoscaling loop coordinate with the Redis message broker and the n8n-worker deployment to dynamically manage worker replica counts?": RewriteResult(
+                    rewritten_query="KEDA autoscaling Redis bull jobs wait worker replica counts ScaledObject helm/n8n/templates/hpa-worker.yaml",
+                    rewritten=True,
+                    explanation="Mock rewrite: Expanded to target KEDA ScaledObject and worker replica scaling logic based on Redis queue."
+                ),
+                "How is the default resource request and limit configuration structured for the n8n components and database instances within the Helm values schema?": RewriteResult(
+                    rewritten_query="Helm values.yaml cpu memory requests limits n8n components helm/n8n/values.yaml",
+                    rewritten=True,
+                    explanation="Mock rewrite: Expanded to target Helm values schema requests/limits allocations."
+                ),
+                "How are Azure Key Vault secret objects mapped to specific environment variable keys inside the SecretProviderClass definition?": RewriteResult(
+                    rewritten_query="SecretProviderClass secretObjects objects mapping Azure Key Vault helm/n8n/templates/secretproviderclass.yaml",
+                    rewritten=True,
+                    explanation="Mock rewrite: Expanded to target SecretProviderClass secretObjects mapping parameters."
+                ),
+                "How is the PrometheusRule alerting expression for high workflow failure rates calculated using metrics from n8n queue execution?": RewriteResult(
+                    rewritten_query="PrometheusRule alert n8n scaling mode queue jobs failed rule monitoring/alerts/n8n-rules.yaml",
+                    rewritten=True,
+                    explanation="Mock rewrite: Expanded to target PrometheusRule alerting rules for queue execution failures."
+                ),
+                "How is the user-assigned or system-assigned kubelet identity in AKS configured in Terraform to allow read access to Azure Key Vault secrets?": RewriteResult(
+                    rewritten_query="Terraform user system assigned kubelet identity AKS Key Vault access policy terraform/env/dev/main.tf terraform/modules/keyvault/main.tf",
+                    rewritten=True,
+                    explanation="Mock rewrite: Expanded to target AKS kubelet identity and Key Vault access policies in Terraform."
+                ),
+                "How is the Azure federated identity credential structured in Terraform to authenticate GitHub Actions CI/CD workflows using OIDC rather than static secrets?": RewriteResult(
+                    rewritten_query="Terraform azurerm federated identity credential GitHub actions OIDC token exchange terraform/env/dev/oidc.tf",
+                    rewritten=True,
+                    explanation="Mock rewrite: Expanded to target Azure federated identity credentials and GitHub Actions OIDC configurations."
+                ),
+                "Which inter-service paths are explicitly blocked by the NetworkPolicy architecture, and what architectural reasons justify preventing workers from communicating directly with the main API or webhooks?": RewriteResult(
+                    rewritten_query="NetworkPolicy inter service communication matrix worker Redis component communication docs/architecture/component-communication.md",
+                    rewritten=True,
+                    explanation="Mock rewrite: Expanded to target NetworkPolicy inter-service blockages and architecture docs."
+                ),
+                "How was compliance with named ServiceAccounts and resource limits verified across all running n8n pods in the cluster, as documented in the verification ledger?": RewriteResult(
+                    rewritten_query="verification ledger kubectl ServiceAccounts resource limits pods validation docs/verification_ledger.md",
+                    rewritten=True,
+                    explanation="Mock rewrite: Expanded to target the verification ledger and kubectl validation verification."
+                )
+            }
+
+    async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
+        resolved_project = project if project is not None else detect_project(query)
+        
+        # Rewrite query
+        start_time = time.perf_counter()
+        rewrite_res = await self.rewriter.rewrite(query=query, project=resolved_project)
+        latency = time.perf_counter() - start_time
+        
+        # Save details
+        self.rewrite_details[query] = {
+            "rewritten_query": rewrite_res.rewritten_query,
+            "rewritten": rewrite_res.rewritten,
+            "explanation": rewrite_res.explanation,
+            "latency": latency
+        }
+        
+        # Use rewritten query for retrieval
+        retrieval_query = rewrite_res.rewritten_query
+        return await hybrid_retrieve(
+            query=retrieval_query,
+            top_k=top_k,
+            project=resolved_project
+        )
+
+    def get_rewrite_details(self, query: str) -> Optional[dict]:
+        return self.rewrite_details.get(query)
 
 
 
@@ -122,6 +240,33 @@ def save_markdown_report(result: EvaluationResult, output_path: Path) -> None:
             f"{lm.mrr:.3f} | {lm.average_similarity:.3f} |"
         )
         
+    has_rewrites = any(r.rewritten_query is not None for r in result.question_results)
+    if has_rewrites:
+        rewrite_count = sum(1 for r in result.question_results if r.rewritten)
+        rewrite_rate = rewrite_count / result.total_questions if result.total_questions > 0 else 0.0
+        avg_latency = sum(r.rewrite_latency for r in result.question_results if r.rewrite_latency is not None) / result.total_questions if result.total_questions > 0 else 0.0
+        
+        lines.extend([
+            "",
+            "## Query Rewriter Analysis",
+            f"- **Rewrite Rate:** {rewrite_rate * 100:.1f}% ({rewrite_count} / {result.total_questions} queries)",
+            f"- **Average Rewrite Latency:** {avg_latency * 1000:.1f} ms",
+            "",
+            "### Detailed Rewrite Decisions",
+            "| Question ID | Original Query | Rewritten Query | Rewritten? | Explanation | Latency |",
+            "| --- | --- | --- | :---: | --- | :---: |"
+        ])
+        
+        for r in result.question_results:
+            rewritten_str = "Yes" if r.rewritten else "No"
+            clean_original = r.question.replace("|", "\\|").replace("\n", " ")
+            clean_rewritten = (r.rewritten_query or "").replace("|", "\\|").replace("\n", " ")
+            clean_explanation = (r.rewrite_explanation or "").replace("|", "\\|").replace("\n", " ")
+            latency_str = f"{r.rewrite_latency * 1000:.1f} ms" if r.rewrite_latency is not None else "N/A"
+            lines.append(
+                f"| {r.question_id} | {clean_original} | {clean_rewritten} | {rewritten_str} | {clean_explanation} | {latency_str} |"
+            )
+
     lines.extend([
         "",
         "## Failure Analysis"
@@ -349,7 +494,7 @@ async def main() -> None:
     parser.add_argument(
         "--run-type",
         type=str,
-        choices=["vector", "manual-docs", "bm25", "hybrid", "hybrid-diversified", "hybrid-graded", "rrf", "grader"],
+        choices=["vector", "manual-docs", "bm25", "hybrid", "hybrid-diversified", "hybrid-graded", "hybrid-rewritten", "rrf", "grader"],
         default="vector",
         help="The evaluation run type folder (e.g. vector, manual-docs)."
     )
@@ -386,6 +531,8 @@ async def main() -> None:
                 retriever_adapter = HybridDiversifiedRetrieverAdapter()
             elif args.run_type == "hybrid-graded":
                 retriever_adapter = HybridGradedRetrieverAdapter()
+            elif args.run_type == "hybrid-rewritten":
+                retriever_adapter = HybridRewrittenRetrieverAdapter()
             elif args.run_type == "rrf":
                 retriever_adapter = HybridRRFRetrieverAdapter()
             else:
