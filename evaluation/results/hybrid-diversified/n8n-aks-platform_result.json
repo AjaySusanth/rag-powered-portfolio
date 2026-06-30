@@ -3,68 +3,68 @@
     "generated_at": "2026-06-25T16:33:02Z",
     "top_k": 5,
     "total_questions": 15,
-    "recall": 0.6333333333333333,
-    "hit_rate": 0.7333333333333333,
-    "mrr": 0.35777777777777775,
-    "average_similarity": 37.247320577445244,
+    "recall": 0.6,
+    "hit_rate": 0.6666666666666666,
+    "mrr": 0.4666666666666667,
+    "average_similarity": 0.03209025534002398,
     "category_metrics": [
         {
             "category": "core_logic",
             "total_questions": 5,
             "hit_rate": 0.8,
             "recall": 0.8,
-            "mrr": 0.4333333333333333,
-            "average_similarity": 39.59082474430922
+            "mrr": 0.4,
+            "average_similarity": 0.03188204650393968
         },
         {
             "category": "data_models",
             "total_questions": 3,
             "hit_rate": 0.6666666666666666,
             "recall": 0.6666666666666666,
-            "mrr": 0.5,
-            "average_similarity": 31.54639706576642
+            "mrr": 0.6666666666666666,
+            "average_similarity": 0.032654680063458494
         },
         {
             "category": "documentation",
             "total_questions": 2,
             "hit_rate": 1.0,
             "recall": 0.75,
-            "mrr": 0.5,
-            "average_similarity": 39.07804534256276
+            "mrr": 0.75,
+            "average_similarity": 0.03239446668849102
         },
         {
             "category": "infrastructure",
             "total_questions": 2,
             "hit_rate": 0.5,
             "recall": 0.5,
-            "mrr": 0.1,
-            "average_similarity": 30.79983007724081
+            "mrr": 0.5,
+            "average_similarity": 0.03177805800756621
         },
         {
             "category": "pipeline",
             "total_questions": 3,
-            "hit_rate": 0.6666666666666666,
-            "recall": 0.3333333333333333,
+            "hit_rate": 0.3333333333333333,
+            "recall": 0.16666666666666666,
             "mrr": 0.16666666666666666,
-            "average_similarity": 39.65425624038083
+            "average_similarity": 0.03149801587301587
         }
     ],
     "layer_metrics": [
         {
             "layer": "design",
             "total_questions": 7,
-            "hit_rate": 0.7142857142857143,
-            "recall": 0.7142857142857143,
-            "mrr": 0.34523809523809523,
-            "average_similarity": 38.592020169722936
+            "hit_rate": 0.5714285714285714,
+            "recall": 0.5714285714285714,
+            "mrr": 0.2857142857142857,
+            "average_similarity": 0.03188204650393968
         },
         {
             "layer": "artifact",
             "total_questions": 11,
             "hit_rate": 0.5454545454545454,
             "recall": 0.5,
-            "mrr": 0.2681818181818182,
-            "average_similarity": 36.126737583880505
+            "mrr": 0.45454545454545453,
+            "average_similarity": 0.03222906123074685
         }
     ],
     "failures": [
@@ -78,17 +78,17 @@
             ],
             "retrieved_sources": [
                 "n8n-aks-platform/architecture.md",
-                "n8n-aks-platform/lessons-learned.md",
                 "n8n-aks-platform/decisions.md",
-                ".github/workflows/ci.yaml",
-                "n8n-aks-platform/lessons-learned.md"
+                "n8n-aks-platform/lessons-learned.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/challenges.md"
             ],
             "similarity_scores": [
-                34.1914127743262,
-                29.958425414518487,
-                29.46152760693902,
-                25.550497526941093,
-                23.77304838262044
+                0.03278688524590164,
+                0.031746031746031744,
+                0.0315136476426799,
+                0.030017921146953404,
+                0.028438886647841874
             ],
             "is_hit": false,
             "rank": null,
@@ -109,21 +109,51 @@
             "retrieved_sources": [
                 "n8n-aks-platform/decisions.md",
                 "docs/verification_ledger.md",
+                "n8n-aks-platform/lessons-learned.md",
                 "n8n-aks-platform/challenges.md",
-                "n8n-aks-platform/architecture.md",
-                "n8n-aks-platform/lessons-learned.md"
+                "n8n-aks-platform/architecture.md"
             ],
             "similarity_scores": [
-                50.647692969408936,
-                48.1085608972133,
-                34.21176991036874,
-                34.16277029815639,
-                33.534899577458695
+                0.03278688524590164,
+                0.03225806451612903,
+                0.03125763125763126,
+                0.029957522915269395,
+                0.029211087420042643
             ],
             "is_hit": false,
             "rank": null,
             "expected_layers": [
                 "artifact",
+                "artifact"
+            ],
+            "failure_reason": "No expected sources retrieved."
+        },
+        {
+            "question_id": "N8N-008",
+            "question": "How does the KEDA autoscaling loop coordinate with the Redis message broker and the n8n-worker deployment to dynamically manage worker replica counts?",
+            "category": "pipeline",
+            "expected_sources": [
+                "helm/n8n/templates/hpa-worker.yaml",
+                "helm/n8n/templates/worker.yaml"
+            ],
+            "retrieved_sources": [
+                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/challenges.md",
+                "n8n-aks-platform/decisions.md",
+                "README.md",
+                "docs/verification_ledger.md"
+            ],
+            "similarity_scores": [
+                0.03252247488101534,
+                0.031544957774465976,
+                0.03149801587301587,
+                0.031054405392392875,
+                0.03057889822595705
+            ],
+            "is_hit": false,
+            "rank": null,
+            "expected_layers": [
+                "design",
                 "artifact"
             ],
             "failure_reason": "No expected sources retrieved."
@@ -136,18 +166,18 @@
                 "helm/n8n/values.yaml"
             ],
             "retrieved_sources": [
-                "n8n-aks-platform/lessons-learned.md",
-                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/decisions.md",
                 "n8n-aks-platform/architecture.md",
                 "docs/verification_ledger.md",
-                "n8n-aks-platform/challenges.md"
+                ".github/workflows/ci.yaml",
+                "helm/n8n/Chart.yaml"
             ],
             "similarity_scores": [
-                27.244944957039053,
-                26.134301368535425,
-                25.218412671837605,
-                22.332326950963303,
-                21.95585778945623
+                0.029827662395050816,
+                0.02854251012145749,
+                0.028531243721117136,
+                0.02817460317460317,
+                0.01639344262295082
             ],
             "is_hit": false,
             "rank": null,
@@ -165,18 +195,18 @@
                 "terraform/modules/keyvault/main.tf"
             ],
             "retrieved_sources": [
-                "n8n-aks-platform/architecture.md",
                 "n8n-aks-platform/decisions.md",
-                "terraform/modules/aks/outputs.tf",
+                "n8n-aks-platform/architecture.md",
                 "n8n-aks-platform/challenges.md",
-                "terraform/modules/aks/main.tf"
+                "docs/verification_ledger.md",
+                "terraform/modules/aks/outputs.tf"
             ],
             "similarity_scores": [
-                40.170077147089884,
-                39.12090648587993,
-                38.200827543609535,
-                34.03965526703041,
-                32.91271717607491
+                0.031754032258064516,
+                0.031544957774465976,
+                0.03149801587301587,
+                0.03131881575727918,
+                0.030158730158730156
             ],
             "is_hit": false,
             "rank": null,
@@ -199,16 +229,16 @@
             "retrieved_sources": [
                 "docs/verification_ledger.md",
                 "gitops/argocd/gatekeeper/templates/disallowed-tags-template.yaml",
-                "gitops/argocd/gatekeeper/templates/disallowed-tags-template.yaml",
                 "gitops/argocd/gatekeeper/constraints/disallowed-tags-constraints.yaml",
-                "n8n-aks-platform/architecture.md"
+                "gitops/argocd/gatekeeper/templates/required-resources-template.yaml",
+                "n8n-aks-platform/lessons-learned.md"
             ],
             "similarity_scores": [
-                48.725890529543044,
-                42.020685846102275,
-                40.54593210676409,
-                38.81892374002811,
-                36.42279708813446
+                0.03278688524590164,
+                0.03200204813108039,
+                0.031754032258064516,
+                0.030536130536130537,
+                0.029850746268656716
             ],
             "is_hit": true,
             "rank": 2,
@@ -227,21 +257,21 @@
                 "gitops/argocd/gatekeeper/constraints/required-resources-constraint.yaml"
             ],
             "retrieved_sources": [
-                "gitops/argocd/gatekeeper/templates/required-resources-template.yaml",
                 "docs/verification_ledger.md",
-                "docs/verification_ledger.md",
+                "gitops/argocd/gatekeeper/constraints/required-resources-constraint.yaml",
                 "gitops/argocd/gatekeeper/templates/required-resources-template.yaml",
-                "gitops/argocd/gatekeeper/constraints/required-resources-constraint.yaml"
+                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/lessons-learned.md"
             ],
             "similarity_scores": [
-                48.01647151681338,
-                47.32267522784392,
-                44.51536329721861,
-                37.44896057267588,
-                35.462101452752464
+                0.03252247488101534,
+                0.03125763125763126,
+                0.030679156908665108,
+                0.030536130536130537,
+                0.029709507042253523
             ],
             "is_hit": true,
-            "rank": 1,
+            "rank": 2,
             "expected_layers": [
                 "design",
                 "design"
@@ -257,20 +287,20 @@
             ],
             "retrieved_sources": [
                 "README.md",
-                "n8n-aks-platform/architecture.md",
                 "helm/n8n/templates/networkpolicies.yaml",
                 "docs/architecture/component-communication.md",
-                "helm/n8n/templates/networkpolicies.yaml"
+                "n8n-aks-platform/architecture.md",
+                "docs/verification_ledger.md"
             ],
             "similarity_scores": [
-                40.9610344182919,
-                32.627195537903816,
-                26.847134986430277,
-                26.007130519990262,
-                25.83908352776499
+                0.03278688524590164,
+                0.03200204813108039,
+                0.03149801587301587,
+                0.031054405392392875,
+                0.029709507042253523
             ],
             "is_hit": true,
-            "rank": 3,
+            "rank": 2,
             "expected_layers": [
                 "design"
             ],
@@ -285,20 +315,20 @@
             ],
             "retrieved_sources": [
                 "n8n-aks-platform/challenges.md",
-                "n8n-aks-platform/lessons-learned.md",
                 "helm/n8n/templates/networkpolicies.yaml",
+                "README.md",
                 "n8n-aks-platform/architecture.md",
-                "README.md"
+                "n8n-aks-platform/lessons-learned.md"
             ],
             "similarity_scores": [
-                65.99926109404046,
-                58.052507928577924,
-                41.479006627890946,
-                38.93912669255323,
-                33.12052587828312
+                0.03252247488101534,
+                0.032266458495966696,
+                0.03125763125763126,
+                0.030330882352941176,
+                0.030017921146953404
             ],
             "is_hit": true,
-            "rank": 3,
+            "rank": 2,
             "expected_layers": [
                 "design"
             ],
@@ -314,17 +344,17 @@
             ],
             "retrieved_sources": [
                 "n8n-aks-platform/architecture.md",
-                "n8n-aks-platform/lessons-learned.md",
                 "n8n-aks-platform/decisions.md",
-                ".github/workflows/ci.yaml",
-                "n8n-aks-platform/lessons-learned.md"
+                "n8n-aks-platform/lessons-learned.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/challenges.md"
             ],
             "similarity_scores": [
-                34.1914127743262,
-                29.958425414518487,
-                29.46152760693902,
-                25.550497526941093,
-                23.77304838262044
+                0.03278688524590164,
+                0.031746031746031744,
+                0.0315136476426799,
+                0.030017921146953404,
+                0.028438886647841874
             ],
             "is_hit": false,
             "rank": null,
@@ -343,21 +373,21 @@
                 "gitops/argocd/application.yaml"
             ],
             "retrieved_sources": [
-                "n8n-aks-platform/decisions.md",
                 "docs/verification_ledger.md",
-                "n8n-aks-platform/architecture.md",
                 ".github/workflows/ci.yaml",
-                "docs/verification_ledger.md"
+                "n8n-aks-platform/decisions.md",
+                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/lessons-learned.md"
             ],
             "similarity_scores": [
-                51.7332783660474,
-                49.519750516876144,
-                49.03454213263371,
-                44.71171060938387,
-                43.20768946378135
+                0.031754032258064516,
+                0.03149801587301587,
+                0.03131881575727918,
+                0.031024531024531024,
+                0.028381642512077296
             ],
             "is_hit": true,
-            "rank": 4,
+            "rank": 2,
             "expected_layers": [
                 "artifact",
                 "artifact"
@@ -375,16 +405,16 @@
             "retrieved_sources": [
                 "n8n-aks-platform/decisions.md",
                 "docs/verification_ledger.md",
+                "n8n-aks-platform/lessons-learned.md",
                 "n8n-aks-platform/challenges.md",
-                "n8n-aks-platform/architecture.md",
-                "n8n-aks-platform/lessons-learned.md"
+                "n8n-aks-platform/architecture.md"
             ],
             "similarity_scores": [
-                50.647692969408936,
-                48.1085608972133,
-                34.21176991036874,
-                34.16277029815639,
-                33.534899577458695
+                0.03278688524590164,
+                0.03225806451612903,
+                0.03125763125763126,
+                0.029957522915269395,
+                0.029211087420042643
             ],
             "is_hit": false,
             "rank": null,
@@ -403,26 +433,26 @@
                 "helm/n8n/templates/worker.yaml"
             ],
             "retrieved_sources": [
-                "n8n-aks-platform/challenges.md",
                 "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/challenges.md",
                 "n8n-aks-platform/decisions.md",
-                "helm/n8n/templates/hpa-worker.yaml",
-                "n8n-aks-platform/decisions.md"
+                "README.md",
+                "docs/verification_ledger.md"
             ],
             "similarity_scores": [
-                52.164392072140934,
-                43.42890319289233,
-                39.296228421228456,
-                34.596801871377785,
-                33.72482800609304
+                0.03252247488101534,
+                0.031544957774465976,
+                0.03149801587301587,
+                0.031054405392392875,
+                0.03057889822595705
             ],
-            "is_hit": true,
-            "rank": 4,
+            "is_hit": false,
+            "rank": null,
             "expected_layers": [
                 "design",
                 "artifact"
             ],
-            "failure_reason": null
+            "failure_reason": "No expected sources retrieved."
         },
         {
             "question_id": "N8N-009",
@@ -432,18 +462,18 @@
                 "helm/n8n/values.yaml"
             ],
             "retrieved_sources": [
-                "n8n-aks-platform/lessons-learned.md",
-                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/decisions.md",
                 "n8n-aks-platform/architecture.md",
                 "docs/verification_ledger.md",
-                "n8n-aks-platform/challenges.md"
+                ".github/workflows/ci.yaml",
+                "helm/n8n/Chart.yaml"
             ],
             "similarity_scores": [
-                27.244944957039053,
-                26.134301368535425,
-                25.218412671837605,
-                22.332326950963303,
-                21.95585778945623
+                0.029827662395050816,
+                0.02854251012145749,
+                0.028531243721117136,
+                0.02817460317460317,
+                0.01639344262295082
             ],
             "is_hit": false,
             "rank": null,
@@ -460,21 +490,21 @@
                 "helm/n8n/templates/secretproviderclass.yaml"
             ],
             "retrieved_sources": [
-                "docs/verification_ledger.md",
                 "helm/n8n/templates/secretproviderclass.yaml",
-                "n8n-aks-platform/decisions.md",
+                "docs/verification_ledger.md",
                 "terraform/modules/keyvault/variables.tf",
-                "n8n-aks-platform/architecture.md"
+                "n8n-aks-platform/decisions.md",
+                "terraform/modules/keyvault/main.tf"
             ],
             "similarity_scores": [
-                36.661943188397146,
-                28.197615323031723,
-                23.33027368443554,
-                19.229794095033675,
-                18.179252053029053
+                0.03252247488101534,
+                0.032018442622950824,
+                0.031754032258064516,
+                0.031746031746031744,
+                0.03007688828584351
             ],
             "is_hit": true,
-            "rank": 2,
+            "rank": 1,
             "expected_layers": [
                 "artifact"
             ],
@@ -490,16 +520,16 @@
             "retrieved_sources": [
                 "monitoring/alerts/n8n-rules.yaml",
                 "helm/n8n/templates/prometheusrule.yaml",
-                "docs/verification_ledger.md",
                 "README.md",
-                "n8n-aks-platform/decisions.md"
+                "n8n-aks-platform/challenges.md",
+                "docs/verification_ledger.md"
             ],
             "similarity_scores": [
-                34.89517880850112,
-                34.61808437393574,
-                33.677427439010394,
-                33.61749798299581,
-                24.687889200079567
+                0.03278688524590164,
+                0.03225806451612903,
+                0.03149801587301587,
+                0.030776515151515152,
+                0.03057889822595705
             ],
             "is_hit": true,
             "rank": 1,
@@ -517,18 +547,18 @@
                 "terraform/modules/keyvault/main.tf"
             ],
             "retrieved_sources": [
-                "n8n-aks-platform/architecture.md",
                 "n8n-aks-platform/decisions.md",
-                "terraform/modules/aks/outputs.tf",
+                "n8n-aks-platform/architecture.md",
                 "n8n-aks-platform/challenges.md",
-                "terraform/modules/aks/main.tf"
+                "docs/verification_ledger.md",
+                "terraform/modules/aks/outputs.tf"
             ],
             "similarity_scores": [
-                40.170077147089884,
-                39.12090648587993,
-                38.200827543609535,
-                34.03965526703041,
-                32.91271717607491
+                0.031754032258064516,
+                0.031544957774465976,
+                0.03149801587301587,
+                0.03131881575727918,
+                0.030158730158730156
             ],
             "is_hit": false,
             "rank": null,
@@ -546,21 +576,21 @@
                 "terraform/env/dev/oidc.tf"
             ],
             "retrieved_sources": [
-                "n8n-aks-platform/architecture.md",
+                "terraform/env/dev/oidc.tf",
                 "docs/verification_ledger.md",
+                "n8n-aks-platform/architecture.md",
                 "n8n-aks-platform/decisions.md",
-                "n8n-aks-platform/decisions.md",
-                "terraform/env/dev/oidc.tf"
+                ".github/workflows/infra.yaml"
             ],
             "similarity_scores": [
-                33.94851711163646,
-                33.66832752835326,
-                32.12604455071124,
-                30.845942018093353,
-                30.79983007724081
+                0.03177805800756621,
+                0.031754032258064516,
+                0.031099324975891997,
+                0.030776515151515152,
+                0.030621785881252923
             ],
             "is_hit": true,
-            "rank": 5,
+            "rank": 1,
             "expected_layers": [
                 "artifact"
             ],
@@ -575,21 +605,21 @@
                 "README.md"
             ],
             "retrieved_sources": [
-                "docs/verification_ledger.md",
                 "README.md",
-                "n8n-aks-platform/architecture.md",
+                "docs/verification_ledger.md",
+                "n8n-aks-platform/challenges.md",
                 "n8n-aks-platform/lessons-learned.md",
-                "docs/verification_ledger.md"
+                "n8n-aks-platform/architecture.md"
             ],
             "similarity_scores": [
-                45.35487548753661,
-                37.81215203144448,
-                33.02936559244809,
-                27.941639138359236,
-                27.207749630060352
+                0.03252247488101534,
+                0.032266458495966696,
+                0.030776515151515152,
+                0.030330882352941176,
+                0.02976190476190476
             ],
             "is_hit": true,
-            "rank": 2,
+            "rank": 1,
             "expected_layers": [
                 "design",
                 "artifact"
@@ -606,16 +636,16 @@
             "retrieved_sources": [
                 "README.md",
                 "docs/verification_ledger.md",
-                "docs/verification_ledger.md",
-                "docs/verification_ledger.md",
-                "n8n-aks-platform/lessons-learned.md"
+                "n8n-aks-platform/architecture.md",
+                "n8n-aks-platform/lessons-learned.md",
+                "n8n-aks-platform/challenges.md"
             ],
             "similarity_scores": [
-                43.17533378676236,
-                40.34393865368105,
-                39.69798727967502,
-                33.754569053047526,
-                30.161275482650765
+                0.03252247488101534,
+                0.032266458495966696,
+                0.03055037313432836,
+                0.029877369007803793,
+                0.028258706467661692
             ],
             "is_hit": true,
             "rank": 2,
