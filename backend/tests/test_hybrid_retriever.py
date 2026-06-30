@@ -96,3 +96,45 @@ async def test_hybrid_retrieve_with_diversification(mock_bm25_retrieve, mock_vec
     assert results[0].chunk.chunk_id == "chunk-v1"  # file_a.py (RRF score: 0.0325)
     assert results[1].chunk.chunk_id == "chunk-b1"  # file_b.py (RRF score: 0.0163)
 
+
+@pytest.mark.anyio
+@patch("src.retrieval.vector_retriever.retrieve", new_callable=AsyncMock)
+@patch("src.retrieval.bm25_retriever.retrieve", new_callable=AsyncMock)
+@patch("src.retrieval.hybrid_retriever.create_grader_from_settings")
+async def test_hybrid_retrieve_with_grading(mock_create_grader, mock_bm25_retrieve, mock_vector_retrieve):
+    chunk_v1 = make_mock_chunk("chunk-v1", source_file="file_a.py")
+    chunk_v2 = make_mock_chunk("chunk-v2", source_file="file_b.py")
+    chunk_v3 = make_mock_chunk("chunk-v3", source_file="file_c.py")
+    
+    mock_vector_retrieve.return_value = [
+        RetrievalResult(chunk=chunk_v1, score=0.9),
+        RetrievalResult(chunk=chunk_v2, score=0.8),
+        RetrievalResult(chunk=chunk_v3, score=0.7)
+    ]
+    mock_bm25_retrieve.return_value = []
+    
+    # Mock grader grades:
+    # chunk-v1 is relevant
+    # chunk-v2 is irrelevant
+    # chunk-v3 is relevant
+    from src.llm.interfaces import ChunkGrade
+    class SimpleMockGrader:
+        async def grade(self, query, results):
+            return [
+                ChunkGrade(chunk_index=0, is_relevant=True, rejection_reason=None, explanation="Relevant"),
+                ChunkGrade(chunk_index=1, is_relevant=False, rejection_reason="off_topic", explanation="Off-topic"),
+                ChunkGrade(chunk_index=2, is_relevant=True, rejection_reason=None, explanation="Relevant")
+            ]
+            
+    mock_create_grader.return_value = SimpleMockGrader()
+    
+    # Run with top_k=3, diversify=True, grade=True, min_chunks=2
+    # chunk-v2 is filtered out, leaving chunk-v1 and chunk-v3.
+    # Since 2 relevant chunks >= min_chunks (2), it should return [chunk-v1, chunk-v3]
+    results = await retrieve("kubernetes", top_k=3, project="n8n", diversify=True, grade=True, min_chunks=2)
+    
+    assert len(results) == 2
+    assert results[0].chunk.chunk_id == "chunk-v1"
+    assert results[1].chunk.chunk_id == "chunk-v3"
+
+

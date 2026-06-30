@@ -54,6 +54,13 @@ class HybridDiversifiedRetrieverAdapter(Retriever):
         return await hybrid_retrieve(query=query, top_k=top_k, project=project, diversify=True)
 
 
+class HybridGradedRetrieverAdapter(Retriever):
+    """Adapter to map the Hybrid retrieval retrieve function with diversification and grading to the Retriever Protocol."""
+    async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
+        return await hybrid_retrieve(query=query, top_k=top_k, project=project, diversify=True, grade=True, min_chunks=3)
+
+
+
 
 def save_json_report(result: EvaluationResult, output_path: Path) -> None:
     """Serializes the EvaluationResult dataclass and saves it as a JSON file."""
@@ -336,7 +343,7 @@ async def main() -> None:
     parser.add_argument(
         "--run-type",
         type=str,
-        choices=["vector", "manual-docs", "bm25", "hybrid", "hybrid-diversified", "rrf", "grader"],
+        choices=["vector", "manual-docs", "bm25", "hybrid", "hybrid-diversified", "hybrid-graded", "rrf", "grader"],
         default="vector",
         help="The evaluation run type folder (e.g. vector, manual-docs)."
     )
@@ -371,6 +378,8 @@ async def main() -> None:
                 retriever_adapter = HybridRRFRetrieverAdapter()
             elif args.run_type == "hybrid-diversified":
                 retriever_adapter = HybridDiversifiedRetrieverAdapter()
+            elif args.run_type == "hybrid-graded":
+                retriever_adapter = HybridGradedRetrieverAdapter()
             elif args.run_type == "rrf":
                 retriever_adapter = HybridRRFRetrieverAdapter()
             else:
