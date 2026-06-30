@@ -33,7 +33,7 @@ class RetrievalEvaluator:
         # Validate schema first
         DatasetValidator.validate_schema(dataset)
         
-        project = dataset["project"]
+        project = dataset.get("project")
         # Validate expected sources exist in the database (can be bypassed for tests)
         await DatasetValidator.validate_knowledge_base(project, dataset["questions"], db_check=db_check)
 

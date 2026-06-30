@@ -13,6 +13,7 @@ from typing import List, Dict, Any, Optional, Set
 from src.retrieval import vector_retriever, bm25_retriever
 from src.retrieval.rrf import RRFFuser
 from src.models.retrieval_result import RetrievalResult
+from src.retrieval.project_detector import detect_project
 
 logger = logging.getLogger(__name__)
 
@@ -86,8 +87,9 @@ class RetrievalDiagnostics:
             minimum_match = q.get("minimum_match", 1)
             
             # 1. Fetch top-20 candidates concurrently
-            vector_task = vector_retriever.retrieve(query=question_text, top_k=20, project=project)
-            bm25_task = bm25_retriever.retrieve(query=question_text, top_k=20, project=project)
+            resolved_project = project if project is not None else detect_project(question_text)
+            vector_task = vector_retriever.retrieve(query=question_text, top_k=20, project=resolved_project)
+            bm25_task = bm25_retriever.retrieve(query=question_text, top_k=20, project=resolved_project)
             vector_20, bm25_20 = await asyncio.gather(vector_task, bm25_task)
             
             # 2. Compute candidate overlap metrics

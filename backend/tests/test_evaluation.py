@@ -64,8 +64,8 @@ def test_schema_validation_empty():
 
 def test_schema_validation_missing_project(valid_dataset_data):
     del valid_dataset_data["project"]
-    with pytest.raises(DatasetValidationError, match="Dataset is missing a 'project' field."):
-        DatasetValidator.validate_schema(valid_dataset_data)
+    # Should not raise an exception since project is optional now
+    DatasetValidator.validate_schema(valid_dataset_data)
 
 
 def test_schema_validation_duplicate_ids(valid_dataset_data):

@@ -5,7 +5,7 @@ that all expected source files exist in the indexed database for a given project
 Enforcing validation prevents execution of outdated or malformed test cases, providing
 fast feedback and preserving dataset integrity.
 """
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 import logging
 from src.db.core import get_db_pool
 
@@ -29,8 +29,8 @@ class DatasetValidator:
             raise DatasetValidationError("Dataset is empty.")
             
         project = data.get("project")
-        if not project or not project.strip():
-            raise DatasetValidationError("Dataset is missing a 'project' field.")
+        if "project" in data and (not project or not isinstance(project, str) or not project.strip()):
+            raise DatasetValidationError("Dataset 'project' field cannot be empty if specified.")
             
         questions = data.get("questions")
         if questions is None:
@@ -101,9 +101,10 @@ class DatasetValidator:
                     )
 
     @staticmethod
-    async def validate_knowledge_base(project: str, questions: List[Dict[str, Any]], db_check: bool = True) -> None:
+    async def validate_knowledge_base(project: Optional[str], questions: List[Dict[str, Any]], db_check: bool = True) -> None:
         """
         Validates that all expected source files exist in the indexed database for the given project.
+        If project is None, validates files exist across any project in the database.
         """
         if not db_check:
             return
@@ -125,14 +126,26 @@ class DatasetValidator:
             )
             
         async with pool.acquire() as conn:
-            query = "SELECT DISTINCT source_file FROM chunks WHERE project = $1 AND source_file = any($2::text[])"
-            rows = await conn.fetch(query, project, list(all_sources))
+            if project:
+                query = "SELECT DISTINCT source_file FROM chunks WHERE project = $1 AND source_file = any($2::text[])"
+                rows = await conn.fetch(query, project, list(all_sources))
+            else:
+                query = "SELECT DISTINCT source_file FROM chunks WHERE source_file = any($1::text[])"
+                rows = await conn.fetch(query, list(all_sources))
             existing = {row["source_file"] for row in rows}
             
             missing = all_sources - existing
             if missing:
+                if project:
+                    err_msg = (
+                        f"The following expected source files are missing from the indexed knowledge base "
+                        f"for project '{project}': {sorted(list(missing))}."
+                    )
+                else:
+                    err_msg = (
+                        f"The following expected source files are missing from the indexed knowledge base: "
+                        f"{sorted(list(missing))}."
+                    )
                 raise DatasetValidationError(
-                    f"The following expected source files are missing from the indexed knowledge base "
-                    f"for project '{project}': {sorted(list(missing))}. "
-                    "Please ensure these files are indexed before running the evaluation."
+                    f"{err_msg} Please ensure these files are indexed before running the evaluation."
                 )
