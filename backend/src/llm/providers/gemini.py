@@ -7,13 +7,13 @@ LLM calls, which significantly reduces latency and token cost.
 """
 
 import logging
-from typing import List
+from typing import List, Optional, AsyncIterator, AsyncGenerator
 from google.genai import types
 
 from pydantic import BaseModel, Field
 from src.config import settings
 from src.llm.gemini_client import get_gemini_client, LLMError
-from src.llm.interfaces import BaseGrader, ChunkGrade
+from src.llm.interfaces import BaseGrader, ChunkGrade, BaseGenerator
 from src.models.retrieval_result import RetrievalResult
 
 logger = logging.getLogger(__name__)
@@ -107,3 +107,40 @@ class GeminiGrader(BaseGrader):
                 else:
                     logger.error(f"Gemini retrieval grading failed after {attempt+1} attempts: {e}")
                     raise LLMError(f"Gemini retrieval grading failed: {e}") from e
+
+
+class GeminiGenerator(BaseGenerator):
+    """
+    Answer Generator implementation using Google Gemini content streaming.
+    """
+    def __init__(self, model_name: str = settings.GEMINI_MODEL_NAME):
+        self.model_name = model_name
+
+    async def stream(
+        self,
+        prompt: str,
+        system_instruction: Optional[str] = None
+    ) -> AsyncGenerator[str, None]:
+        """
+        Streams answer tokens asynchronously from Gemini.
+        """
+        client = get_gemini_client()
+        config = types.GenerateContentConfig(
+            temperature=0.0,
+        )
+        if system_instruction:
+            config.system_instruction = system_instruction
+
+        try:
+            response_stream = await client.aio.models.generate_content_stream(
+                model=self.model_name,
+                contents=prompt,
+                config=config
+            )
+            async for chunk in response_stream:
+                if chunk.text:
+                    yield chunk.text
+        except Exception as e:
+            logger.error(f"Gemini streaming failed: {e}")
+            raise LLMError(f"Gemini streaming failed: {e}") from e
+

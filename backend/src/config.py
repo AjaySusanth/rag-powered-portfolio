@@ -71,6 +71,10 @@ class Settings(BaseSettings):
         default="gemini",
         description="The provider for the retrieval grader (e.g., gemini, mock)"
     )
+    GENERATOR_PROVIDER: str = Field(
+        default="gemini",
+        description="The provider for answer generation (e.g., gemini, mock)"
+    )
     GRADER_MIN_CHUNKS: int = Field(
         default=3,
         description="Minimum number of chunks to return from grader. If relevant chunks are less than this, fallback to original list."
