@@ -7,7 +7,7 @@ enabling easy testing and provider swapping.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional, Literal
+from typing import List, Optional, Literal, AsyncIterator, AsyncGenerator
 from pydantic import BaseModel, Field
 from src.models.retrieval_result import RetrievalResult
 
@@ -49,3 +49,20 @@ class BaseGrader(ABC):
             A list of ChunkGrade results, one for each input chunk.
         """
         pass
+
+
+class BaseGenerator(ABC):
+    """
+    Abstract interface for answer generation (streaming).
+    """
+    @abstractmethod
+    async def stream(
+        self,
+        prompt: str,
+        system_instruction: Optional[str] = None
+    ) -> AsyncGenerator[str, None]:
+        """
+        Generates answer tokens streaming from the LLM based on a prompt.
+        """
+        pass
+
