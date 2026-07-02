@@ -23,13 +23,7 @@ PROJECT_ROOT = BACKEND_DIR.parent
 sys.path.insert(0, str(BACKEND_DIR))
 sys.path.insert(0, str(BACKEND_DIR / "src"))
 
-from src.ingestion.github_fetcher import fetch_github_repository
-from src.ingestion.manual_loader import load_manual_documents
-from src.chunking.chunker import chunk_document
-from src.embedding.azure_openai_embedder import embed_chunks
-from src.db.init_db import init_db
-from src.vectorstore.pgvector_store import upsert_chunks, delete_project, count_chunks
-from src.retrieval.bm25_retriever import index_instance
+from src.services.ingestion_service import IngestionService
 
 
 async def main() -> None:
@@ -39,97 +33,28 @@ async def main() -> None:
         sys.exit(1)
 
     project_name = sys.argv[1].strip().lower()
-    yaml_path = PROJECT_ROOT / "knowledge" / project_name / "ingest.yml"
-    knowledge_dir = PROJECT_ROOT / "knowledge"
-
-    if not yaml_path.exists():
-        print(f"Error: ingest.yml not found at {yaml_path}")
-        sys.exit(1)
-
     print(f"Project: {project_name}\n")
+    print("Triggering ingestion pipeline...")
 
-    # 1. Fetch documents from GitHub
-    print("Fetching documents from GitHub...")
     try:
-        github_documents = await fetch_github_repository(str(yaml_path))
+        summary = await IngestionService.ingest_project(project_name)
+        print(f"\nIndexing complete:")
+        print(f"Status: {summary.status}")
+        print(f"Documents: {summary.documents_processed}")
+        print(f"Chunks: {summary.chunks_created}")
+        print(f"Embeddings Generated: {summary.embeddings_generated}")
+        print(f"Vectors Stored: {summary.chunks_created}")
+        print(f"Duration: {summary.duration_seconds}s")
+        if summary.errors:
+            print("\nWarnings/Errors:")
+            for err in summary.errors:
+                print(f"- {err}")
     except Exception as e:
-        print(f"Failed to fetch documents from GitHub: {e}")
+        print(f"Ingestion failed: {e}")
         sys.exit(1)
-
-    # 2. Load manual documents
-    print("Loading manual documents...")
-    try:
-        manual_documents = load_manual_documents(project_name, knowledge_dir)
-    except Exception as e:
-        print(f"Failed to load manual documents: {e}")
-        sys.exit(1)
-
-    # 3. Merge documents
-    documents = github_documents + manual_documents
-    num_docs = len(documents)
-    if num_docs == 0:
-        print("No documents found to ingest.")
-        sys.exit(0)
-
-    print(f"Total documents to index: {num_docs} (GitHub: {len(github_documents)}, Manual: {len(manual_documents)})")
-
-    # 4. Chunk documents
-    all_chunks = []
-    for doc in documents:
-        all_chunks.extend(chunk_document(doc))
-
-    num_chunks = len(all_chunks)
-    if num_chunks == 0:
-        print("No chunks produced from documents.")
-        sys.exit(0)
-
-    # 5. Generate embeddings
-    try:
-        embeddings = await embed_chunks(all_chunks)
-    except Exception as e:
-        print(f"Failed to generate embeddings: {e}")
-        sys.exit(1)
-
-    num_embeddings = len(embeddings)
-
-    # 6. Initialize Database
-    try:
-        await init_db()
-    except Exception as e:
-        print(f"Failed to initialize database: {e}")
-        sys.exit(1)
-
-    # 7. Delete existing chunks (clean re-index)
-    try:
-        print(f"Clearing existing chunks for project '{project_name}' and '__global__'...")
-        await delete_project(project_name)
-        await delete_project("__global__")
-    except Exception as e:
-        print(f"Failed to clear existing chunks: {e}")
-        sys.exit(1)
-
-    # 8. Store in pgvector
-    try:
-        await upsert_chunks(all_chunks, embeddings)
-    except Exception as e:
-        print(f"Failed to store chunks in database: {e}")
-        sys.exit(1)
-
-    # 9. Refresh BM25 Index in-memory
-    try:
-        print("Refreshing BM25 index in-memory...")
-        await index_instance.refresh_index()
-    except Exception as e:
-        print(f"Failed to refresh BM25 index: {e}")
-        sys.exit(1)
-
-    print(f"\nIndexing complete:")
-    print(f"Documents: {num_docs}")
-    print(f"Chunks: {num_chunks}")
-    print(f"Embeddings Generated: {num_embeddings}")
-    print(f"Vectors Stored: {num_chunks}")
 
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
