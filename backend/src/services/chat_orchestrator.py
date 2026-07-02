@@ -19,6 +19,7 @@ from src.retrieval.project_detector import detect_project
 from src.retrieval.rewriters.factory import create_rewriter_from_settings
 from src.retrieval.hybrid_retriever import retrieve
 from src.services.prompt_builder import PromptBuilder, PromptBuildResult
+from src.services.prompt_guard import PromptGuard
 from src.llm.factory import create_generator_from_settings
 from src.llm.gemini_client import LLMError
 
@@ -51,6 +52,9 @@ class ChatOrchestrator:
         if not query or not query.strip():
             yield StreamErrorEvent(code="invalid_query", message="Query string cannot be empty.")
             return
+
+        # 0. Prompt Injection Detection
+        guard_result = PromptGuard.analyze(query)
 
         # 1. Project Detection
         try:
