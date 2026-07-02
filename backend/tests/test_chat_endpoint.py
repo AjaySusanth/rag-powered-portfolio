@@ -80,12 +80,14 @@ async def test_chat_endpoint_success(
         # data: {"event": "token", "token": "Hello"}
         # data: {"event": "token", "token": " "}
         # data: {"event": "token", "token": "world!"}
+        # data: {"event": "citations", "citations": [{"file": "about-me.md", "layer": "identity", "project": "n8n-aks-platform"}]}
         # data: [DONE]
-        assert len(lines) == 4
+        assert len(lines) == 5
         assert lines[0] == 'data: {"event": "token", "token": "Hello"}'
         assert lines[1] == 'data: {"event": "token", "token": " "}'
         assert lines[2] == 'data: {"event": "token", "token": "world!"}'
-        assert lines[3] == "data: [DONE]"
+        assert lines[3] == 'data: {"event": "citations", "citations": [{"file": "about-me.md", "layer": "identity", "project": "n8n-aks-platform"}]}'
+        assert lines[4] == "data: [DONE]"
 
 
 @pytest.mark.anyio
@@ -232,3 +234,192 @@ async def test_chat_endpoint_empty_message_stream_error() -> None:
         assert "error" in lines[0]
         assert "invalid_query" in lines[0]
         assert lines[1] == "data: [DONE]"
+
+
+@pytest.mark.anyio
+@patch("src.services.chat_orchestrator.detect_project")
+@patch("src.services.chat_orchestrator.retrieve", new_callable=AsyncMock)
+@patch("src.services.chat_orchestrator.create_generator_from_settings")
+async def test_chat_endpoint_citations_ordering_and_deduplication(
+    mock_create_generator,
+    mock_retrieve,
+    mock_detect_project
+) -> None:
+    """Verifies that citations preserve the prompt builder ordering and filter out duplicate source files."""
+    mock_detect_project.return_value = "n8n-aks-platform"
+
+    # Define 4 chunks where:
+    # Chunk A: file1.md, project: n8n-aks-platform (score 0.90)
+    # Chunk B: file2.md, project: n8n-aks-platform (score 0.80)
+    # Chunk C: file1.md, project: n8n-aks-platform (score 0.95) - higher score, sorted first
+    # Chunk D: file1.md, project: other-project (score 0.85) - same file name, different project
+    chunk_a = Chunk(
+        chunk_id="chunk_a",
+        parent_document_id="doc_1",
+        content_hash="hash_a",
+        content="Content A",
+        project="n8n-aks-platform",
+        layer="artifact",
+        source_type="github",
+        source_file="file1.md",
+        chunk_index=1,
+        token_count=10,
+        char_count=50
+    )
+    chunk_b = Chunk(
+        chunk_id="chunk_b",
+        parent_document_id="doc_2",
+        content_hash="hash_b",
+        content="Content B",
+        project="n8n-aks-platform",
+        layer="artifact",
+        source_type="github",
+        source_file="file2.md",
+        chunk_index=2,
+        token_count=10,
+        char_count=50
+    )
+    chunk_c = Chunk(
+        chunk_id="chunk_c",
+        parent_document_id="doc_1",
+        content_hash="hash_c",
+        content="Content C",
+        project="n8n-aks-platform",
+        layer="artifact",
+        source_type="github",
+        source_file="file1.md",
+        chunk_index=3,
+        token_count=10,
+        char_count=50
+    )
+    chunk_d = Chunk(
+        chunk_id="chunk_d",
+        parent_document_id="doc_3",
+        content_hash="hash_d",
+        content="Content D",
+        project="other-project",
+        layer="artifact",
+        source_type="github",
+        source_file="file1.md",
+        chunk_index=4,
+        token_count=10,
+        char_count=50
+    )
+
+    # Retrieval returns them unsorted
+    mock_retrieve.return_value = [
+        RetrievalResult(chunk=chunk_a, score=0.90),
+        RetrievalResult(chunk=chunk_b, score=0.80),
+        RetrievalResult(chunk=chunk_c, score=0.95),
+        RetrievalResult(chunk=chunk_d, score=0.85)
+    ]
+
+    mock_generator = MagicMock()
+    async def mock_stream_iter(prompt, system_instruction):
+        yield "Response text"
+    mock_generator.stream.side_effect = mock_stream_iter
+    mock_create_generator.return_value = mock_generator
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        payload = {"message": "Test query"}
+        response = await client.post("/chat", json=payload)
+        assert response.status_code == 200
+
+        lines = [line.strip() for line in response.text.split("\n") if line.strip()]
+        
+        # We expect: token, citations, DONE
+        assert len(lines) == 3
+        assert lines[0] == 'data: {"event": "token", "token": "Response text"}'
+        
+        # Citations event should:
+        # 1. Be sorted by score descending:
+        #    - chunk_c: file1.md (n8n-aks-platform, score 0.95)
+        #    - chunk_a: file1.md (n8n-aks-platform, score 0.90) -> Duplicate of chunk_c (same project + file), dropped
+        #    - chunk_d: file1.md (other-project, score 0.85) -> Keep! Different project.
+        #    - chunk_b: file2.md (n8n-aks-platform, score 0.80) -> Keep!
+        # 2. Output order:
+        #    - file1.md (n8n-aks-platform)
+        #    - file1.md (other-project)
+        #    - file2.md (n8n-aks-platform)
+        assert "citations" in lines[1]
+        import json
+        citations_data = json.loads(lines[1].replace("data:", "").strip())
+        citations = citations_data["citations"]
+        assert len(citations) == 3
+        assert citations[0]["file"] == "file1.md"
+        assert citations[0]["project"] == "n8n-aks-platform"
+        
+        assert citations[1]["file"] == "file1.md"
+        assert citations[1]["project"] == "other-project"
+        
+        assert citations[2]["file"] == "file2.md"
+        assert citations[2]["project"] == "n8n-aks-platform"
+        assert lines[2] == "data: [DONE]"
+
+
+@pytest.mark.anyio
+@patch("src.services.chat_orchestrator.detect_project")
+@patch("src.services.chat_orchestrator.retrieve", new_callable=AsyncMock)
+@patch("src.services.chat_orchestrator.create_generator_from_settings")
+async def test_chat_endpoint_zero_chunks(
+    mock_create_generator,
+    mock_retrieve,
+    mock_detect_project
+) -> None:
+    """Verifies that an empty citations list is emitted if retrieval returns zero chunks."""
+    mock_detect_project.return_value = None
+    mock_retrieve.return_value = []
+
+    mock_generator = MagicMock()
+    async def mock_stream_iter(prompt, system_instruction):
+        yield "Fallback response"
+    mock_generator.stream.side_effect = mock_stream_iter
+    mock_create_generator.return_value = mock_generator
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        payload = {"message": "unrelated query"}
+        response = await client.post("/chat", json=payload)
+        assert response.status_code == 200
+
+        lines = [line.strip() for line in response.text.split("\n") if line.strip()]
+        assert len(lines) == 3
+        assert lines[0] == 'data: {"event": "token", "token": "Fallback response"}'
+        assert lines[1] == 'data: {"event": "citations", "citations": []}'
+        assert lines[2] == "data: [DONE]"
+
+
+@pytest.mark.anyio
+@patch("src.services.chat_orchestrator.detect_project")
+@patch("src.services.chat_orchestrator.retrieve", new_callable=AsyncMock)
+@patch("src.services.chat_orchestrator.create_generator_from_settings")
+async def test_chat_endpoint_llm_failure_no_citations(
+    mock_create_generator,
+    mock_retrieve,
+    mock_detect_project
+) -> None:
+    """Verifies that if generator fails mid-stream, NO citations event is yielded before termination."""
+    mock_detect_project.return_value = None
+    mock_retrieve.return_value = []
+
+    mock_generator = MagicMock()
+    async def mock_stream_iter_fail(prompt, system_instruction):
+        yield "Initial response"
+        raise Exception("Gemini crashed")
+    mock_generator.stream.side_effect = mock_stream_iter_fail
+    mock_create_generator.return_value = mock_generator
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        payload = {"message": "crash LLM"}
+        response = await client.post("/chat", json=payload)
+        assert response.status_code == 200
+
+        lines = [line.strip() for line in response.text.split("\n") if line.strip()]
+        # We expect: token, error, DONE (no citations)
+        assert len(lines) == 3
+        assert lines[0] == 'data: {"event": "token", "token": "Initial response"}'
+        assert "error" in lines[1]
+        assert "unexpected_error" in lines[1]
+        assert lines[2] == "data: [DONE]"
