@@ -21,6 +21,17 @@ from src.retrieval.rewriters.base import BaseQueryRewriter
 from src.models.rewrite_result import RewriteResult
 
 
+@pytest.fixture(autouse=True)
+def mock_cache_always_miss():
+    """Ensures that all chat endpoint tests run with a clean cache miss, forcing full pipeline execution."""
+    with patch("src.services.chat_orchestrator.create_cache_from_settings") as mock_factory:
+        mock_cache = MagicMock()
+        mock_cache.get_chat_response = AsyncMock(return_value=None)
+        mock_cache.set_chat_response = AsyncMock()
+        mock_factory.return_value = mock_cache
+        yield mock_cache
+
+
 def make_test_chunk() -> Chunk:
     """Helper to generate a mock Chunk."""
     return Chunk(
