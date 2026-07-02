@@ -1,0 +1,54 @@
+{
+  "languages": [
+    "Python",
+    "JavaScript",
+    "TypeScript"
+  ],
+  "frameworks": [
+    "FastAPI",
+    "Express.js",
+    "React",
+    "Tailwind CSS"
+  ],
+  "databases": [
+    "PostgreSQL",
+    "pgvector",
+    "MongoDB",
+    "Redis"
+  ],
+  "cloud": [
+    "Microsoft Azure",
+    "Azure Container Apps",
+    "Azure Container Registry",
+    "Azure PostgreSQL Flexible Server"
+  ],
+  "devops": [
+    "Docker",
+    "Kubernetes",
+    "Azure Kubernetes Service (AKS)",
+    "Helm",
+    "GitHub Actions",
+    "ArgoCD",
+    "Terraform",
+    "Calico Network Policies",
+    "OPA Gatekeeper",
+    "Secrets Store CSI Driver",
+    "Prometheus",
+    "Grafana",
+    "KEDA"
+  ],
+  "ai_ml": [
+    "Embeddings",
+    "Vector Search",
+    "LLM Integration",
+    "Natural Language Processing",
+    "Document Intelligence",
+    "Named Entity Recognition"
+  ],
+  "tools": [
+    "n8n",
+    "Telegram Bot API",
+    "Prisma ORM",
+    "Postman"
+  ]
+}
