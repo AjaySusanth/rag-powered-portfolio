@@ -15,6 +15,7 @@ from typing import AsyncIterator, Optional
 
 from src.config import settings
 from src.api.schemas.chat import StreamTokenEvent, BaseStreamEvent, StreamErrorEvent, Citation, StreamCitationsEvent
+from src.cache.factory import create_cache_from_settings
 from src.retrieval.project_detector import detect_project
 from src.retrieval.rewriters.factory import create_rewriter_from_settings
 from src.retrieval.hybrid_retriever import retrieve
@@ -30,6 +31,9 @@ class ChatOrchestrator:
     """
     Orchestrates the lifecycle of a single user chat message.
     """
+    
+    def __init__(self):
+        self.cache = create_cache_from_settings()
 
     async def stream_chat(
         self,
@@ -55,6 +59,15 @@ class ChatOrchestrator:
 
         # 0. Prompt Injection Detection
         guard_result = PromptGuard.analyze(query)
+
+        # 0.5 Cache Lookup
+        cached_response = await self.cache.get_chat_response(query)
+        if cached_response:
+            logger.info("Cache hit for query.")
+            yield StreamTokenEvent(token=cached_response["answer"])
+            citations = [Citation(**c) for c in cached_response.get("citations", [])]
+            yield StreamCitationsEvent(citations=citations)
+            return
 
         # 1. Project Detection
         try:
@@ -108,9 +121,11 @@ class ChatOrchestrator:
             return
 
         # 5. LLM Streaming
+        full_answer = ""
         try:
             generator = create_generator_from_settings()
             async for token in generator.stream(build_result.prompt, system_instruction=PromptBuilder.SYSTEM_INSTRUCTION):
+                full_answer += token
                 yield StreamTokenEvent(token=token)
         except LLMError as e:
             logger.error(f"LLM streaming error: {e}")
@@ -122,8 +137,8 @@ class ChatOrchestrator:
             return
 
         # 6. Yield Citations (only on successful completion of token streaming)
+        citations = []
         try:
-            citations = []
             seen_files = set()
             for res in build_result.chunks_used:
                 source_file = res.chunk.source_file or "unknown"
@@ -146,3 +161,7 @@ class ChatOrchestrator:
             # but not completely crash the stream since the answer has already been successfully streamed.
             # However, for completeness we can yield an empty citations event.
             yield StreamCitationsEvent(citations=[])
+            
+        # 7. Cache the successful response
+        if full_answer.strip():
+            await self.cache.set_chat_response(query, full_answer, citations)

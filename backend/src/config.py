@@ -107,6 +107,15 @@ class Settings(BaseSettings):
         description="Duration of rate limiting window in seconds"
     )
 
+    # Cache Configuration
+    CACHE_TTL_SECONDS: int = Field(
+        default=86400,
+        description="Time to live for cached chat responses in seconds (default: 24h)"
+    )
+    PROMPT_VERSION: str = Field(
+        default="v1.0",
+        description="Version string for the system prompt to invalidate cache on prompt updates"
+    )
 
     @field_validator("AZURE_OPENAI_ENDPOINT", mode="before")
     @classmethod
