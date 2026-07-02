@@ -39,3 +39,19 @@ class PortfolioService:
             
         with open(stack_file, "r", encoding="utf-8") as f:
             return json.load(f)
+
+    @staticmethod
+    @lru_cache(maxsize=1)
+    def get_hire() -> Dict[str, Any]:
+        """
+        Reads, parses, and returns hiring details from hire.json.
+        Cached via lru_cache to ensure we only load and parse the JSON file once.
+        """
+        hire_file = PROJECT_ROOT / "backend" / "data" / "hire.json"
+        
+        if not hire_file.exists():
+            raise FileNotFoundError(f"Hiring metadata file not found at: {hire_file}")
+            
+        with open(hire_file, "r", encoding="utf-8") as f:
+            return json.load(f)
+

@@ -9,10 +9,12 @@ from src.services.portfolio_service import PortfolioService
 
 @pytest.fixture
 def clean_lru_cache():
-    """Clears the lru_cache for get_stack before and after tests."""
+    """Clears the lru_cache for get_stack and get_hire before and after tests."""
     PortfolioService.get_stack.cache_clear()
+    PortfolioService.get_hire.cache_clear()
     yield
     PortfolioService.get_stack.cache_clear()
+    PortfolioService.get_hire.cache_clear()
 
 
 @pytest.mark.anyio
@@ -72,6 +74,54 @@ async def test_get_stack_missing(mock_project_root, clean_lru_cache) -> None:
 
 
 @pytest.mark.anyio
+async def test_get_hire_success(clean_lru_cache) -> None:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.get("/hire")
+        assert response.status_code == 200
+        data = response.json()
+        
+        # Verify schema elements
+        assert data["name"] == "Ajay Susanth"
+        assert data["currently_available"] is True
+        assert isinstance(data["preferred_roles"], list)
+        assert isinstance(data["employment_types"], list)
+        assert isinstance(data["preferred_locations"], list)
+        assert data["work_authorization"] == "India"
+        assert "email" in data["contact"]
+        assert "linkedin" in data["contact"]
+        assert "github" in data["contact"]
+        assert "portfolio" in data["contact"]
+        assert data["resume_url"] == "/resume"
+
+
+@pytest.mark.anyio
+@patch("src.services.portfolio_service.PROJECT_ROOT")
+async def test_get_hire_missing(mock_project_root, clean_lru_cache) -> None:
+    # Force service to look for hire.json in a non-existent folder
+    mock_project_root.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value.exists.return_value = False
+    
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.get("/hire")
+        assert response.status_code == 404
+        assert "Hiring metadata file not found" in response.json()["detail"]
+
+
+@pytest.mark.anyio
+@patch("src.services.portfolio_service.PortfolioService.get_hire")
+async def test_get_hire_malformed_returns_500(mock_get_hire, clean_lru_cache) -> None:
+    # Mock returning invalid data missing required fields to trigger ValidationError
+    mock_get_hire.return_value = {"name": "Ajay Susanth"}  # Missing all other fields
+    
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.get("/hire")
+        assert response.status_code == 500
+        assert "Server-side configuration error" in response.json()["detail"]
+
+
+@pytest.mark.anyio
 @patch("src.services.chat_orchestrator.ChatOrchestrator")
 @patch("src.services.chat_orchestrator.retrieve")
 @patch("src.services.chat_orchestrator.PromptBuilder")
@@ -91,9 +141,14 @@ async def test_no_rag_components_invoked(
         resp_stack = await client.get("/stack")
         assert resp_stack.status_code == 200
 
+        # Call GET /hire
+        resp_hire = await client.get("/hire")
+        assert resp_hire.status_code == 200
+
     # Ensure none of the RAG/LLM/caching decorators or modules were invoked
     mock_orchestrator.assert_not_called()
     mock_retrieve.assert_not_called()
     mock_builder.assert_not_called()
     mock_gen.assert_not_called()
     mock_cache.assert_not_called()
+

@@ -1,0 +1,29 @@
+{
+  "name": "Ajay Susanth",
+  "currently_available": true,
+  "status": "Actively seeking full-time DevOps or Backend opportunities",
+  "preferred_roles": [
+    "Backend Engineer",
+    "DevOps Engineer",
+    "Software Engineer",
+    "Cloud Engineer"
+  ],
+  "employment_types": [
+    "Full-time",
+    "Internship",
+    "Contract"
+  ],
+  "preferred_locations": [
+    "Remote",
+    "Kochi, India",
+    "India"
+  ],
+  "work_authorization": "India",
+  "contact": {
+    "email": "ajaysusanth10@gmail.com",
+    "linkedin": "https://www.linkedin.com/in/ajay2005susanth/",
+    "github": "https://github.com/AjaySusanth",
+    "portfolio": "https://ajaysusanth.github.io"
+  },
+  "resume_url": "/resume"
+}
