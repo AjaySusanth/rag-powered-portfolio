@@ -97,6 +97,16 @@ class Settings(BaseSettings):
         description="GitHub Personal Access Token"
     )
 
+    # API Rate Limiting Configuration
+    RATE_LIMIT_REQUESTS: int = Field(
+        default=10,
+        description="Maximum requests allowed per window"
+    )
+    RATE_LIMIT_WINDOW_SECONDS: int = Field(
+        default=60,
+        description="Duration of rate limiting window in seconds"
+    )
+
 
     @field_validator("AZURE_OPENAI_ENDPOINT", mode="before")
     @classmethod
