@@ -8,7 +8,7 @@ allows it to be imported and run easily by ASGI servers (like uvicorn).
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.routes import chat
+from src.api.routes import chat, portfolio
 
 app = FastAPI(
     title="RAG-Powered Developer Portfolio Backend",
@@ -27,6 +27,7 @@ app.add_middleware(
 
 # Register routes
 app.include_router(chat.router)
+app.include_router(portfolio.router)
 
 
 @app.get("/health")
