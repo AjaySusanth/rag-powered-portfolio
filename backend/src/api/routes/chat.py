@@ -9,17 +9,19 @@ keeping the downstream orchestrator and LLM layers cleanly decoupled from FastAP
 import json
 import asyncio
 import logging
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
 from src.api.schemas.chat import ChatRequest
 from src.services.chat_orchestrator import ChatOrchestrator
+from src.api.rate_limiter import RateLimiter
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+chat_limiter = RateLimiter()
 
 
-@router.post("/chat")
+@router.post("/chat", dependencies=[Depends(chat_limiter)])
 async def chat_endpoint(request: ChatRequest) -> StreamingResponse:
     """
     HTTP POST /chat endpoint. Validates request and returns a Server-Sent Events (SSE) stream.

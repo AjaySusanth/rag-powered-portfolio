@@ -484,3 +484,105 @@ async def test_chat_endpoint_injection_attempt_success(
             assert lines[0] == 'data: {"event": "token", "token": "TalentForge is a secure platform."}'
             assert "citations" in lines[1]
             assert lines[2] == "data: [DONE]"
+
+
+@pytest.mark.anyio
+@patch("src.services.chat_orchestrator.detect_project")
+@patch("src.services.chat_orchestrator.retrieve", new_callable=AsyncMock)
+@patch("src.services.chat_orchestrator.create_generator_from_settings")
+async def test_chat_endpoint_rate_limiting_triggered(
+    mock_create_generator,
+    mock_retrieve,
+    mock_detect_project
+) -> None:
+    """Verifies that the rate limiter blocks downstream execution and returns HTTP 429 when limits are exceeded."""
+    from src.api.routes.chat import chat_limiter
+    chat_limiter.windows.clear()
+
+    mock_detect_project.return_value = None
+    mock_retrieve.return_value = []
+
+    mock_generator = MagicMock()
+    async def mock_stream_iter(prompt, system_instruction):
+        yield "Response"
+    mock_generator.stream.side_effect = mock_stream_iter
+    mock_create_generator.return_value = mock_generator
+
+    # Set rate limits to 2 requests per 60 seconds
+    with patch("src.api.rate_limiter.settings") as mock_settings:
+        mock_settings.RATE_LIMIT_REQUESTS = 2
+        mock_settings.RATE_LIMIT_WINDOW_SECONDS = 60
+
+        transport = ASGITransport(app=app, client=("1.1.1.1", 12345))
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            payload = {"message": "Hello"}
+
+            # Request 1 (Success)
+            resp1 = await client.post("/chat", json=payload)
+            assert resp1.status_code == 200
+
+            # Request 2 (Success)
+            resp2 = await client.post("/chat", json=payload)
+            assert resp2.status_code == 200
+
+            # Reset call counts to assert downstream bypass
+            mock_retrieve.reset_mock()
+
+            # Request 3 (Blocked)
+            resp3 = await client.post("/chat", json=payload)
+            assert resp3.status_code == 429
+            assert resp3.json()["detail"] == "Too Many Requests. Please try again later."
+            assert "Retry-After" in resp3.headers
+
+            # Downstream retrieve should not be called on the 3rd request
+            mock_retrieve.assert_not_called()
+
+
+@pytest.mark.anyio
+@patch("src.services.chat_orchestrator.detect_project")
+@patch("src.services.chat_orchestrator.retrieve", new_callable=AsyncMock)
+@patch("src.services.chat_orchestrator.create_generator_from_settings")
+async def test_chat_endpoint_rate_limiting_client_isolation(
+    mock_create_generator,
+    mock_retrieve,
+    mock_detect_project
+) -> None:
+    """Verifies that rate limits are isolated per client IP."""
+    from src.api.routes.chat import chat_limiter
+    chat_limiter.windows.clear()
+
+    mock_detect_project.return_value = None
+    mock_retrieve.return_value = []
+
+    mock_generator = MagicMock()
+    async def mock_stream_iter(prompt, system_instruction):
+        yield "Response"
+    mock_generator.stream.side_effect = mock_stream_iter
+    mock_create_generator.return_value = mock_generator
+
+    # Set rate limits to 1 request per 60 seconds
+    with patch("src.api.rate_limiter.settings") as mock_settings:
+        mock_settings.RATE_LIMIT_REQUESTS = 1
+        mock_settings.RATE_LIMIT_WINDOW_SECONDS = 60
+
+        # We construct two clients with different mock IPs
+        transport_a = ASGITransport(app=app, client=("1.1.1.1", 12345))
+        transport_b = ASGITransport(app=app, client=("2.2.2.2", 12345))
+
+        async with AsyncClient(transport=transport_a, base_url="http://test") as client_a, \
+                   AsyncClient(transport=transport_b, base_url="http://test") as client_b:
+            
+            payload = {"message": "Hello"}
+
+            # Client A request 1 (Success)
+            resp_a1 = await client_a.post("/chat", json=payload)
+            assert resp_a1.status_code == 200
+
+            # Client A request 2 (Blocked 429)
+            resp_a2 = await client_a.post("/chat", json=payload)
+            assert resp_a2.status_code == 429
+
+            # Client B request 1 (Success 200 - isolated from A's limit)
+            resp_b1 = await client_b.post("/chat", json=payload)
+            assert resp_b1.status_code == 200
+
