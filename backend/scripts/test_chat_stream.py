@@ -26,6 +26,10 @@ try:
                         event = json.loads(data_str)
                         if event.get("event") == "token":
                             print(event.get("token"), end="", flush=True)
+                        elif event.get("event") == "citations":
+                            print("\n\nCitations:")
+                            for cit in event.get("citations", []):
+                                print(f" - {cit.get('file')} ({cit.get('layer')} | {cit.get('project')})")
                         elif event.get("event") == "error":
                             print(f"\n[Error: {event.get('message')}]")
                     except json.JSONDecodeError:
