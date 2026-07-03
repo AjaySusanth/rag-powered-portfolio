@@ -15,6 +15,7 @@ import logging
 from typing import List, Optional
 from openai import AsyncAzureOpenAI
 from src.config import settings
+from src.cache.factory import create_cache_from_settings
 
 logger = logging.getLogger(__name__)
 
@@ -65,44 +66,71 @@ def get_azure_client() -> AsyncAzureOpenAI:
 
 async def embed_texts(texts: List[str], batch_size: int = 100) -> List[List[float]]:
     """
-    Generates 1536-dimensional embeddings for a list of text strings using Azure OpenAI.
+    Generates 1536-dimensional embeddings for a list of text strings.
     
-    Why batch:
-      Sending texts in batches (default: 100) avoids payload limits, respects rate limits,
-      and reduces HTTP connection overhead by bundling requests.
-      
-    Concept — Embeddings:
-      An embedding converts a text string into a high-dimensional vector of floats (1536 for text-embedding-3-small).
-      Distance between these vectors (e.g. cosine distance) represents semantic similarity,
-      allowing search queries to match documents with similar meaning even if they use different words.
+    Checks the Redis cache first. For cache misses, delegates to the Azure OpenAI client.
+    Deduplicates identical strings within the same batch to avoid redundant API calls.
     """
     if not texts:
         return []
 
-    client = get_azure_client()
-    embeddings: List[List[float]] = []
+    # 1. Deduplicate texts in this batch while preserving order
+    seen = set()
+    unique_texts = []
+    for text in texts:
+        if text not in seen:
+            seen.add(text)
+            unique_texts.append(text)
 
-    # Clean inputs to avoid empty strings which can cause API errors
-    cleaned_texts = [text if text.strip() else "[empty]" for text in texts]
+    # 2. Check the Redis cache for unique texts using MGET bulk lookup
+    cache = create_cache_from_settings()
+    cached_embeddings = await cache.get_embeddings(unique_texts)
 
-    # Process in batches
-    for i in range(0, len(cleaned_texts), batch_size):
-        batch = cleaned_texts[i : i + batch_size]
-        try:
-            # Azure OpenAI uses the deployment name as the "model" parameter
-            response = await client.embeddings.create(
-                input=batch,
-                model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT
-            )
-            # The API returns data objects containing the embedding vectors.
-            # We sort them by index to guarantee ordering matches the input texts.
-            sorted_data = sorted(response.data, key=lambda x: x.index)
-            embeddings.extend([item.embedding for item in sorted_data])
-        except Exception as e:
-            logger.error(f"Failed to generate embeddings for batch {i//batch_size}: {e}")
-            raise EmbeddingError(f"Azure OpenAI embedding generation failed: {e}") from e
+    # 3. Separate hits and misses
+    miss_texts = []
+    for text, cached_emb in zip(unique_texts, cached_embeddings):
+        if cached_emb is None:
+            miss_texts.append(text)
 
-    return embeddings
+    # 4. Generate embeddings for cache misses
+    new_embeddings = []
+    if miss_texts:
+        client = get_azure_client()
+        # Clean inputs to avoid empty strings which can cause API errors
+        cleaned_misses = [text if text.strip() else "[empty]" for text in miss_texts]
+
+        # Process in batches
+        for i in range(0, len(cleaned_misses), batch_size):
+            batch = cleaned_misses[i : i + batch_size]
+            try:
+                # Azure OpenAI uses the deployment name as the "model" parameter
+                response = await client.embeddings.create(
+                    input=batch,
+                    model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT
+                )
+                # Sort data by index to guarantee order matches the input
+                sorted_data = sorted(response.data, key=lambda x: x.index)
+                new_embeddings.extend([item.embedding for item in sorted_data])
+            except Exception as e:
+                logger.error(f"Failed to generate embeddings for batch {i//batch_size}: {e}")
+                raise EmbeddingError(f"Azure OpenAI embedding generation failed: {e}") from e
+
+        # 5. Store newly generated embeddings in the Redis cache
+        if new_embeddings:
+            await cache.set_embeddings(miss_texts, new_embeddings)
+
+    # 6. Reconstruct the mapping dictionary from unique texts to final vectors
+    lookup = {}
+    new_emb_idx = 0
+    for text, cached_emb in zip(unique_texts, cached_embeddings):
+        if cached_emb is not None:
+            lookup[text] = cached_emb
+        else:
+            lookup[text] = new_embeddings[new_emb_idx]
+            new_emb_idx += 1
+
+    # 7. Map back to the original list sequence (including any duplicate positions)
+    return [lookup[text] for text in texts]
 
 
 async def embed_query(text: str) -> List[float]:
