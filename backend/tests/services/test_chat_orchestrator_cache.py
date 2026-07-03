@@ -24,6 +24,16 @@ class MockCache(BaseCache):
             "citations": [c.model_dump() for c in citations]
         }
 
+    async def get_embedding(self, text: str):
+        if self.should_fail:
+            return None
+        return self.data.get(f"embed:{text}")
+
+    async def set_embedding(self, text: str, embedding: list):
+        if self.should_fail:
+            return
+        self.data[f"embed:{text}"] = embedding
+
 
 @pytest.fixture
 def mock_pipeline():

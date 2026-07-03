@@ -112,6 +112,18 @@ class Settings(BaseSettings):
         default=86400,
         description="Time to live for cached chat responses in seconds (default: 24h)"
     )
+    EMBEDDING_CACHE_TTL_SECONDS: int = Field(
+        default=604800,
+        description="Time to live for cached embeddings in seconds (default: 7d)"
+    )
+    EMBEDDING_PROVIDER: str = Field(
+        default="azure_openai",
+        description="The provider for generating embeddings (e.g., azure_openai, mock)"
+    )
+    EMBEDDING_MODEL: str = Field(
+        default="text-embedding-3-small",
+        description="The model name for embeddings"
+    )
     PROMPT_VERSION: str = Field(
         default="v1.0",
         description="Version string for the system prompt to invalidate cache on prompt updates"
