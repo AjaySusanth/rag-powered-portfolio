@@ -39,6 +39,7 @@ export function OfflineState({ className, ...props }: OfflineStateProps) {
               size="sm"
               className="gap-2 hover:bg-muted"
               render={<Link href={link.href} />}
+              nativeButton={false}
             >
               <Icon className="h-3.5 w-3.5 text-muted-foreground" />
               {link.label}
