@@ -17,6 +17,8 @@ from urllib.parse import urlparse
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 ENV_FILE_PATH = PROJECT_ROOT / ".env"
 
+GLOBAL_PROJECT_NAME = "__global__"
+
 class Settings(BaseSettings):
     """
     Application settings, populated from environment variables or a .env file.
@@ -78,6 +80,10 @@ class Settings(BaseSettings):
     GRADER_MIN_CHUNKS: int = Field(
         default=3,
         description="Minimum number of chunks to return from grader. If relevant chunks are less than this, fallback to original list."
+    )
+    DIVERSIFICATION_MAX_PER_SOURCE: int = Field(
+        default=3,
+        description="Maximum number of chunks allowed from a single source file in the diversified results."
     )
     ENABLE_QUERY_REWRITER: bool = Field(
         default=False,

@@ -1,0 +1,912 @@
+
+==========================================
+QUERY 1: "Tell me about yourself"
+==========================================
+Rank 1:
+  Project:      __global__
+  Document:     about-me.md
+  Chunk ID:     88349716304026ded7cbd1d7fb869cda41b54a32ef2841ab7efc37395a3ccec0
+  RRF Score:    0.030092
+  Vector Rank:  13
+  BM25 Rank:    1
+  Source Type:  manual
+  Layer:        identity
+  Preview:      # About Ajay Susanth
+
+Rank 2:
+  Project:      classsync
+  Document:     backend/src/controllers/authController.js
+  Chunk ID:     6b2b43e7a7833b2cc278cd9184f960c9c0a5cc815f4046757c0b7c6e3c7ce6e4
+  RRF Score:    0.028543
+  Vector Rank:  16
+  BM25 Rank:    5
+  Source Type:  github
+  Layer:        artifact
+  Preview:      : user.role,       },       process.env.JWT_SECRET,       { expiresIn: "7d" }, // Token expires in 7 days     );      //...
+
+Rank 3:
+  Project:      talentforge
+  Document:     backend/app/services/ranking/justifier.py
+  Chunk ID:     f3c806711d83d3b32e1ff7d299a160508fbcc0a4a6b850da2591ab09db86da8e
+  RRF Score:    0.016393
+  Vector Rank:  1
+  BM25 Rank:    None
+  Source Type:  github
+  Layer:        artifact
+  Preview:      # ─── Prompt ───────────────────────────────────────────────────────────────  name": p.get("name", ""), "technologies": ...
+
+Rank 4:
+  Project:      talentforge
+  Document:     backend/app/services/parsing/embedding_builder.py
+  Chunk ID:     8ceaa69a2ce08569ae2ba6887849be0b539918d3ef41ee3ff93cc2041012ea3b
+  RRF Score:    0.016129
+  Vector Rank:  2
+  BM25 Rank:    None
+  Source Type:  github
+  Layer:        artifact
+  Preview:      parts.append(f"Skills: {', '.join(hard_skills)}")      if profile.experience:         exp_lines = [             f"{exp.t...
+
+Rank 5:
+  Project:      talentforge
+  Document:     docker-compose.yml
+  Chunk ID:     2b500d49fb54f686565d9b86079b174eba1537a56fa3e2d77270d6a04dcde55c
+  RRF Score:    0.016129
+  Vector Rank:  None
+  BM25 Rank:    2
+  Source Type:  github
+  Layer:        artifact
+  Preview:      - ./frontend:/app       - /app/node_modules     environment:       - VITE_API_BASE_URL=http://localhost:8000/api/v1     ...
+
+Rank 6:
+  Project:      __global__
+  Document:     about-me.md
+  Chunk ID:     e9f2f73e72ff2590fb538afe2cc25d9a412dc2b7f8681a1c9c6fbefb442db8cb
+  RRF Score:    0.015873
+  Vector Rank:  3
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Strengths as a Fresher  As a fresher, Ajay Susanth's primary strengths include curiosity, adaptability, and a willing...
+
+Rank 7:
+  Project:      classsync
+  Document:     backend/src/controllers/authController.js
+  Chunk ID:     726664b6bb386aeb6c74091036c7fe0e36d434c7729edd67b9ab2c736a86243c
+  RRF Score:    0.015873
+  Vector Rank:  None
+  BM25 Rank:    3
+  Source Type:  github
+  Layer:        artifact
+  Preview:      : true,       },     });      if (!user) {       return res.status(404).json({ error: "User not found" });     }      re...
+
+Rank 8:
+  Project:      talentforge
+  Document:     backend/app/services/parsing/regex_extractor.py
+  Chunk ID:     1baab4d9daacbe3be1fed4b8df1f56e6ad9867e562f306d3fe89d65119d6982a
+  RRF Score:    0.015625
+  Vector Rank:  4
+  BM25 Rank:    None
+  Source Type:  github
+  Layer:        artifact
+  Preview:      # Portfolio / personal website: common patterns in resumes
+
+Rank 9:
+  Project:      classsync
+  Document:     frontend/src/context/AuthContext.jsx
+  Chunk ID:     39cb1eaf11c12698c3055f86b6ba35b5b9664291484d5333b76a0fffd596596a
+  RRF Score:    0.015625
+  Vector Rank:  None
+  BM25 Rank:    4
+  Source Type:  github
+  Layer:        artifact
+  Preview:      import { createContext, useContext, useState, useEffect } from "react"; import {   login as loginApi,   register as regi...
+
+Rank 10:
+  Project:      __global__
+  Document:     hire.md
+  Chunk ID:     a5f56a42c4aebe8bb8bff53c0514462408a2af73d4c32ff023cd107258f27b55
+  RRF Score:    0.015385
+  Vector Rank:  5
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Contact Information  *   **Email**: [ajaysusanth10@gmail.com](mailto:ajaysusanth10@gmail.com) *   **LinkedIn**: [Ajay...
+
+
+==========================================
+QUERY 2: "What projects have you built?"
+==========================================
+Rank 1:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     3d7529e46a3e665dbbd3ec9cb736b9674ee27f43284c8e2021fc1690749e010e
+  RRF Score:    0.032266
+  Vector Rank:  3
+  BM25 Rank:    1
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## What makes Ajay Susanth's projects different from typical student projects?  Many student projects focus primarily on...
+
+Rank 2:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     3f513665848f3503c9aaa96abaa17ef5112f9f7c51eb48ef1eb13c3ce6a90a52
+  RRF Score:    0.030769
+  Vector Rank:  5
+  BM25 Rank:    5
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## What technologies does Ajay Susanth work with most often?  Technologies frequently used by Ajay Susanth include:  * P...
+
+Rank 3:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     c49bda2b8265179c382d24b1748fd97bf6976b4cc5dfaca961fd9f1661174ae3
+  RRF Score:    0.029387
+  Vector Rank:  14
+  BM25 Rank:    3
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Does Ajay Susanth have experience with CI/CD?  Yes.  Ajay Susanth has worked with GitHub Actions to automate build, p...
+
+Rank 4:
+  Project:      __global__
+  Document:     projects.md
+  Chunk ID:     5826393da02b53b4afd4d51ebc150d4916c78c9de7893ca8a55ce0019d9ea243
+  RRF Score:    0.029214
+  Vector Rank:  1
+  BM25 Rank:    18
+  Source Type:  manual
+  Layer:        identity
+  Preview:      # Portfolio Projects  This catalog lists the completed software engineering and DevOps projects developed by Ajay Susant...
+
+Rank 5:
+  Project:      __global__
+  Document:     about-me.md
+  Chunk ID:     5a665f28167a80901a11763a50908515295493f59b4738347bc4735981332d52
+  RRF Score:    0.027984
+  Vector Rank:  13
+  BM25 Rank:    10
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Professional Profile  Ajay Susanth is a final-year B.Tech student in Artificial Intelligence and Machine Learning at ...
+
+Rank 6:
+  Project:      __global__
+  Document:     resume.md
+  Chunk ID:     b2ab75d69bce7ac5545be7cf7ca744ae20d638f44b554b898365ad51d2af245d
+  RRF Score:    0.016129
+  Vector Rank:  2
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Project-to-Skill Index  This index maps Ajay Susanth's projects to specific technologies to support retrieval queries...
+
+Rank 7:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     84098a12e8a6ec35f4b1faef3362367fdc71518dd842c3bef5f682da52a5ea46
+  RRF Score:    0.016129
+  Vector Rank:  None
+  BM25 Rank:    2
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Does Ajay Susanth have experience with Infrastructure as Code?  Yes.  Ajay Susanth has used Terraform in multiple pro...
+
+Rank 8:
+  Project:      __global__
+  Document:     resume.md
+  Chunk ID:     fe545f654c3cce79ded630c4567d03eebf26e26a3e331a73a97de48cd9e89760
+  RRF Score:    0.015625
+  Vector Rank:  4
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Project-to-Skill Index   on AKS (using GitHub Actions, ArgoCD, and OCI chart packaging) - **Which project demonstrate...
+
+Rank 9:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     bf6a693d5d43a8d9f42799cc66f111a79918ddff5e5eb43bc63cd7713fd1cdfe
+  RRF Score:    0.015625
+  Vector Rank:  None
+  BM25 Rank:    4
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Does Ajay Susanth have experience with workflow automation?  Yes.  Workflow automation is a recurring theme across mu...
+
+Rank 10:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     e7a3c3ceb664e4f34513f7409bcf786c321278b5882b2ac27ef0098850de43bd
+  RRF Score:    0.015152
+  Vector Rank:  6
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## How should someone explore Ajay Susanth's portfolio?  A good starting point depends on the visitor's interests.  For ...
+
+
+==========================================
+QUERY 3: "What is your technology stack?"
+==========================================
+Rank 1:
+  Project:      n8n-aks-platform
+  Document:     README.md
+  Chunk ID:     eab0db31d9867918c862f064620e245ba77ccbc1442cbd18d9bfc14ebf0f8a3e
+  RRF Score:    0.032522
+  Vector Rank:  1
+  BM25 Rank:    2
+  Source Type:  github
+  Layer:        artifact
+  Preview:      ## Technology Stack  | Layer | Technology | |---|---| | **Cloud** | Azure (AKS · ACR · Key Vault · Azure Blob for tfstat...
+
+Rank 2:
+  Project:      __global__
+  Document:     stack.md
+  Chunk ID:     0521dc3140e0934e6f8b5bf6af683c2e492b06e26dbcb11f43c3d084bb413dab
+  RRF Score:    0.032522
+  Vector Rank:  2
+  BM25 Rank:    1
+  Source Type:  manual
+  Layer:        identity
+  Preview:      # Technology Stack  This document outlines the technical stack and tools used by Ajay Susanth across backend development...
+
+Rank 3:
+  Project:      __global__
+  Document:     about-me.md
+  Chunk ID:     84d95511686ef809f827111541a784534239b81bbf6cd32b2b23aeefb71d0d7b
+  RRF Score:    0.029418
+  Vector Rank:  7
+  BM25 Rank:    9
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Technical Interests  The areas that currently interest Ajay Susanth the most include:  * Cloud Engineering * DevOps E...
+
+Rank 4:
+  Project:      classsync
+  Document:     classsync/architecture.md
+  Chunk ID:     67401cb915cfc31dcc3dd600e525d3e6ea81445149f8d46f28a069ae266f50fe
+  RRF Score:    0.015873
+  Vector Rank:  3
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        design
+  Preview:      ## Tech Stack and Component Topology in ClassSync  In the ClassSync (Automated Classwork) project, the platform utilizes...
+
+Rank 5:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     ae1f0556f0201e7db7b90a86ae9417fdeaeb47af2de5583c39874e12251f46a8
+  RRF Score:    0.015873
+  Vector Rank:  None
+  BM25 Rank:    3
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## What type of roles is Ajay Susanth looking for?  Ajay Susanth is interested in opportunities related to:  * Software ...
+
+Rank 6:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     3f513665848f3503c9aaa96abaa17ef5112f9f7c51eb48ef1eb13c3ce6a90a52
+  RRF Score:    0.015625
+  Vector Rank:  4
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## What technologies does Ajay Susanth work with most often?  Technologies frequently used by Ajay Susanth include:  * P...
+
+Rank 7:
+  Project:      classsync
+  Document:     n8n-workflows/Telegram Command Router.json
+  Chunk ID:     c2dc9f6bee8a50462b4f00348140aba38d685f7d493153b33df3d2c8c98d919e
+  RRF Score:    0.015625
+  Vector Rank:  None
+  BM25 Rank:    4
+  Source Type:  github
+  Layer:        artifact
+  Preview:      "credentials": {         "telegramApi": {           "id": "Vp1Fe9nTp8aXZhVr",           "name": "Telegram account"      ...
+
+Rank 8:
+  Project:      talentforge
+  Document:     APPROACH.md
+  Chunk ID:     55ecdfa6bd6eadc03ad57824c36769280e432d1578264afa4c838dc4a646f721
+  RRF Score:    0.015385
+  Vector Rank:  5
+  BM25 Rank:    None
+  Source Type:  github
+  Layer:        design
+  Preview:      ## 3. Tech Stack & Justification  | Layer | Choice | Why | |-------|--------|-----| | **API** | FastAPI + Pydantic v2 | ...
+
+Rank 9:
+  Project:      n8n-aks-platform
+  Document:     docs/verification_ledger.md
+  Chunk ID:     2b9160b93d0ce4855ab99b3c4f7aed57e658e927ed7ab590432ef218305c2502
+  RRF Score:    0.015385
+  Vector Rank:  None
+  BM25 Rank:    5
+  Source Type:  github
+  Layer:        artifact
+  Preview:      ## Evidence Strategy  Two verification types are used deliberately:   - **Command output** — for static configuration st...
+
+Rank 10:
+  Project:      __global__
+  Document:     resume.md
+  Chunk ID:     2590e361e633d27768e66bf8a8a9b4343fd899db49171e1d77d5b64dc9b53bec
+  RRF Score:    0.015152
+  Vector Rank:  6
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Technical Skills  The technical skills of Ajay Susanth include: - **Languages**: Python, JavaScript, TypeScript, MERN...
+
+
+==========================================
+QUERY 4: "How can I hire you?"
+==========================================
+Rank 1:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     b9fa547fc11aa26ba56542db05d5cc1d4002b92b88aadb98735e2472ca968600
+  RRF Score:    0.031054
+  Vector Rank:  7
+  BM25 Rank:    2
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## How can someone contact Ajay Susanth?  Someone can contact Ajay Susanth via the following contact details: - **Email*...
+
+Rank 2:
+  Project:      talentforge
+  Document:     APPROACH.md
+  Chunk ID:     ff0cb220064b1dfa3c47817a44e2cc7c4f8ae620674e86885fba713a79ce9813
+  RRF Score:    0.029514
+  Vector Rank:  12
+  BM25 Rank:    4
+  Source Type:  github
+  Layer:        design
+  Preview:      ## 1. Problem Statement  Traditional resume screening is manual, inconsistent, and scales poorly. Recruiters spend ~23 h...
+
+Rank 3:
+  Project:      __global__
+  Document:     hire.md
+  Chunk ID:     dfca99aebe9ce7838d8ae300e9d2827690064945d69f604955cd88b6e1c9a0f4
+  RRF Score:    0.016393
+  Vector Rank:  1
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      # Hiring Information  This document contains hiring, availability, and contact information for Ajay Susanth.  ---
+
+Rank 4:
+  Project:      __global__
+  Document:     about-me.md
+  Chunk ID:     80774b67a501cf8571af36fa8307d0c0a4a527603d8c9fb482a6346bcbfb228b
+  RRF Score:    0.016393
+  Vector Rank:  None
+  BM25 Rank:    1
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Engineering Philosophy  Ajay Susanth approaches software development from a systems perspective.  When building proje...
+
+Rank 5:
+  Project:      __global__
+  Document:     hire.md
+  Chunk ID:     a5f56a42c4aebe8bb8bff53c0514462408a2af73d4c32ff023cd107258f27b55
+  RRF Score:    0.016129
+  Vector Rank:  2
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Contact Information  *   **Email**: [ajaysusanth10@gmail.com](mailto:ajaysusanth10@gmail.com) *   **LinkedIn**: [Ajay...
+
+Rank 6:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     3687946847b006a167e02c7dbb545668680879534be84ef8a50b346a35e747e3
+  RRF Score:    0.015873
+  Vector Rank:  3
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Why should a recruiter or hiring manager talk to Ajay Susanth?  Ajay Susanth combines interests in software engineeri...
+
+Rank 7:
+  Project:      classsync
+  Document:     n8n-workflows/Telegram Command Router.json
+  Chunk ID:     c2dc9f6bee8a50462b4f00348140aba38d685f7d493153b33df3d2c8c98d919e
+  RRF Score:    0.015873
+  Vector Rank:  None
+  BM25 Rank:    3
+  Source Type:  github
+  Layer:        artifact
+  Preview:      "credentials": {         "telegramApi": {           "id": "Vp1Fe9nTp8aXZhVr",           "name": "Telegram account"      ...
+
+Rank 8:
+  Project:      __global__
+  Document:     hire.md
+  Chunk ID:     5d83da96fa0a5c5ebe176ea524402353a64010fef3289ebcdaa751b2b1f2e477
+  RRF Score:    0.015625
+  Vector Rank:  4
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Resume Availability  *   Ajay Susanth's resume is available for download at: [Download Resume](/resume)
+
+Rank 9:
+  Project:      __global__
+  Document:     hire.md
+  Chunk ID:     ca0d0735f1b2504cfd7eaa301626019857b2af86a0b00d23b6c675acb8f90689
+  RRF Score:    0.015385
+  Vector Rank:  5
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Preferred Roles  *   Backend Engineer *   DevOps Engineer *   Software Engineer *   Cloud Engineer  ---  ## Employmen...
+
+Rank 10:
+  Project:      talentforge
+  Document:     backend/app/services/parsing/ner_extractor.py
+  Chunk ID:     c30584628a5b1e2ba9be47e83b5ad541dfaadb2f160efbad3369c45593b4025f
+  RRF Score:    0.015385
+  Vector Rank:  None
+  BM25 Rank:    5
+  Source Type:  github
+  Layer:        artifact
+  Preview:      # Entity type mapping from BERT NER labels to our domain   deduplicated entities      Note:         If the HF API is una...
+
+
+==========================================
+QUERY 5: "What backend technologies do you know?"
+==========================================
+Rank 1:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     3f513665848f3503c9aaa96abaa17ef5112f9f7c51eb48ef1eb13c3ce6a90a52
+  RRF Score:    0.031746
+  Vector Rank:  3
+  BM25 Rank:    3
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## What technologies does Ajay Susanth work with most often?  Technologies frequently used by Ajay Susanth include:  * P...
+
+Rank 2:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     b3c9ccde0e21c79237169ad296c3b91a34f483208f91277c8103a77b8469d490
+  RRF Score:    0.027444
+  Vector Rank:  16
+  BM25 Rank:    10
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## What are Ajay Susanth's strongest technical areas?  Ajay Susanth's strongest technical areas include:  * Cloud Infras...
+
+Rank 3:
+  Project:      __global__
+  Document:     stack.md
+  Chunk ID:     3dc489eb603c990c1335cdf7006431062f2bd8e66e238b2749f879b220f1240d
+  RRF Score:    0.016393
+  Vector Rank:  1
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Languages  *   **Python**: Primary language for backend services, machine learning integrations, and scripting. *   *...
+
+Rank 4:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     5ae20c98e022fed50d69cd20974af9d9d9554f2cdd24eb922778fd3ebc60a5c2
+  RRF Score:    0.016393
+  Vector Rank:  None
+  BM25 Rank:    1
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## What is Ajay Susanth currently focusing on learning?  Ajay Susanth is currently focused on strengthening knowledge in...
+
+Rank 5:
+  Project:      __global__
+  Document:     stack.md
+  Chunk ID:     d63853ca29632f386ae3ed27848250ecdc29b6f3318e8f4876e4bdb31b20b6b9
+  RRF Score:    0.016129
+  Vector Rank:  2
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Backend  *   **FastAPI**: Highly performant, async Python framework used to build RESTful APIs. *   **Express.js**: M...
+
+Rank 6:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     ae1f0556f0201e7db7b90a86ae9417fdeaeb47af2de5583c39874e12251f46a8
+  RRF Score:    0.016129
+  Vector Rank:  None
+  BM25 Rank:    2
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## What type of roles is Ajay Susanth looking for?  Ajay Susanth is interested in opportunities related to:  * Software ...
+
+Rank 7:
+  Project:      n8n-aks-platform
+  Document:     README.md
+  Chunk ID:     eab0db31d9867918c862f064620e245ba77ccbc1442cbd18d9bfc14ebf0f8a3e
+  RRF Score:    0.015625
+  Vector Rank:  4
+  BM25 Rank:    None
+  Source Type:  github
+  Layer:        artifact
+  Preview:      ## Technology Stack  | Layer | Technology | |---|---| | **Cloud** | Azure (AKS · ACR · Key Vault · Azure Blob for tfstat...
+
+Rank 8:
+  Project:      n8n-aks-platform
+  Document:     docs/verification_ledger.md
+  Chunk ID:     2b9160b93d0ce4855ab99b3c4f7aed57e658e927ed7ab590432ef218305c2502
+  RRF Score:    0.015625
+  Vector Rank:  None
+  BM25 Rank:    4
+  Source Type:  github
+  Layer:        artifact
+  Preview:      ## Evidence Strategy  Two verification types are used deliberately:   - **Command output** — for static configuration st...
+
+Rank 9:
+  Project:      __global__
+  Document:     stack.md
+  Chunk ID:     0521dc3140e0934e6f8b5bf6af683c2e492b06e26dbcb11f43c3d084bb413dab
+  RRF Score:    0.015385
+  Vector Rank:  5
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      # Technology Stack  This document outlines the technical stack and tools used by Ajay Susanth across backend development...
+
+Rank 10:
+  Project:      talentforge
+  Document:     backend/app/services/ranking/justifier.py
+  Chunk ID:     9cad2970123c255629943fd277b02902167f273d9dbd34a027cf8bdd56c88132
+  RRF Score:    0.015385
+  Vector Rank:  None
+  BM25 Rank:    5
+  Source Type:  github
+  Layer:        artifact
+  Preview:      # ─── Prompt ───────────────────────────────────────────────────────────────  _SYSTEM_PROMPT = """You are a talent-match...
+
+
+==========================================
+QUERY 6: "Explain your RAG Portfolio project."
+==========================================
+Rank 1:
+  Project:      __global__
+  Document:     projects.md
+  Chunk ID:     5826393da02b53b4afd4d51ebc150d4916c78c9de7893ca8a55ce0019d9ea243
+  RRF Score:    0.030478
+  Vector Rank:  1
+  BM25 Rank:    11
+  Source Type:  manual
+  Layer:        identity
+  Preview:      # Portfolio Projects  This catalog lists the completed software engineering and DevOps projects developed by Ajay Susant...
+
+Rank 2:
+  Project:      talentforge
+  Document:     backend/app/services/parsing/regex_extractor.py
+  Chunk ID:     1baab4d9daacbe3be1fed4b8df1f56e6ad9867e562f306d3fe89d65119d6982a
+  RRF Score:    0.029857
+  Vector Rank:  6
+  BM25 Rank:    8
+  Source Type:  github
+  Layer:        artifact
+  Preview:      # Portfolio / personal website: common patterns in resumes
+
+Rank 3:
+  Project:      talentforge
+  Document:     backend/app/services/parsing/gemini_extractor.py
+  Chunk ID:     8a4fdf52f39ba58e502c327f5d15f9bdfb4618b32fb1e26598d9564b57b5e571
+  RRF Score:    0.016393
+  Vector Rank:  None
+  BM25 Rank:    1
+  Source Type:  github
+  Layer:        artifact
+  Preview:      # Generic tokens with low signal value in repo slug/project matching.  .com", "x.com", "facebook.com",         "instagra...
+
+Rank 4:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     e7a3c3ceb664e4f34513f7409bcf786c321278b5882b2ac27ef0098850de43bd
+  RRF Score:    0.016129
+  Vector Rank:  2
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## How should someone explore Ajay Susanth's portfolio?  A good starting point depends on the visitor's interests.  For ...
+
+Rank 5:
+  Project:      talentforge
+  Document:     APPROACH.md
+  Chunk ID:     ff0cb220064b1dfa3c47817a44e2cc7c4f8ae620674e86885fba713a79ce9813
+  RRF Score:    0.016129
+  Vector Rank:  None
+  BM25 Rank:    2
+  Source Type:  github
+  Layer:        design
+  Preview:      ## 1. Problem Statement  Traditional resume screening is manual, inconsistent, and scales poorly. Recruiters spend ~23 h...
+
+Rank 6:
+  Project:      __global__
+  Document:     resume.md
+  Chunk ID:     b2ab75d69bce7ac5545be7cf7ca744ae20d638f44b554b898365ad51d2af245d
+  RRF Score:    0.015873
+  Vector Rank:  3
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Project-to-Skill Index  This index maps Ajay Susanth's projects to specific technologies to support retrieval queries...
+
+Rank 7:
+  Project:      classsync
+  Document:     n8n-workflows/Telegram Command Router.json
+  Chunk ID:     fb77a64b835700408404aaa0b0c4a91d70040b5f23f8d9b820cde63a5cb8b41e
+  RRF Score:    0.015873
+  Vector Rank:  None
+  BM25 Rank:    3
+  Source Type:  github
+  Layer:        artifact
+  Preview:      ": "Link Success Message",             "type": "main",             "index": 0           }         ],         [          ...
+
+Rank 8:
+  Project:      __global__
+  Document:     resume.md
+  Chunk ID:     fe545f654c3cce79ded630c4567d03eebf26e26a3e331a73a97de48cd9e89760
+  RRF Score:    0.015625
+  Vector Rank:  4
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Project-to-Skill Index   on AKS (using GitHub Actions, ArgoCD, and OCI chart packaging) - **Which project demonstrate...
+
+Rank 9:
+  Project:      classsync
+  Document:     n8n-workflows/Telegram Command Router.json
+  Chunk ID:     2e4a620596981a6d493e81d81ba1741791ffea37693b4054706413af3f4045d6
+  RRF Score:    0.015625
+  Vector Rank:  None
+  BM25 Rank:    4
+  Source Type:  github
+  Layer:        artifact
+  Preview:      Message",       "webhookId": "YOUR_WEBHOOK_ID",       "credentials": {         "telegramApi": {           "id": "YOUR_TE...
+
+Rank 10:
+  Project:      talentforge
+  Document:     APPROACH.md
+  Chunk ID:     191d224649fc0a520341e5061ed6a4ee217f789b3a5097bd54217e33030119de
+  RRF Score:    0.015385
+  Vector Rank:  5
+  BM25 Rank:    None
+  Source Type:  github
+  Layer:        design
+  Preview:      ## 2. Solution Architecture  The system is a four-stage asynchronous pipeline, each stage designed to maximise accuracy ...
+
+
+==========================================
+QUERY 7: "What cloud technologies have you used?"
+==========================================
+Rank 1:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     733784eb040333c1e1024c1ef15db0298a2dffcf53c224c3354c12fbc04306f1
+  RRF Score:    0.031754
+  Vector Rank:  2
+  BM25 Rank:    4
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## How did Ajay Susanth learn Cloud and DevOps technologies?  Ajay Susanth primarily learns through project-based develo...
+
+Rank 2:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     3f513665848f3503c9aaa96abaa17ef5112f9f7c51eb48ef1eb13c3ce6a90a52
+  RRF Score:    0.031545
+  Vector Rank:  6
+  BM25 Rank:    1
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## What technologies does Ajay Susanth work with most often?  Technologies frequently used by Ajay Susanth include:  * P...
+
+Rank 3:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     84098a12e8a6ec35f4b1faef3362367fdc71518dd842c3bef5f682da52a5ea46
+  RRF Score:    0.029762
+  Vector Rank:  12
+  BM25 Rank:    3
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Does Ajay Susanth have experience with Infrastructure as Code?  Yes.  Ajay Susanth has used Terraform in multiple pro...
+
+Rank 4:
+  Project:      __global__
+  Document:     about-me.md
+  Chunk ID:     0c05d1b02a687d01407d08b1f03ca2eebd779e31cbc315a770d63433222799a0
+  RRF Score:    0.029710
+  Vector Rank:  4
+  BM25 Rank:    11
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Why Cloud and DevOps  Over time, Ajay Susanth's interests expanded from backend development into cloud infrastructure...
+
+Rank 5:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     5ae20c98e022fed50d69cd20974af9d9d9554f2cdd24eb922778fd3ebc60a5c2
+  RRF Score:    0.029643
+  Vector Rank:  14
+  BM25 Rank:    2
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## What is Ajay Susanth currently focusing on learning?  Ajay Susanth is currently focused on strengthening knowledge in...
+
+Rank 6:
+  Project:      __global__
+  Document:     stack.md
+  Chunk ID:     0521dc3140e0934e6f8b5bf6af683c2e492b06e26dbcb11f43c3d084bb413dab
+  RRF Score:    0.028992
+  Vector Rank:  8
+  BM25 Rank:    10
+  Source Type:  manual
+  Layer:        identity
+  Preview:      # Technology Stack  This document outlines the technical stack and tools used by Ajay Susanth across backend development...
+
+Rank 7:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     b3c9ccde0e21c79237169ad296c3b91a34f483208f91277c8103a77b8469d490
+  RRF Score:    0.028624
+  Vector Rank:  7
+  BM25 Rank:    13
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## What are Ajay Susanth's strongest technical areas?  Ajay Susanth's strongest technical areas include:  * Cloud Infras...
+
+Rank 8:
+  Project:      talentforge
+  Document:     talentforge/lessons-learned.md
+  Chunk ID:     f5a6c49b76db4a129347702e1e1a47e4e6c39fdb32bccabc8a97cca7e3152f3f
+  RRF Score:    0.026905
+  Vector Rank:  11
+  BM25 Rank:    18
+  Source Type:  manual
+  Layer:        design
+  Preview:      ## Design for Cloud Economics Before the First Line of Infrastructure Code in TalentForge  One of the clearest architect...
+
+Rank 9:
+  Project:      __global__
+  Document:     resume.md
+  Chunk ID:     fe545f654c3cce79ded630c4567d03eebf26e26a3e331a73a97de48cd9e89760
+  RRF Score:    0.025658
+  Vector Rank:  20
+  BM25 Rank:    16
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Project-to-Skill Index   on AKS (using GitHub Actions, ArgoCD, and OCI chart packaging) - **Which project demonstrate...
+
+Rank 10:
+  Project:      __global__
+  Document:     stack.md
+  Chunk ID:     05f95206d23245a96d228cea6fdb6ae8e394b7b0a186e39fae1027ba6b5688df
+  RRF Score:    0.016393
+  Vector Rank:  1
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Cloud  *   **Microsoft Azure**: Core public cloud platform. *   **Azure Container Apps**: Fully managed serverless co...
+
+
+==========================================
+QUERY 8: "What DevOps experience do you have?"
+==========================================
+Rank 1:
+  Project:      __global__
+  Document:     about-me.md
+  Chunk ID:     0c05d1b02a687d01407d08b1f03ca2eebd779e31cbc315a770d63433222799a0
+  RRF Score:    0.030282
+  Vector Rank:  1
+  BM25 Rank:    12
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Why Cloud and DevOps  Over time, Ajay Susanth's interests expanded from backend development into cloud infrastructure...
+
+Rank 2:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     84098a12e8a6ec35f4b1faef3362367fdc71518dd842c3bef5f682da52a5ea46
+  RRF Score:    0.030214
+  Vector Rank:  11
+  BM25 Rank:    2
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Does Ajay Susanth have experience with Infrastructure as Code?  Yes.  Ajay Susanth has used Terraform in multiple pro...
+
+Rank 3:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     5ae20c98e022fed50d69cd20974af9d9d9554f2cdd24eb922778fd3ebc60a5c2
+  RRF Score:    0.029551
+  Vector Rank:  16
+  BM25 Rank:    1
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## What is Ajay Susanth currently focusing on learning?  Ajay Susanth is currently focused on strengthening knowledge in...
+
+Rank 4:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     b3c9ccde0e21c79237169ad296c3b91a34f483208f91277c8103a77b8469d490
+  RRF Score:    0.029514
+  Vector Rank:  12
+  BM25 Rank:    4
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## What are Ajay Susanth's strongest technical areas?  Ajay Susanth's strongest technical areas include:  * Cloud Infras...
+
+Rank 5:
+  Project:      __global__
+  Document:     hire.md
+  Chunk ID:     ae6c66fff7bbde6e2edff11ddbe60cec56b2d6f87acb6df4fe4041797058e8b7
+  RRF Score:    0.029031
+  Vector Rank:  3
+  BM25 Rank:    16
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Availability & Status  *   **Availability**: Currently available for new opportunities. *   **Status**: Actively seek...
+
+Rank 6:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     c49bda2b8265179c382d24b1748fd97bf6976b4cc5dfaca961fd9f1661174ae3
+  RRF Score:    0.027972
+  Vector Rank:  6
+  BM25 Rank:    18
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Does Ajay Susanth have experience with CI/CD?  Yes.  Ajay Susanth has worked with GitHub Actions to automate build, p...
+
+Rank 7:
+  Project:      __global__
+  Document:     stack.md
+  Chunk ID:     ef9a0d253541ab8447800f0c50850326b706962b990826ea49300b595e43d39a
+  RRF Score:    0.016129
+  Vector Rank:  2
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## DevOps  *   **Docker**: Containerization engine for application portability and environment consistency. *   **Kubern...
+
+Rank 8:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     aff784cb5c23578a002a0f043d7dad784ec0b7bbd3498fe2ce385db933383f7d
+  RRF Score:    0.015873
+  Vector Rank:  None
+  BM25 Rank:    3
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## What are Ajay Susanth's salary expectations?  Ajay Susanth does not have a fixed salary expectation. As a fresher, hi...
+
+Rank 9:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     733784eb040333c1e1024c1ef15db0298a2dffcf53c224c3354c12fbc04306f1
+  RRF Score:    0.015625
+  Vector Rank:  4
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## How did Ajay Susanth learn Cloud and DevOps technologies?  Ajay Susanth primarily learns through project-based develo...
+
+Rank 10:
+  Project:      __global__
+  Document:     faq.md
+  Chunk ID:     528202a487359966650cfee4aa4545b0458605943393e84bbe8fb67450efa246
+  RRF Score:    0.015385
+  Vector Rank:  5
+  BM25 Rank:    None
+  Source Type:  manual
+  Layer:        identity
+  Preview:      ## Why is Ajay Susanth interested in Cloud and DevOps?  Ajay Susanth initially focused on backend development but became...
+

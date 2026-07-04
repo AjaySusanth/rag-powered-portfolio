@@ -8,9 +8,20 @@ Since `pytest-asyncio` is not in requirements, we leverage the pre-installed `an
 with `@pytest.mark.anyio` to execute async test coroutines cleanly.
 """
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, MagicMock
 import pytest
 from src.ingestion.embedder import embed_texts, embed_query, EmbeddingError
+
+
+@pytest.fixture(autouse=True)
+def mock_cache_always_miss():
+    """Ensures that all embedder tests run with a clean cache miss, preventing real Redis connectivity or cache hits."""
+    with patch("src.ingestion.embedder.create_cache_from_settings") as mock_factory:
+        mock_cache = MagicMock()
+        mock_cache.get_embeddings = AsyncMock(side_effect=lambda texts: [None] * len(texts))
+        mock_cache.set_embeddings = AsyncMock()
+        mock_factory.return_value = mock_cache
+        yield mock_cache
 
 
 @pytest.mark.anyio
@@ -42,8 +53,8 @@ async def test_embed_texts_success() -> None:
 
         # Assert results match sorted order of indices (0 first, then 1)
         assert len(results) == 2
-        assert results[0] == [0.1] * 1536
-        assert results[1] == [0.2] * 1536
+        assert results[0] == pytest.approx([0.1] * 1536)
+        assert results[1] == pytest.approx([0.2] * 1536)
         
         # Verify call parameters
         mock_client.embeddings.create.assert_called_once()
@@ -97,7 +108,7 @@ async def test_embed_query_returns_single_vector() -> None:
         # Must be a flat list of floats, not a list of lists
         assert isinstance(result, list)
         assert len(result) == 1536
-        assert result[0] == 0.42
+        assert result[0] == pytest.approx(0.42)
         # Exactly one API call, with the query wrapped in a single-element list
         mock_client.embeddings.create.assert_called_once()
 

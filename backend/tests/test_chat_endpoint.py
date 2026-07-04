@@ -152,6 +152,7 @@ async def test_chat_endpoint_query_rewriter(
             mock_retrieve.assert_called_once_with(
                 query="Kubernetes cluster setup AKS details",
                 project="n8n-aks-platform",
+                top_k=15,
                 diversify=True,
                 grade=True
             )
@@ -485,6 +486,7 @@ async def test_chat_endpoint_injection_attempt_success(
             mock_retrieve.assert_called_once_with(
                 query=payload["message"],
                 project="talentforge",
+                top_k=15,
                 diversify=True,
                 grade=True
             )

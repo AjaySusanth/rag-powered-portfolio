@@ -97,6 +97,7 @@ class ChatOrchestrator:
             chunks = await retrieve(
                 query=search_query,
                 project=project,
+                top_k=15,
                 diversify=True,
                 grade=True
             )

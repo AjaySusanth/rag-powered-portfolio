@@ -1,0 +1,103 @@
+==========================================
+QUERY: What projects have you built?
+==========================================
+--- ANSWER ---
+Ajay has built the following projects:
+
+### 1. TalentForge
+An AI-powered resume screening, parsing, and candidate ranking system.
+*   **Purpose**: Automates the screening of job applications to replace manual, subjective processes.
+*   **Key Technologies**: FastAPI, Celery, Redis, PostgreSQL (with pgvector), React, Tailwind CSS, Google Gemini, and OpenAI embeddings.
+*   **Highlights**: Features asynchronous ingestion, a multi-stage parser using NER and LLMs, and a hybrid ranking engine that combines semantic vector search.
+
+### 2. ClassSync
+An automated notification and routing system for Google Classroom.
+*   **Purpose**: Helps students track academic updates, deadlines, and announcements that are otherwise scattered across platforms.
+*   **Key Technologies**: Node.js, Express.js, n8n, MongoDB, Google Classroom API, and Telegram Bot API.
+*   **Highlights**: Includes a custom webhook/poll routing system, automated state tracking in MongoDB to prevent duplicate notifications, and a Telegram delivery engine.
+
+### 3. Scalable n8n Architecture on AKS
+A DevOps and platform engineering project focused on production-grade infrastructure.
+*   **Purpose**: Redesigns n8n’s monolithic deployment into independently scalable workloads on Azure Kubernetes Service (AKS).
+*   **Key Technologies**: Terraform, Azure Kubernetes Service (AKS), GitHub Actions, Helm, ArgoCD, Prometheus, Grafana, OPA Gatekeeper, and Azure Key Vault.
+*   **Highlights**: Implements GitOps workflows, horizontal autoscaling based on Redis queue depth, and security hardening through network policies and secret management. This is a pure infrastructure project with no application code.
+
+--- CITATIONS ---
+- projects.md (__global__ | identity)
+- resume.md (__global__ | identity)
+- README.md (n8n-aks-platform | artifact)
+
+
+==========================================
+QUERY: Name the projects in Ajay's portfolio
+==========================================
+--- ANSWER ---
+The projects featured in Ajay Susanth's portfolio are:
+
+*   **Scalable n8n Architecture on AKS**: Focuses on Cloud and DevOps, utilizing Kubernetes, Terraform, GitOps, and workflow automation.
+*   **TalentForge**: Focuses on Backend Engineering and AI-powered applications, featuring LLM integration, vector search, and hybrid ranking engines.
+*   **ClassSync**: Focuses on Full Stack Development and workflow automation, utilizing technologies such as Express.js, Prisma ORM, PostgreSQL, and Azure Container Apps.
+
+--- CITATIONS ---
+- faq.md (__global__ | identity)
+- resume.md (__global__ | identity)
+- projects.md (__global__ | identity)
+
+
+==========================================
+QUERY: Explain TalentForge
+==========================================
+--- ANSWER ---
+TalentForge is a smart talent selection engine designed to automate and improve the efficiency of resume screening, a process that is traditionally manual, inconsistent, and time-consuming.
+
+### Core Purpose
+The system aims to parse unstructured resumes with high accuracy, rank candidates against job descriptions using a hybrid approach (semantic understanding and hard requirements), and provide transparent, auditable explanations for its ranking decisions.
+
+### Key Architectural Features
+*   **Four-Stage Asynchronous Pipeline:** The system processes resumes through a pipeline consisting of:
+    1.  **Parsing:** Uses multi-model triangulation (Azure Document Intelligence, HuggingFace BERT, and Regex) to extract data, which is then synthesized by an LLM (Gemini 2.0 Flash) to minimize hallucinations.
+    2.  **Canonicalization:** Uses deterministic Python code (not LLMs) for business-critical calculations, such as normalizing skills and calculating precise work experience by merging overlapping intervals.
+    3.  **Ranking:** Employs a hybrid engine executed as a single PostgreSQL CTE query. It combines semantic scores (via `pgvector` cosine similarity) with rule-based scores (skills, experience, etc.) at a 40/60 weight split.
+    4.  **Justification:** Generates two-sentence, grounded explanations for the top 5 candidates to provide recruiters with immediate insights.
+
+### Design Philosophy
+*   **Deterministic vs. Generative:** TalentForge strictly separates concerns: LLMs are used for extraction and synthesis, while deterministic code is used for all business logic and calculations to ensure reproducibility and auditability.
+*   **Cloud Economics:** The architecture is designed for "scale-to-zero" cost efficiency. It is built to run on serverless infrastructure (e.g., Azure Container Apps, Neon PostgreSQL, Upstash Redis), keeping projected hosting costs under $25 per month for intermittent, bursty usage patterns.
+*   **Data Integrity:** The system treats document metadata as a first-class data source, extracting hidden hyperlinks from binary file structures (PDF/DOCX) rather than relying solely on visual OCR output.
+*   **Observability:** The backend utilizes structured JSON logging with unique `request_id`s and distributed tracing to identify latency bottlenecks and ensure operational visibility.
+
+Currently, TalentForge runs locally via Docker Compose, with a target production architecture designed for a fully serverless deployment on Microsoft Azure.
+
+--- CITATIONS ---
+- talentforge/architecture.md (talentforge | design)
+- talentforge/lessons-learned.md (talentforge | design)
+- talentforge/decisions.md (talentforge | design)
+- talentforge/challenges.md (talentforge | design)
+- APPROACH.md (talentforge | design)
+
+
+==========================================
+QUERY: Explain ClassSync
+==========================================
+--- ANSWER ---
+**ClassSync** is an automated classwork management platform designed to streamline communication and assignment tracking between teachers and students. It utilizes a decoupled architecture to separate core business logic from background automation and third-party integrations.
+
+### Core Architecture and Tech Stack
+*   **Application Layer:** Built with a React 19 frontend and a Node.js/Express 5 backend, using PostgreSQL 16 and Prisma ORM for data management.
+*   **Automation Engine:** The system offloads background tasks, cron scheduling, and Telegram messaging to a self-hosted **n8n** instance. This keeps the main API lightweight and responsive by moving intensive tasks (like polling or bulk notifications) out of the primary request cycle.
+*   **Infrastructure:** The platform is containerized and managed via Azure Container Apps, utilizing Terraform for infrastructure-as-code and a GitHub Actions CI/CD pipeline for zero-downtime deployments.
+
+### Key Features and Design Principles
+*   **Decoupled Services:** ClassSync uses service abstractions for notifications and storage. This allows the system to switch between different providers (e.g., moving from Supabase Storage to AWS S3) with minimal code changes.
+*   **Telegram Integration:** The system uses a "Telegram Command Router" in n8n to handle the single-webhook constraint of the Telegram Bot API. It supports features like account linking, assignment notifications, and command-based interactions (e.g., `/assignments`).
+*   **Self-Healing Workflows:** To improve efficiency, the system includes a self-healing mechanism for scheduled tasks. If all students have submitted their work, the system automatically updates reminder statuses to prevent redundant database polling.
+*   **Data Consistency:** The platform handles complex scenarios, such as students joining mid-course, by using database transactions to backfill missing submission records, ensuring that all past assignments appear on a student's dashboard immediately upon enrollment.
+*   **Reliability:** The system employs a "fire-and-forget" pattern for egress channels (like Telegram notifications) to ensure that external API latency does not impact the performance of core user operations, such as file uploads.
+
+--- CITATIONS ---
+- classsync/architecture.md (classsync | design)
+- classsync/decisions.md (classsync | design)
+- classsync/lessons-learned.md (classsync | design)
+- classsync/challenges.md (classsync | design)
+
+

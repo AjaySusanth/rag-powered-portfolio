@@ -165,3 +165,37 @@ def test_layer_specific_chunk_sizing(layer: str, expected_max_chunk_size: int, e
         assert c.char_count == len(c.content)
         # Note: Prepended headings add tokens, so we ensure the base window length is respected
         # The main validation is that token_count and char_count match calculations.
+
+
+def test_heading_hierarchy_preservation():
+    """
+    Verifies that empty headings are treated as pending context, the full heading
+    hierarchy is preserved, sibling sections are not merged, and trailing empty
+    headings are discarded.
+    """
+    content = """# Projects
+
+## TalentForge
+
+## ClassSync
+This is the description for ClassSync and it contains enough body text to not get folded.
+"""
+    doc = Document(
+        content=content,
+        project="test",
+        layer="design",
+        source_type="manual",
+        source_file="projects.md"
+    )
+    
+    chunks = chunk_document(doc)
+    # Header-only sections (projects, TalentForge) shouldn't produce their own chunks.
+    # Sibling (TalentForge) must be popped. Only "Projects" and "ClassSync" should remain.
+    assert len(chunks) == 1
+    
+    chunk = chunks[0]
+    # Check that heading contains the hierarchy path and excludes sibling "TalentForge"
+    assert chunk.metadata["heading"] == "# Projects\n## ClassSync"
+    assert "TalentForge" not in chunk.content
+    assert "# Projects\n## ClassSync" in chunk.content
+    assert "This is the description" in chunk.content

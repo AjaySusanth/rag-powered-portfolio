@@ -69,33 +69,32 @@ def test_load_manual_documents_success(tmp_path):
     nested_dir.mkdir()
     (nested_dir / "deep_doc.md").write_text("Deep Markdown Content", encoding="utf-8")
 
-    # Load manual documents for project "talentforge"
-    documents = load_manual_documents("talentforge", knowledge_dir)
+    # Load manual documents for project "__global__"
+    global_documents = load_manual_documents("__global__", knowledge_dir)
+    assert len(global_documents) == 3
     
-    # Counts validation:
-    # Global identity files: resume.md, about-me.md, faq.md = 3
-    # Project files: architecture.md, decisions.md, challenges.md, lessons-learned.md, nested/deep_doc.md = 5
-    # Total = 8 documents (ignored_root.txt and ingest.yml are ignored)
-    assert len(documents) == 8
-    
-    # Verify file types ignored
-    unsupported_files = [doc for doc in documents if doc.source_file.endswith(".txt") or doc.source_file.endswith(".yml")]
-    assert len(unsupported_files) == 0
+    # Verify file types ignored in global load
+    global_unsupported = [doc for doc in global_documents if doc.source_file.endswith(".txt")]
+    assert len(global_unsupported) == 0
 
-    # Verify Project Assignment & Layer Mapping
-    global_docs = [doc for doc in documents if doc.project == "__global__"]
-    assert len(global_docs) == 3
-    for doc in global_docs:
+    for doc in global_documents:
+        assert doc.project == "__global__"
         assert doc.layer == "identity"
         assert doc.source_type == "manual"
         assert doc.source_file in ["resume.md", "about-me.md", "faq.md"]
         assert doc.metadata == {"source": "manual", "original_file": doc.source_file}
-        
-    project_docs = [doc for doc in documents if doc.project == "talentforge"]
-    assert len(project_docs) == 5
+
+    # Load manual documents for project "talentforge"
+    project_documents = load_manual_documents("talentforge", knowledge_dir)
+    assert len(project_documents) == 5
+    
+    # Verify file types ignored in project load
+    project_unsupported = [doc for doc in project_documents if doc.source_file.endswith(".yml")]
+    assert len(project_unsupported) == 0
     
     # Check specific project files
-    for doc in project_docs:
+    for doc in project_documents:
+        assert doc.project == "talentforge"
         assert doc.source_type == "manual"
         assert doc.metadata == {"source": "manual", "original_file": doc.source_file}
         

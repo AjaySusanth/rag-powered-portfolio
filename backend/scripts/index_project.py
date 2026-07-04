@@ -30,6 +30,7 @@ async def main() -> None:
     if len(sys.argv) < 2:
         print("Error: Missing project name argument.")
         print("Usage: python scripts/index_project.py <project_name>")
+        print("Note: Use '__global__' as the project name to index root global identity files (resume.md, about-me.md, faq.md).")
         sys.exit(1)
 
     project_name = sys.argv[1].strip().lower()

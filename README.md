@@ -28,6 +28,18 @@ Currently in the planning and architecture phase.
 
 Additional technologies may be introduced as the project evolves.
 
+## Knowledge Ingestion
+
+The portfolio uses an offline indexing script to ingest projects and identity files into the `pgvector` store. To run ingestion, set your `PYTHONPATH` and use the local virtual environment:
+
+```bash
+# Ingest root global identity files (resume.md, about-me.md, faq.md, projects.md, stack.md, hire.md)
+$env:PYTHONPATH="backend"; .\venv\Scripts\python backend/scripts/index_project.py __global__
+
+# Ingest a specific project (e.g., talentforge)
+$env:PYTHONPATH="backend"; .\venv\Scripts\python backend/scripts/index_project.py talentforge
+```
+
 ## Development Philosophy
 
 This project is being built with a strong emphasis on:

@@ -1,0 +1,59 @@
+Rank 1 | Score: 0.0323 | Project: __global__ | Source: faq.md > # Frequently Asked Questions
+## What makes Ajay Susanth's projects different from typical student projects?
+Preview: # Frequently Asked Questions ## What makes Ajay Susanth's projects different from typical student projects?  Many studen...
+
+Rank 2 | Score: 0.0306 | Project: __global__ | Source: faq.md > # Frequently Asked Questions
+## What technologies does Ajay Susanth work with most often?
+Preview: # Frequently Asked Questions ## What technologies does Ajay Susanth work with most often?  Technologies frequently used ...
+
+Rank 3 | Score: 0.0304 | Project: __global__ | Source: projects.md > # Portfolio Projects
+## 1. TalentForge
+Preview: # Portfolio Projects ## 1. TalentForge   pgvector) and lexical keyword matching (BM25) merged using Reciprocal Rank Fusi...
+
+Rank 4 | Score: 0.0288 | Project: __global__ | Source: faq.md > # Frequently Asked Questions
+## Does Ajay Susanth have experience with CI/CD?
+Preview: # Frequently Asked Questions ## Does Ajay Susanth have experience with CI/CD?  Yes.  Ajay Susanth has worked with GitHub...
+
+Rank 5 | Score: 0.0283 | Project: __global__ | Source: projects.md > # Portfolio Projects
+## 3. ClassSync
+Preview: # Portfolio Projects ## 3. ClassSync  *   **Description**: An automated Google Classroom notification and routing system...
+
+Rank 6 | Score: 0.0279 | Project: __global__ | Source: faq.md > # Frequently Asked Questions
+## Does Ajay Susanth have experience with workflow automation?
+Preview: # Frequently Asked Questions ## Does Ajay Susanth have experience with workflow automation?  Yes.  Workflow automation i...
+
+Rank 7 | Score: 0.0273 | Project: __global__ | Source: faq.md > # Frequently Asked Questions
+## What are Ajay Susanth's strongest technical areas?
+Preview: # Frequently Asked Questions ## What are Ajay Susanth's strongest technical areas?  Ajay Susanth's strongest technical a...
+
+Rank 8 | Score: 0.0253 | Project: __global__ | Source: resume.md > # Ajay Susanth
+## Project: Scalable n8n Architecture on AKS
+Preview: # Ajay Susanth ## Project: Scalable n8n Architecture on AKS  Scalable n8n Architecture on AKS is a DevOps and container ...
+
+Rank 9 | Score: 0.0164 | Project: __global__ | Source: projects.md > # Portfolio Projects
+Preview: # Portfolio Projects  This catalog lists the completed software engineering and DevOps projects developed by Ajay Susant...
+
+Rank 10 | Score: 0.0161 | Project: __global__ | Source: resume.md > # Ajay Susanth
+## Project-to-Skill Index
+Preview: # Ajay Susanth ## Project-to-Skill Index  This index maps Ajay Susanth's projects to specific technologies to support re...
+
+Rank 11 | Score: 0.0161 | Project: __global__ | Source: faq.md > # Frequently Asked Questions
+## Does Ajay Susanth have experience with Infrastructure as Code?
+Preview: # Frequently Asked Questions ## Does Ajay Susanth have experience with Infrastructure as Code?  Yes.  Ajay Susanth has u...
+
+Rank 12 | Score: 0.0154 | Project: __global__ | Source: resume.md > # Ajay Susanth
+## Project-to-Skill Index
+Preview: # Ajay Susanth ## Project-to-Skill Index   on AKS (using GitHub Actions, ArgoCD, and OCI chart packaging) - **Which proj...
+
+Rank 13 | Score: 0.0152 | Project: __global__ | Source: faq.md > # Frequently Asked Questions
+## What are Ajay Susanth's salary expectations?
+Preview: # Frequently Asked Questions ## What are Ajay Susanth's salary expectations?  Ajay Susanth does not have a fixed salary ...
+
+Rank 14 | Score: 0.0149 | Project: __global__ | Source: projects.md > # Portfolio Projects
+## 1. TalentForge
+Preview: # Portfolio Projects ## 1. TalentForge  *   **Description**: An AI-powered resume screening, parsing, and candidate rank...
+
+Rank 15 | Score: 0.0147 | Project: __global__ | Source: faq.md > # Frequently Asked Questions
+## How should someone explore Ajay Susanth's portfolio?
+Preview: # Frequently Asked Questions ## How should someone explore Ajay Susanth's portfolio?  A good starting point depends on t...
+

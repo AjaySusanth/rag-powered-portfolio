@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 from typing import List
 
-from src.config import PROJECT_ROOT
+from src.config import PROJECT_ROOT, GLOBAL_PROJECT_NAME
 from src.ingestion.github_fetcher import fetch_github_repository
 from src.ingestion.manual_loader import load_manual_documents
 from src.chunking.chunker import chunk_document
@@ -40,19 +40,27 @@ class IngestionService:
         """
         start_time = time.time()
         project_name = project_name_raw.strip().lower()
-        yaml_path = PROJECT_ROOT / "knowledge" / project_name / "ingest.yml"
         knowledge_dir = PROJECT_ROOT / "knowledge"
         
         errors: List[str] = []
 
-        if not yaml_path.exists():
-            raise FileNotFoundError(f"Configuration ingest.yml not found at: {yaml_path}")
-
-        # 1. Fetch documents from GitHub
-        github_documents = await fetch_github_repository(str(yaml_path))
-
-        # 2. Load manual documents
-        manual_documents = load_manual_documents(project_name, knowledge_dir)
+        # 1. & 2. Fetch and load documents depending on target namespace
+        # WHY THIS WAS CHOSEN:
+        # Global identity documents do not have a corresponding GitHub repository or ingest.yml.
+        # By checking GLOBAL_PROJECT_NAME, we bypass remote repository fetch workflows for global documents
+        # and only call manual loader. For projects, we enforce ingest.yml check and run the full pipeline.
+        if project_name == GLOBAL_PROJECT_NAME:
+            github_documents = []
+            manual_documents = load_manual_documents(GLOBAL_PROJECT_NAME, knowledge_dir)
+        else:
+            yaml_path = PROJECT_ROOT / "knowledge" / project_name / "ingest.yml"
+            if not yaml_path.exists():
+                raise FileNotFoundError(f"Configuration ingest.yml not found at: {yaml_path}")
+            
+            # Fetch documents from GitHub
+            github_documents = await fetch_github_repository(str(yaml_path))
+            # Load project-specific manual documents
+            manual_documents = load_manual_documents(project_name, knowledge_dir)
 
         # 3. Merge documents
         documents = github_documents + manual_documents
@@ -99,9 +107,12 @@ class IngestionService:
         # 6. Initialize Database
         await init_db()
 
-        # 7. Delete existing chunks (clean re-index)
+        # 7. Delete existing chunks (clean re-index of target project/namespace only)
+        # WHY THIS WAS CHOSEN:
+        # Only clear the target namespace being processed. If ingesting a specific project,
+        # the GLOBAL_PROJECT_NAME namespace is preserved untouched. If ingesting GLOBAL_PROJECT_NAME,
+        # only the global chunks are deleted and cleanly re-indexed.
         await delete_project(project_name)
-        await delete_project("__global__")
 
         # 8. Store in pgvector
         await upsert_chunks(all_chunks, embeddings)

@@ -14,7 +14,14 @@ the project's architectural guidelines.
 from dataclasses import dataclass, field
 from typing import Any, Dict
 
-IDENTITY_FILES = {"resume.md", "about-me.md", "faq.md"}
+IDENTITY_FILES = {
+    "resume.md",
+    "about-me.md",
+    "faq.md",
+    "projects.md",
+    "stack.md",
+    "hire.md",
+}
 
 DESIGN_FILES = {
     "architecture.md",

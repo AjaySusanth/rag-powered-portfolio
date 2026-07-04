@@ -1,0 +1,277 @@
+==========================================
+QUERY: Tell me about yourself
+==========================================
+--- FINAL PROMPT ---
+
+You are the AI assistant for Ajay's Professional Portfolio.
+Your goal is to answer questions about Ajay's skills, experience, education, projects, and background using ONLY the provided context chunks.
+
+STRICT GROUNDING RULES:
+1. You must answer the user's question using ONLY the provided context chunks. Do NOT make up facts, speculate, or draw on any outside or pre-trained knowledge about Ajay. Maintain strict grounding and do not hallucinate.
+2. Synthesize information across multiple context chunks to provide a complete and integrated response.
+3. If only partial information is available in the context chunks, provide the best possible grounded answer using that partial information, stating clearly what is known.
+4. If NONE of the provided context chunks are relevant or contain information to answer the user's query, state clearly that you do not have that information.
+5. Be professional, direct, and concise. Format your response cleanly using Markdown.
+
+User Question: Tell me about yourself
+
+Retrieved Context:
+--- CONTEXT CHUNK 1 (Project: __global__ | Source: about-me.md > # About Ajay Susanth
+## Strengths as a Fresher) ---
+# About Ajay Susanth
+## Strengths as a Fresher
+
+As a fresher, Ajay Susanth's primary strengths include curiosity, adaptability, and a willingness to learn unfamiliar technologies when required by a project.
+
+Ajay is comfortable moving across different parts of the software stack, including frontend development, backend development, databases, cloud infrastructure, CI/CD pipelines, containerization, automation workflows, and AI integrations.
+
+This broad exposure helps Ajay understand how different parts of a system interact and provides a foundation for continued growth as a software engineer.
+
+--- CONTEXT CHUNK 2 (Project: __global__ | Source: about-me.md > # About Ajay Susanth
+## Community and Professional Development) ---
+# About Ajay Susanth
+## Community and Professional Development
+
+Ajay Susanth actively participates in technical communities and student-led initiatives that encourage learning, collaboration, and knowledge sharing.
+
+Through involvement in engineering communities, project work, technical discussions, and continuous learning, Ajay seeks opportunities to improve both technical depth and practical software engineering skills.
+
+--- CONTEXT CHUNK 3 (Project: __global__ | Source: about-me.md > # About Ajay Susanth
+## Long-Term Goals) ---
+# About Ajay Susanth
+## Long-Term Goals
+
+Ajay Susanth aims to become a well-rounded software engineer with strong foundations in both application development and cloud infrastructure.
+
+His long-term goal is to contribute to systems that are reliable, scalable, maintainable, and useful, while continuing to learn new technologies and engineering practices throughout his career.
+
+--- CONTEXT CHUNK 4 (Project: classsync | Source: backend/src/controllers/authController.js > No Heading) ---
+: user.role,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }, // Token expires in 7 days
+    );
+
+    // Return token and user info (without password)
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        telegramLinked: user.telegramLinked,
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Login failed" });
+  }
+};
+
+/**
+ * Get current user profile.
+ * Requires authentication (JWT token).
+ */
+export const getMe = async (req, res) => {
+  try {
+    // req.user is set by authenticate middleware
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        telegramLinked: true,
+        telegramChatId: true,
+        createdAt: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+
+
+--- CONTEXT CHUNK 5 (Project: __global__ | Source: about-me.md > # About Ajay Susanth
+## Career Interests) ---
+# About Ajay Susanth
+## Career Interests
+
+Ajay Susanth is interested in pursuing opportunities related to:
+
+* Software Engineering
+* Backend Engineering
+* Full Stack Development
+* Cloud Engineering
+* DevOps Engineering
+* AI-Powered Software Systems
+
+Ajay is particularly interested in roles that provide opportunities to work on modern software systems while continuing to develop expertise in cloud infrastructure, automation, distributed systems, and backend technologies.
+
+
+
+
+==========================================
+QUERY: Explain what is ClassSync
+==========================================
+--- FINAL PROMPT ---
+
+You are the AI assistant for Ajay's Professional Portfolio.
+Your goal is to answer questions about Ajay's skills, experience, education, projects, and background using ONLY the provided context chunks.
+
+STRICT GROUNDING RULES:
+1. You must answer the user's question using ONLY the provided context chunks. Do NOT make up facts, speculate, or draw on any outside or pre-trained knowledge about Ajay. Maintain strict grounding and do not hallucinate.
+2. Synthesize information across multiple context chunks to provide a complete and integrated response.
+3. If only partial information is available in the context chunks, provide the best possible grounded answer using that partial information, stating clearly what is known.
+4. If NONE of the provided context chunks are relevant or contain information to answer the user's query, state clearly that you do not have that information.
+5. Be professional, direct, and concise. Format your response cleanly using Markdown.
+
+User Question: Explain what is ClassSync
+
+Retrieved Context:
+--- CONTEXT CHUNK 1 (Project: classsync | Source: classsync/architecture.md > # ClassSync (Automated Classwork) - Architectural Documentation
+## Notification Delivery and Storage Service Abstractions in ClassSync) ---
+# ClassSync (Automated Classwork) - Architectural Documentation
+## Notification Delivery and Storage Service Abstractions in ClassSync
+
+To facilitate clean extensibility, the ClassSync (Automated Classwork) project separates core business logic from external messaging and storage APIs using service abstractions. The notification service uses a channel-agnostic registry pattern. A base class, `NotificationChannel`, defines the contract for sending messages, which is implemented by the `TelegramChannel` class to interact with the Telegram Bot API using Axios. The `NotificationService` aggregates these channels, orchestrating the dispatch of messages and writing corresponding results to the database's `NotificationLog` table. This allows the backend to trigger fire-and-forget confirmations directly to students upon successful submissions. For document storage, the system utilizes a `StorageProvider` base class and a concrete `SupabaseStorage` implementation. When a student uploads a file for an assignment, the file buffer is passed to the storage client, which uploads the binary to a Supabase bucket and returns a public URL. This URL is then recorded in the student's submission record. This decoupled design isolates changes to third-party endpoints, ensuring that switching to alternative storage or messaging systems requires minimal code changes.
+
+--- CONTEXT CHUNK 2 (Project: classsync | Source: classsync/decisions.md > # ClassSync (Automated Classwork) - Technical Decisions Log
+## Why a Channel-Agnostic Notification Service Abstraction was Chosen for ClassSync) ---
+# ClassSync (Automated Classwork) - Technical Decisions Log
+## Why a Channel-Agnostic Notification Service Abstraction was Chosen for ClassSync
+
+In the ClassSync (Automated Classwork) project, notification delivery is built around a channel-agnostic registry pattern rather than being tightly coupled to the Telegram Bot API. Educational platforms must remain adaptable to changing communication channels; for instance, students might prefer WhatsApp or email notifications over Telegram. If the application controller code directly invoked the Telegram API, adding support for a new channel would require modifying every controller that sends notifications, creating a high maintenance burden and increasing the risk of regression bugs. To address this, the codebase implements a base `NotificationChannel` class that defines a common interface for dispatching messages. A concrete `TelegramChannel` class inherits from this base and handles Telegram-specific API calls. The `NotificationService` acts as a central registry where channels are registered. When a notification needs to be sent, the controller simply calls the service, which dispatches the message via the active channel and logs the result to the `NotificationLog` table. This design ensures that adding new notification channels requires only implementing the abstraction and registering the new channel, leaving the core business logic untouched.
+
+--- CONTEXT CHUNK 3 (Project: classsync | Source: classsync/decisions.md > # ClassSync (Automated Classwork) - Technical Decisions Log
+## Why n8n was Chosen for Workflow Orchestration in ClassSync) ---
+# ClassSync (Automated Classwork) - Technical Decisions Log
+## Why n8n was Chosen for Workflow Orchestration in ClassSync
+
+In the ClassSync (Automated Classwork) project, n8n was chosen as the workflow automation and orchestration engine instead of implementing inline schedulers (like node-cron) or managing worker queues (like BullMQ) inside the Node.js application. Inline cron schedulers run within the primary application process, meaning that intensive cron executions or database polling can block the event loop and degrade the responsiveness of client-facing REST endpoints. Managing worker queues introduces additional infrastructure requirements (such as a Redis instance) and requires writing significant boilerplate code for job retries, message formatting, and third-party API integration. By offloading these responsibilities to n8n, the ClassSync API remains lightweight, stateless, and focused purely on CRUD operations and authorization rules. Furthermore, n8n provides a visual interface for constructing pipelines, built-in nodes for Telegram operations, and automatic retry behaviors. This allows the development team to adjust notification timing, update chat layouts, or add error-handling flows without rewriting and redeploying the core application code. The trade-off is the operational overhead of hosting and maintaining a separate n8n instance, but this cost is offset by faster development velocity and isolation of background scheduling loads from the main server process.
+
+--- CONTEXT CHUNK 4 (Project: __global__ | Source: resume.md > # Ajay Susanth
+## Project: ClassSync (Automated Classwork)) ---
+# Ajay Susanth
+## Project: ClassSync (Automated Classwork)
+
+ClassSync (also known as Automated Classwork) is a multi-tenant classwork automation platform built by Ajay Susanth. For ClassSync, Ajay Susanth architected a multi-tenant REST API using Express.js with classroom-scoped authorization for assignment and grading workflows.
+
+Ajay Susanth integrated n8n-based workflow automation with webhook-driven event processing and authenticated internal APIs for Telegram notification delivery and reminder scheduling.
+
+Ajay Susanth provisioned Azure cloud infrastructure including Azure Container Apps, container registry, relational database, log analytics, and Key Vault via Terraform, enabling repeatable infrastructure-as-code deployments.
+
+Ajay Susanth containerized the application with multi-stage Docker builds behind an Nginx reverse proxy and designed a Telegram-first account-linking flow using short-lived tokens and chat-ID binding.
+
+--- CONTEXT CHUNK 5 (Project: classsync | Source: classsync/decisions.md > # ClassSync (Automated Classwork) - Technical Decisions Log
+## Why an Abstracted Storage Provider Architecture was Chosen for ClassSync) ---
+# ClassSync (Automated Classwork) - Technical Decisions Log
+## Why an Abstracted Storage Provider Architecture was Chosen for ClassSync
+
+In the ClassSync (Automated Classwork) project, document storage is abstracted through a provider pattern rather than relying on local disk storage or direct calls to a specific cloud vendor. Storing uploaded assignments and student submissions on the server's local file system would make the application stateful. This statefulness would prevent deploying the application on serverless platforms (like Azure Container Apps) that scale to zero, as files would be lost when container instances are recycled. To resolve this, the system implements a `StorageProvider` interface that abstracts file uploads and deletions. A concrete `SupabaseStorage` class implements this interface, using the `@supabase/supabase-js` SDK to upload files to a remote object storage bucket and retrieve public URLs. The controllers handle file buffers and interact only with the `StorageProvider` contract. This abstraction ensures that migrating from Supabase Storage to alternative solutions like AWS S3 or Azure Blob Storage only requires writing a new class implementing the interface, ensuring the upload and grading controllers remain unaffected by cloud infrastructure changes.
+
+
+
+
+==========================================
+QUERY: What projects have you built?
+==========================================
+--- FINAL PROMPT ---
+
+You are the AI assistant for Ajay's Professional Portfolio.
+Your goal is to answer questions about Ajay's skills, experience, education, projects, and background using ONLY the provided context chunks.
+
+STRICT GROUNDING RULES:
+1. You must answer the user's question using ONLY the provided context chunks. Do NOT make up facts, speculate, or draw on any outside or pre-trained knowledge about Ajay. Maintain strict grounding and do not hallucinate.
+2. Synthesize information across multiple context chunks to provide a complete and integrated response.
+3. If only partial information is available in the context chunks, provide the best possible grounded answer using that partial information, stating clearly what is known.
+4. If NONE of the provided context chunks are relevant or contain information to answer the user's query, state clearly that you do not have that information.
+5. Be professional, direct, and concise. Format your response cleanly using Markdown.
+
+User Question: What projects have you built?
+
+Retrieved Context:
+--- CONTEXT CHUNK 1 (Project: __global__ | Source: faq.md > # Frequently Asked Questions
+## What makes Ajay Susanth's projects different from typical student projects?) ---
+# Frequently Asked Questions
+## What makes Ajay Susanth's projects different from typical student projects?
+
+Many student projects focus primarily on application features.
+
+Ajay Susanth's projects typically include additional engineering concerns such as:
+
+* Infrastructure provisioning
+* CI/CD pipelines
+* Containerization
+* Deployment automation
+* Monitoring and observability
+* Security controls
+* Workflow automation
+
+This allows Ajay Susanth to gain experience across a broader portion of the software delivery lifecycle.
+
+--- CONTEXT CHUNK 2 (Project: __global__ | Source: faq.md > # Frequently Asked Questions
+## What technologies does Ajay Susanth work with most often?) ---
+# Frequently Asked Questions
+## What technologies does Ajay Susanth work with most often?
+
+Technologies frequently used by Ajay Susanth include:
+
+* Python
+* JavaScript
+* TypeScript
+* FastAPI
+* Express.js
+* React
+* PostgreSQL
+* Redis
+* Docker
+* Kubernetes
+* Terraform
+* GitHub Actions
+* Microsoft Azure
+
+The exact technologies vary by project, but these tools appear consistently across multiple projects.
+
+--- CONTEXT CHUNK 3 (Project: __global__ | Source: faq.md > # Frequently Asked Questions
+## Does Ajay Susanth have experience with CI/CD?) ---
+# Frequently Asked Questions
+## Does Ajay Susanth have experience with CI/CD?
+
+Yes.
+
+Ajay Susanth has worked with GitHub Actions to automate build, packaging, and deployment workflows. CI/CD practices are incorporated into several projects to support repeatable deployments and operational consistency.
+
+--- CONTEXT CHUNK 4 (Project: __global__ | Source: projects.md > # Portfolio Projects
+## 3. ClassSync) ---
+# Portfolio Projects
+## 3. ClassSync
+
+*   **Description**: An automated Google Classroom notification and routing system delivering course updates, announcements, and assignments to students.
+*   **Problem Solved**: Students frequently miss time-sensitive academic announcements, assignment deadlines, and grade updates scattered across email notifications and the Google Classroom web portal.
+*   **Major Technologies**:
+    *   **Languages**: Node.js, JavaScript
+    *   **Frameworks**: Express.js
+    *   **Workflows**: n8n (visual workflow automation engine)
+    *   **Database**: MongoDB
+    *   **APIs**: Google Classroom API, Telegram Bot API
+*   **Key Engineering Highlights**:
+    *   **Webhook & Poll Routing System**: Designed a custom webhook router in n8n to digest and translate incoming Google Classroom feed updates.
+    *   **State Tracking**: Implemented automated MongoDB polling states to deduplicate updates and track announcement delivery history, preventing duplicate messages to student channels.
+    *   **Telegram Delivery Engine**: Built custom Telegram bot integrations with interactive commands for students to filter announcements by course subject or assignment type.
+
+--- CONTEXT CHUNK 5 (Project: __global__ | Source: faq.md > # Frequently Asked Questions
+## Does Ajay Susanth have experience with workflow automation?) ---
+# Frequently Asked Questions
+## Does Ajay Susanth have experience with workflow automation?
+
+Yes.
+
+Workflow automation is a recurring theme across multiple projects. Ajay Susanth has worked with n8n-based automation systems, webhook-driven workflows, event-triggered processing, scheduled tasks, and notification pipelines.
+
+
+
+

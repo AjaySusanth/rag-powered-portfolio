@@ -56,7 +56,11 @@ async def retrieve(
         
         # Apply source diversification if enabled
         if diversify:
-            results = diversify_by_source(fused_results, limit=top_k)
+            results = diversify_by_source(
+                fused_results,
+                limit=top_k,
+                max_per_source=settings.DIVERSIFICATION_MAX_PER_SOURCE
+            )
         else:
             results = fused_results[:top_k]
         

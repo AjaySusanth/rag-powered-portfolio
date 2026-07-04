@@ -1,13 +1,18 @@
 """
-DESIGN DECISION:
+DESIGN DECISION & REFINEMENT (JULY 2026):
 This module implements the canonical layer-aware document chunking service.
 It takes a Document object and splits it into a list of Chunk objects using a
 two-pass heading-aware strategy:
   Pass 1 — Split the cleaned document at every Markdown heading line (# / ## / ###)
             so that chunks align with the document's native semantic sections.
-  Pass 2 — Token-chunk each section independently using a sliding window. This
+  Pass 2 — Track active headings using a stack to construct a fully qualified 
+            hierarchical path prefix. Pop siblings/sub-siblings as we navigate, 
+            avoiding sibling merge pollution. Do not emit standalone chunks for 
+            empty headings; instead, carry them forward to the next non-empty 
+            section as hierarchical context prepended to each sub-chunk.
+  Pass 3 — Token-chunk each section independently using a sliding window. This
             guarantees that chunks never cross heading boundaries, and the
-            heading is prepended to each sub-chunk to preserve context.
+            hierarchical path is prepended to each sub-chunk to preserve context.
 
 Layer configs (chunk_size and overlap) are dynamically looked up based on the
 Document's layer string ('identity'/'artifact' = 256/32, 'design' = 512/64).
@@ -143,22 +148,40 @@ def chunk_document(doc: Document) -> List[Chunk]:
     sections = _split_by_headings(clean_text)
     
     raw_chunks: List[_RawChunk] = []
+    # Track the active heading path (stack of tuples: (level, heading_text))
+    heading_stack: List[tuple] = []
 
     for section in sections:
         heading = section.heading
         body = section.body
 
+        if heading:
+            # Determine heading level by counting leading '#'
+            level_match = re.match(r"^(#{1,3})\s", heading)
+            level = len(level_match.group(1)) if level_match else 1
+            
+            # Pop headings that are siblings or deeper (level >= current level)
+            while heading_stack and heading_stack[-1][0] >= level:
+                heading_stack.pop()
+            
+            # Push the current heading to the stack
+            heading_stack.append((level, heading))
+        else:
+            # No heading (e.g. pre-heading content), clear the active stack
+            heading_stack = []
+
         if not body.strip():
-            # Heading with zero body — emit a raw chunk for heading alone
-            if heading:
-                raw_chunks.append(_RawChunk(content=heading, heading=heading))
+            # Skip emitting chunks for empty/header-only sections
             continue
 
+        # Construct full hierarchical prefix from the active heading stack
+        full_heading = "\n".join(h[1] for h in heading_stack) if heading_stack else None
         body_tokens = len(encoding.encode(body))
 
         # Undersized section guard: fold into the previous chunk if it exists
         if body_tokens < MIN_SECTION_BODY_TOKENS and raw_chunks:
-            appended = f"\n\n{heading}\n\n{body}" if heading else f"\n\n{body}"
+            appended_heading = full_heading if full_heading else ""
+            appended = f"\n\n{appended_heading}\n\n{body}" if appended_heading else f"\n\n{body}"
             last = raw_chunks[-1]
             raw_chunks[-1] = _RawChunk(
                 content=last.content + appended,
@@ -169,7 +192,7 @@ def chunk_document(doc: Document) -> List[Chunk]:
         # Normal/oversized section: run sliding window
         section_chunks = _sliding_window(
             text=body,
-            heading=heading,
+            heading=full_heading,
             config=config,
             encoding=encoding,
         )

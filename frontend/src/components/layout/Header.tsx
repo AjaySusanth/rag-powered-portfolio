@@ -70,6 +70,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
             size="icon"
             className="h-9 w-9 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="GitHub Profile"
+            nativeButton={false}
             render={
               <a
                 href="https://github.com/AjaySusanth"
