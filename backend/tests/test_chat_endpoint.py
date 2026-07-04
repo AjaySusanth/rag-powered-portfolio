@@ -32,6 +32,18 @@ def mock_cache_always_miss():
         yield mock_cache
 
 
+@pytest.fixture(autouse=True)
+def mock_citation_attributor():
+    """By default, mock citation attribution to return all input chunk IDs (pass-through)."""
+    with patch("src.services.chat_orchestrator.create_attributor_from_settings") as mock_factory:
+        mock_attributor = AsyncMock()
+        async def mock_attribute(answer, results):
+            return [res.chunk.chunk_id for res in results if res.chunk.chunk_id]
+        mock_attributor.attribute_citations.side_effect = mock_attribute
+        mock_factory.return_value = mock_attributor
+        yield mock_attributor
+
+
 def make_test_chunk() -> Chunk:
     """Helper to generate a mock Chunk."""
     return Chunk(
@@ -598,4 +610,125 @@ async def test_chat_endpoint_rate_limiting_client_isolation(
             # Client B request 1 (Success 200 - isolated from A's limit)
             resp_b1 = await client_b.post("/chat", json=payload)
             assert resp_b1.status_code == 200
+
+
+@pytest.mark.anyio
+@patch("src.services.chat_orchestrator.detect_project")
+@patch("src.services.chat_orchestrator.retrieve", new_callable=AsyncMock)
+@patch("src.services.chat_orchestrator.create_generator_from_settings")
+@patch("src.services.chat_orchestrator.create_attributor_from_settings")
+async def test_chat_endpoint_citation_attribution_filtering(
+    mock_create_attributor,
+    mock_create_generator,
+    mock_retrieve,
+    mock_detect_project
+) -> None:
+    """Verifies that the citation attributor successfully filters citations, deduplicates, and ignores unknown IDs."""
+    mock_detect_project.return_value = None
+
+    # Setup 3 chunks
+    chunk1 = make_test_chunk()
+    chunk1.chunk_id = "c1"
+    chunk1.source_file = "file1.md"
+    
+    chunk2 = make_test_chunk()
+    chunk2.chunk_id = "c2"
+    chunk2.source_file = "file2.md"
+
+    chunk3 = make_test_chunk()
+    chunk3.chunk_id = "c3"
+    chunk3.source_file = "file3.md"
+
+    mock_retrieve.return_value = [
+        RetrievalResult(chunk=chunk1, score=0.9),
+        RetrievalResult(chunk=chunk2, score=0.8),
+        RetrievalResult(chunk=chunk3, score=0.7),
+    ]
+
+    mock_generator = MagicMock()
+    async def mock_stream_iter(prompt, system_instruction):
+        yield "Response"
+    mock_generator.stream.side_effect = mock_stream_iter
+    mock_create_generator.return_value = mock_generator
+
+    # Mock Attributor to return duplicate, valid, and unknown chunk IDs:
+    # "c1" (valid), "c3" (valid), "c1" (duplicate), "c99" (unknown)
+    mock_attributor = AsyncMock()
+    mock_attributor.attribute_citations.return_value = ["c1", "c3", "c1", "c99"]
+    mock_create_attributor.return_value = mock_attributor
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        payload = {"message": "Test query"}
+        response = await client.post("/chat", json=payload)
+        assert response.status_code == 200
+
+        lines = [line.strip() for line in response.text.split("\n") if line.strip()]
+        
+        # We expect citations to contain ONLY file1.md and file3.md (deduplicated, c99 ignored)
+        assert len(lines) == 3
+        assert "citations" in lines[1]
+        
+        citations_data = json.loads(lines[1].replace("data:", "").strip())
+        citations = citations_data["citations"]
+        assert len(citations) == 2
+        assert citations[0]["file"] == "file1.md"
+        assert citations[1]["file"] == "file3.md"
+
+
+@pytest.mark.anyio
+@patch("src.services.chat_orchestrator.detect_project")
+@patch("src.services.chat_orchestrator.retrieve", new_callable=AsyncMock)
+@patch("src.services.chat_orchestrator.create_generator_from_settings")
+@patch("src.services.chat_orchestrator.create_attributor_from_settings")
+async def test_chat_endpoint_citation_attribution_fallback_on_failure(
+    mock_create_attributor,
+    mock_create_generator,
+    mock_retrieve,
+    mock_detect_project
+) -> None:
+    """Verifies that if citation attribution fails, the system falls back to returning all retrieved citations."""
+    mock_detect_project.return_value = None
+
+    chunk1 = make_test_chunk()
+    chunk1.chunk_id = "c1"
+    chunk1.source_file = "file1.md"
+    
+    chunk2 = make_test_chunk()
+    chunk2.chunk_id = "c2"
+    chunk2.source_file = "file2.md"
+
+    mock_retrieve.return_value = [
+        RetrievalResult(chunk=chunk1, score=0.9),
+        RetrievalResult(chunk=chunk2, score=0.8),
+    ]
+
+    mock_generator = MagicMock()
+    async def mock_stream_iter(prompt, system_instruction):
+        yield "Response"
+    mock_generator.stream.side_effect = mock_stream_iter
+    mock_create_generator.return_value = mock_generator
+
+    # Mock Attributor to fail
+    mock_attributor = AsyncMock()
+    mock_attributor.attribute_citations.side_effect = Exception("Attributor timeout")
+    mock_create_attributor.return_value = mock_attributor
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        payload = {"message": "Test query"}
+        response = await client.post("/chat", json=payload)
+        assert response.status_code == 200
+
+        lines = [line.strip() for line in response.text.split("\n") if line.strip()]
+        
+        # We expect citations to fall back to ALL retrieved chunks (file1.md and file2.md)
+        assert len(lines) == 3
+        assert "citations" in lines[1]
+        
+        citations_data = json.loads(lines[1].replace("data:", "").strip())
+        citations = citations_data["citations"]
+        assert len(citations) == 2
+        assert citations[0]["file"] == "file1.md"
+        assert citations[1]["file"] == "file2.md"
 

@@ -1,0 +1,120 @@
+======================================================================
+QUERY: What deployment strategy is used in ClassSync?
+======================================================================
+
+LATENCY: 4.95 seconds
+
+--- BEFORE CITATIONS (ALL RETRIEVED CHUNKS) ---
+- classsync/architecture.md (classsync)
+- classsync/decisions.md (classsync)
+- classsync/lessons-learned.md (classsync)
+- classsync/challenges.md (classsync)
+- n8n-workflows/README.md (classsync)
+- .github/workflows/ci-cd.yml (classsync)
+
+--- AFTER CITATIONS (GROUNDED / ATTRIBUTED CHUNKS) ---
+- .github/workflows/ci-cd.yml (classsync)
+
+--- GENERATED ANSWER ---
+ClassSync utilizes a **zero-downtime Blue/Green release strategy** for its deployment to production.
+
+This process is managed by a GitHub Actions CI/CD pipeline, which automates the deployment lifecycle. The strategy involves deploying a new revision to Azure Container Apps that initially receives 0% of the traffic. Traffic is shifted to the new revision only after it successfully passes a revision-specific smoke test.
+
+======================================================================
+QUERY: Which projects did Ajay deploy and where?
+======================================================================
+
+LATENCY: 4.82 seconds
+
+--- BEFORE CITATIONS (ALL RETRIEVED CHUNKS) ---
+- faq.md (__global__)
+- resume.md (__global__)
+- projects.md (__global__)
+- about-me.md (__global__)
+
+--- AFTER CITATIONS (GROUNDED / ATTRIBUTED CHUNKS) ---
+- resume.md (__global__)
+
+--- GENERATED ANSWER ---
+Based on the provided documents, Ajay Susanth has deployed the following projects:
+
+*   **Scalable n8n Architecture on AKS:** This project is deployed on **Microsoft Azure** using **Azure Kubernetes Service (AKS)**. It utilizes Terraform for infrastructure provisioning, and CI/CD is managed via GitHub Actions and ArgoCD.
+*   **ClassSync:** This project is deployed using **Azure Container Apps** and **PostgreSQL Flexible Server**, with infrastructure provisioned via Terraform.
+
+The provided context does not specify the deployment environments for the **TalentForge** project.
+
+======================================================================
+QUERY: Explain the resume parsing pipeline in TalentForge.
+======================================================================
+
+LATENCY: 8.33 seconds
+
+--- BEFORE CITATIONS (ALL RETRIEVED CHUNKS) ---
+- talentforge/architecture.md (talentforge)
+- talentforge/decisions.md (talentforge)
+- talentforge/challenges.md (talentforge)
+- talentforge/lessons-learned.md (talentforge)
+
+--- AFTER CITATIONS (GROUNDED / ATTRIBUTED CHUNKS) ---
+- talentforge/architecture.md (talentforge)
+- talentforge/decisions.md (talentforge)
+- talentforge/challenges.md (talentforge)
+- talentforge/lessons-learned.md (talentforge)
+
+--- GENERATED ANSWER ---
+The resume parsing pipeline in TalentForge is a stateful, twelve-step asynchronous workflow designed to extract high-fidelity structured profiles. It utilizes a "multi-model triangulation" approach, delegating specific tasks to the most suitable tools to minimize hallucinations and ensure data integrity.
+
+### The Pipeline Workflow
+1.  **Ingestion & Validation:** Recruiters upload files, which are validated for MIME type using `python-magic`. Files are stored in Supabase, and a task is enqueued to Celery.
+2.  **Pre-extraction (Hyperlink Harvesting):** Before OCR, the system uses `fitz` (for PDFs) and `zipfile` (for DOCX) to extract authoritative hyperlink destinations (e.g., GitHub, LinkedIn) directly from document metadata, bypassing the need for LLMs to guess URLs from display text.
+3.  **Layout-Aware OCR:** Azure AI Document Intelligence (`prebuilt-layout`) is used to parse text. To prevent "column interleaving" (where multi-column layouts are read incorrectly), the system iterates through `result.paragraphs` in visual reading order rather than raw storage order. Table data is reconstructed row-by-row into a pipe-delimited format.
+4.  **Pattern Matching:** A deterministic regex engine runs in parallel to identify emails, phone numbers, and bare-domain portfolios.
+5.  **Named Entity Recognition (NER):** The HuggingFace `bert-base-NER` model extracts names, locations, and organizations to provide ground-truth hints for the LLM.
+6.  **Synthesis:** The raw text, regex outputs, NER hints, and harvested hyperlinks are injected into `gemini-2.0-flash`, which maps the data to a strict Pydantic schema.
+7.  **Deterministic Canonicalization:**
+    *   **Experience:** An `experience_calculator.py` module performs date arithmetic, resolves overlapping roles, and calculates tenure using linear month indices.
+    *   **Skills:** A tiered `skill_normaliser.py` uses a static alias dictionary for common skills, falling back to a Groq-hosted Llama 3.3 70B model for unknown skills, and finally to a local formatting fallback.
+8.  **Embedding & Persistence:** The profile is summarized and converted into a 1536-dimensional semantic vector using OpenAI’s `text-embedding-3-small` model. The final JSON profile and vector are persisted in PostgreSQL.
+
+### Key Design Principles
+*   **Separation of Concerns:** The system enforces a strict boundary where LLMs handle unstructured text synthesis, while deterministic Python code handles all business logic (calculations, date math, and skill normalization). This ensures results are reproducible, auditable, and defensible.
+*   **Resilience:** The pipeline includes tiered fallbacks. If Azure DI is unavailable, it uses a local parser (PyMuPDF/python-docx) with coordinate-based sorting to maintain reading order. If the Groq API fails during skill normalization, the system degrades gracefully to local formatting.
+*   **Data Integrity:** By using deterministic logic for calculations and deduplication, TalentForge ensures that ranking scores are consistent and not subject to the non-determinism of generative models.
+
+======================================================================
+QUERY: What projects have you built?
+======================================================================
+
+LATENCY: 6.74 seconds
+
+--- BEFORE CITATIONS (ALL RETRIEVED CHUNKS) ---
+- projects.md (__global__)
+- resume.md (__global__)
+- README.md (n8n-aks-platform)
+
+--- AFTER CITATIONS (GROUNDED / ATTRIBUTED CHUNKS) ---
+- projects.md (__global__)
+- resume.md (__global__)
+- README.md (n8n-aks-platform)
+
+--- GENERATED ANSWER ---
+Ajay has built the following projects:
+
+### 1. TalentForge
+An AI-powered resume screening, parsing, and candidate ranking system.
+*   **Purpose**: Automates the screening of job applications to replace manual, subjective processes.
+*   **Key Technologies**: FastAPI, Celery, Redis, PostgreSQL (with pgvector), React, Tailwind CSS, Google Gemini, and OpenAI embeddings.
+*   **Highlights**: Features asynchronous ingestion, a multi-stage parser using NER and LLMs, and a hybrid ranking engine that combines semantic vector search.
+
+### 2. ClassSync
+An automated notification and routing system for Google Classroom.
+*   **Purpose**: Helps students track academic updates, deadlines, and announcements that are otherwise scattered across platforms.
+*   **Key Technologies**: Node.js, Express.js, n8n, MongoDB, Google Classroom API, and Telegram Bot API.
+*   **Highlights**: Includes a custom webhook/poll routing system, automated state tracking in MongoDB to prevent duplicate notifications, and a Telegram delivery engine.
+
+### 3. Scalable n8n Architecture on AKS
+A DevOps and platform engineering project focused on production-grade infrastructure.
+*   **Purpose**: Redesigns n8n’s monolithic deployment into independently scalable workloads on Azure Kubernetes Service (AKS).
+*   **Key Technologies**: Terraform, Azure Kubernetes Service (AKS), GitHub Actions, Helm, ArgoCD, Prometheus, Grafana, OPA Gatekeeper, and Azure Key Vault.
+*   **Highlights**: Implements GitOps workflows, horizontal autoscaling based on Redis queue depth, and security hardening through network policies and secret management. This is a pure infrastructure project with no application code.
+

@@ -97,6 +97,14 @@ class Settings(BaseSettings):
         default="gemini",
         description="The provider for the query rewriter (e.g., gemini, mock)"
     )
+    MODEL_ATTRIBUTOR: str = Field(
+        default="gemini-3.1-flash-lite",
+        description="The Gemini model name to use for citation attribution"
+    )
+    ATTRIBUTOR_PROVIDER: str = Field(
+        default="gemini",
+        description="The provider for the citation attributor (e.g., gemini, mock)"
+    )
 
     GITHUB_TOKEN: Optional[str] = Field(
         default=None,

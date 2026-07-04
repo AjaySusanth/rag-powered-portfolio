@@ -66,3 +66,21 @@ class BaseGenerator(ABC):
         """
         pass
 
+
+class BaseCitationAttributor(ABC):
+    """
+    Abstract interface for post-generation citation attribution.
+    Determines which chunks directly support the generated response.
+    """
+    @abstractmethod
+    async def attribute_citations(
+        self,
+        answer: str,
+        results: List[RetrievalResult]
+    ) -> List[str]:
+        """
+        Filters a list of RetrievalResults, returning a list of chunk IDs
+        that directly support statements made in the answer.
+        """
+        pass
+

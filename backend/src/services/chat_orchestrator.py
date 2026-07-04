@@ -21,7 +21,7 @@ from src.retrieval.rewriters.factory import create_rewriter_from_settings
 from src.retrieval.hybrid_retriever import retrieve
 from src.services.prompt_builder import PromptBuilder, PromptBuildResult
 from src.services.prompt_guard import PromptGuard
-from src.llm.factory import create_generator_from_settings
+from src.llm.factory import create_generator_from_settings, create_attributor_from_settings
 from src.llm.gemini_client import LLMError
 
 logger = logging.getLogger(__name__)
@@ -140,8 +140,47 @@ class ChatOrchestrator:
         # 6. Yield Citations (only on successful completion of token streaming)
         citations = []
         try:
+            # Post-generation citation attribution
+            try:
+                attributor = create_attributor_from_settings()
+                logger.info("Executing post-generation citation attribution...")
+                supporting_ids = await attributor.attribute_citations(full_answer, build_result.chunks_used)
+                
+                # 1. Deduplicate supporting_ids returned by the LLM
+                seen_supporting = set()
+                deduped_supporting = []
+                for cid in supporting_ids:
+                    if cid not in seen_supporting:
+                        seen_supporting.add(cid)
+                        deduped_supporting.append(cid)
+                
+                # 2. Filter and map back to RetrievalResult, ignoring unknown IDs safely
+                valid_chunks_map = {res.chunk.chunk_id: res for res in build_result.chunks_used if res.chunk.chunk_id}
+                
+                attributed_chunks = []
+                for cid in deduped_supporting:
+                    if cid in valid_chunks_map:
+                        attributed_chunks.append(valid_chunks_map[cid])
+                    else:
+                        logger.warning(f"Attributor returned unknown chunk ID: {cid}. Safely ignoring.")
+                
+                # 3. Apply fallback if no valid grounding chunks are returned (unless explicitly 0)
+                if attributed_chunks:
+                    logger.info(f"Attribution complete. Filtered citations from {len(build_result.chunks_used)} -> {len(attributed_chunks)}.")
+                    chunks_for_citations = attributed_chunks
+                else:
+                    if len(supporting_ids) == 0:
+                        logger.info("Attributor explicitly returned 0 citations.")
+                        chunks_for_citations = []
+                    else:
+                        logger.warning("Attributor returned no valid grounding chunks. Falling back to all retrieved chunks.")
+                        chunks_for_citations = build_result.chunks_used
+            except Exception as attr_err:
+                logger.error(f"Citation attribution failed: {attr_err}. Falling back to all retrieved chunks.")
+                chunks_for_citations = build_result.chunks_used
+
             seen_files = set()
-            for res in build_result.chunks_used:
+            for res in chunks_for_citations:
                 source_file = res.chunk.source_file or "unknown"
                 project = res.chunk.project or "global"
                 dedup_key = (project, source_file)
@@ -158,9 +197,6 @@ class ChatOrchestrator:
             logger.info(f"Successfully emitted {len(citations)} citations.")
         except Exception as e:
             logger.error(f"Error compiling citations: {e}")
-            # If compiling citations fails after successful LLM streaming, we should probably log it,
-            # but not completely crash the stream since the answer has already been successfully streamed.
-            # However, for completeness we can yield an empty citations event.
             yield StreamCitationsEvent(citations=[])
             
         # 7. Cache the successful response

@@ -7,8 +7,9 @@ modifying the retrieval pipeline or evaluation suite.
 """
 
 from src.config import settings
-from src.llm.interfaces import BaseGrader, BaseGenerator
+from src.llm.interfaces import BaseGrader, BaseGenerator, BaseCitationAttributor
 from src.llm.providers.gemini import GeminiGrader, GeminiGenerator
+from src.services.citation_attributor import GeminiCitationAttributor
 
 
 def create_grader_from_settings() -> BaseGrader:
@@ -36,3 +37,15 @@ def create_generator_from_settings() -> BaseGenerator:
         return GeminiGenerator(model_name=settings.GEMINI_MODEL_NAME)
     else:
         raise ValueError(f"Unknown generator provider: {settings.GENERATOR_PROVIDER}")
+
+
+def create_attributor_from_settings() -> BaseCitationAttributor:
+    """
+    Creates and returns a BaseCitationAttributor instance based on settings.
+    """
+    provider = settings.ATTRIBUTOR_PROVIDER.lower()
+
+    if provider == "gemini":
+        return GeminiCitationAttributor(model_name=settings.MODEL_ATTRIBUTOR)
+    else:
+        raise ValueError(f"Unknown ATTRIBUTOR_PROVIDER: {settings.ATTRIBUTOR_PROVIDER}")
