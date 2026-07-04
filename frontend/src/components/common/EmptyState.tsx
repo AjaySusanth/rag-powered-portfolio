@@ -37,7 +37,7 @@ export function EmptyState({
         {description}
       </p>
       {actionText && actionHref && (
-        <Button variant="outline" size="sm" className="gap-2 hover:bg-muted/80" render={<Link href={actionHref} />}>
+        <Button variant="outline" size="sm" className="gap-2 hover:bg-muted/80" render={<Link href={actionHref} />} nativeButton={false}>
           <ArrowLeft className="h-4 w-4" />
           {actionText}
         </Button>

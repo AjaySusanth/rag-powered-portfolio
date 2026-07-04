@@ -48,6 +48,7 @@ export function HeroSection() {
           variant="default"
           className="gap-2 px-5 font-semibold"
           render={<a href={ctas.chat.href} />}
+          nativeButton={false}
         >
           <MessageSquare className="h-4 w-4" />
           {ctas.chat.label}
@@ -57,6 +58,7 @@ export function HeroSection() {
           variant="outline"
           className="gap-2 hover:bg-muted font-semibold"
           render={<Link href={ctas.resume.href} />}
+          nativeButton={false}
         >
           <FileText className="h-4 w-4 text-muted-foreground" />
           {ctas.resume.label}
@@ -66,6 +68,7 @@ export function HeroSection() {
           variant="outline"
           className="gap-2 hover:bg-muted font-semibold"
           render={<Link href={ctas.hire.href} />}
+          nativeButton={false}
         >
           <Mail className="h-4 w-4 text-muted-foreground" />
           {ctas.hire.label}
@@ -81,6 +84,7 @@ export function HeroSection() {
               rel="noopener noreferrer"
             />
           }
+          nativeButton={false}
         >
           <GithubIcon />
           {ctas.github.label}

@@ -2,7 +2,7 @@ import * as React from "react";
 import { PageContainer } from "@/components/common/PageContainer";
 import { HeroSection } from "@/components/home/HeroSection";
 import { SummaryStrip } from "@/components/home/SummaryStrip";
-import { EmptyChat } from "@/components/home/EmptyChat";
+import { ChatContainer } from "@/components/chat/ChatContainer";
 
 export default function Home() {
   return (
@@ -15,7 +15,7 @@ export default function Home() {
       <SummaryStrip />
 
       {/* 3. Empty Chat Area */}
-      <EmptyChat />
+      <ChatContainer />
 
     </PageContainer>
   );
