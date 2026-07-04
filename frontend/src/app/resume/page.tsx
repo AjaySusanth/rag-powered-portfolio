@@ -1,8 +1,14 @@
+"use client";
+
 import * as React from "react";
+import dynamic from "next/dynamic";
 import { PageContainer } from "@/components/common/PageContainer";
 import { PageHeader } from "@/components/common/PageHeader";
-import { EmptyState } from "@/components/common/EmptyState";
-import { FileText } from "lucide-react";
+
+// Dynamically load the client-only PDF viewer
+const ResumeViewer = dynamic(() => import("@/components/resume/ResumeViewer"), {
+  ssr: false,
+});
 
 export default function ResumePage() {
   return (
@@ -11,11 +17,9 @@ export default function ResumePage() {
         title="Resume"
         description="View and download my latest professional CV. Details work experience, system design milestones, and cloud competencies."
       />
-      <EmptyState
-        title="Resume viewer coming soon"
-        description="We are integrating the interactive react-pdf engine. In the meantime, you'll soon be able to download the resume directly."
-        icon={<FileText className="h-10 w-10 text-primary animate-pulse" />}
-      />
+      <div className="mt-6 w-full max-w-4xl mx-auto">
+        <ResumeViewer />
+      </div>
     </PageContainer>
   );
 }

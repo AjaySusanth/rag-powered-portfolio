@@ -25,7 +25,7 @@ export function ChatContainer() {
   const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
   const [backendOffline, setBackendOffline] = useState(false);
 
-  // Check backend liveness on mount
+  // Check backend liveness on mount and check for ?q= query param
   useEffect(() => {
     const checkLiveness = async () => {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -49,6 +49,18 @@ export function ChatContainer() {
       }
     };
     checkLiveness();
+
+    // Read ?q= query param
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const queryPrompt = params.get("q");
+      if (queryPrompt) {
+        setInputValue(queryPrompt);
+        // Clear param from URL to avoid repopulate on refresh
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    }
   }, []);
 
   const handleSelectPrompt = (promptText: string, id: string) => {
