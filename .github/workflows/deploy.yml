@@ -59,7 +59,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
-          pip install ruff pytest anyio
+          pip install ruff pytest anyio pytest-anyio
 
       - name: Run Linter (Ruff)
         run: |
@@ -74,6 +74,8 @@ jobs:
           AZURE_OPENAI_KEY: mock-key
           GEMINI_API_KEY: mock-gemini-key
         run: |
+          # Root pyproject.toml sets pythonpath = ["backend"], so `from src.xxx`
+          # resolves correctly when running from the repo root.
           python -m pytest backend/tests
 
   frontend-build:
@@ -85,14 +87,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-python@v5 # Wait, Node.js uses setup-node! Let's correct it.
-        # Let's use actions/setup-node@v4
-        # with:
-        #   node-version: 20
-        #   cache: npm
-        #   cache-dependency-path: frontend/package-lock.json
-
-      - name: Set up Node.js Runtime
         uses: actions/setup-node@v4
         with:
           node-version: '20'

@@ -1,0 +1,8 @@
+[tool.pytest.ini_options]
+# WHY: When pytest is invoked from the repo root (as in CI via
+# `python -m pytest backend/tests`), Python cannot resolve `from src.xxx import ...`
+# because `backend/` is not on sys.path by default. Setting pythonpath = ["backend"]
+# here — in the root pyproject.toml — ensures pytest always adds backend/ to
+# sys.path regardless of which directory it is launched from.
+pythonpath = ["backend"]
+testpaths = ["backend/tests"]
