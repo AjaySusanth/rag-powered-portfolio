@@ -1,7 +1,9 @@
 # test_gemini.py
 
 import os
+
 from google import genai
+
 
 def main():
     api_key = os.getenv("GEMINI_API_KEY")

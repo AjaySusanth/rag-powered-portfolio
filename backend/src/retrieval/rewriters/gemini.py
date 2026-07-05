@@ -1,18 +1,19 @@
 """
 WHY THIS WAS CHOSEN:
-This module implements the Gemini-based Query Rewriter. It uses the Gemini API's 
-structured schema validation to ensure the LLM returns a structured JSON matching 
-RewriteResult. It includes robust transient error handling with exponential backoff, 
+This module implements the Gemini-based Query Rewriter. It uses the Gemini API's
+structured schema validation to ensure the LLM returns a structured JSON matching
+RewriteResult. It includes robust transient error handling with exponential backoff,
 mirroring the behavior of the Retrieval Grader.
 """
 
 import asyncio
 import logging
 from typing import Optional
+
 from google.genai import types
 
 from src.config import settings
-from src.llm.gemini_client import get_gemini_client, LLMError
+from src.llm.gemini_client import LLMError, get_gemini_client
 from src.models.rewrite_result import RewriteResult
 from src.retrieval.rewriters.base import BaseQueryRewriter
 

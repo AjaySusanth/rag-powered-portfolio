@@ -6,15 +6,16 @@ and serialization). It also implements the transport-level client-disconnect han
 keeping the downstream orchestrator and LLM layers cleanly decoupled from FastAPI/HTTP.
 """
 
-import json
 import asyncio
+import json
 import logging
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
+from src.api.rate_limiter import RateLimiter
 from src.api.schemas.chat import ChatRequest
 from src.services.chat_orchestrator import ChatOrchestrator
-from src.api.rate_limiter import RateLimiter
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

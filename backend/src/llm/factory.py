@@ -7,8 +7,8 @@ modifying the retrieval pipeline or evaluation suite.
 """
 
 from src.config import settings
-from src.llm.interfaces import BaseGrader, BaseGenerator, BaseCitationAttributor
-from src.llm.providers.gemini import GeminiGrader, GeminiGenerator
+from src.llm.interfaces import BaseCitationAttributor, BaseGenerator, BaseGrader
+from src.llm.providers.gemini import GeminiGenerator, GeminiGrader
 from src.services.citation_attributor import GeminiCitationAttributor
 
 
@@ -27,7 +27,7 @@ def create_grader_from_settings() -> BaseGrader:
 def create_generator_from_settings() -> BaseGenerator:
     """
     Creates and returns a BaseGenerator instance based on application settings.
-    
+
     Why: Uses GENERATOR_PROVIDER configuration to determine if the provider
     is Gemini or if we should add other providers (like OpenAI or local LLMs) in the future.
     """

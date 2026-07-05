@@ -7,11 +7,12 @@ Using a central Settings class prevents configuration fragmentation and hardcode
 ensuring security and consistency across the database and OpenAI integrations.
 """
 
-from typing import Optional
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field, field_validator
 from pathlib import Path
+from typing import List, Optional
 from urllib.parse import urlparse
+
+from pydantic import Field, field_validator, model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Resolve the absolute path to the project root where .env resides
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -29,6 +30,16 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
+    ENVIRONMENT: str = Field(
+        default="development",
+        description="Deployment environment (e.g., development, production)"
+    )
+
+    ALLOWED_ORIGINS: List[str] = Field(
+        default=["http://localhost:3000", "http://127.0.0.1:3000"],
+        description="List of allowed CORS origins"
+    )
+
     DATABASE_URL: str = Field(
         default="postgresql://postgres:postgres@localhost:5432/portfolio",
         description="PostgreSQL connection string"
@@ -44,8 +55,8 @@ class Settings(BaseSettings):
         validation_alias="AZURE_OPENAI_KEY",  # Allow either AZURE_OPENAI_API_KEY or AZURE_OPENAI_KEY
         description="Azure OpenAI API key"
     )
-    AZURE_OPENAI_ENDPOINT: str = Field(
-        ...,
+    AZURE_OPENAI_ENDPOINT: Optional[str] = Field(
+        default=None,
         description="Azure OpenAI Endpoint URL"
     )
     AZURE_OPENAI_API_VERSION: str = Field(
@@ -145,7 +156,7 @@ class Settings(BaseSettings):
 
     @field_validator("AZURE_OPENAI_ENDPOINT", mode="before")
     @classmethod
-    def clean_endpoint(cls, v: str) -> str:
+    def clean_endpoint(cls, v: Optional[str]) -> Optional[str]:
         """
         Cleans the Azure endpoint. The Azure OpenAI SDK expects the base URL, e.g.:
         'https://<resource-name>.cognitiveservices.azure.com/'
@@ -154,10 +165,48 @@ class Settings(BaseSettings):
         if not v:
             return v
         parsed = urlparse(v)
-        # Reconstruct just the scheme and netloc (e.g., https://resource-name.cognitiveservices.azure.com)
         if parsed.scheme and parsed.netloc:
             return f"{parsed.scheme}://{parsed.netloc}"
         return v
+
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
+    def parse_allowed_origins(cls, v: any) -> List[str]:
+        """
+        Parses comma-separated string of origins into a list.
+        """
+        if isinstance(v, str):
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        return v
+
+    @model_validator(mode="after")
+    def validate_production_keys(self) -> "Settings":
+        """
+        Validates that required credentials/configurations are present and correct.
+        This provides fail-fast behavior at startup, ensuring misconfigured containers fail immediately.
+        """
+        # Ensure database and redis URLs are provided and are not using localhost in production
+        if self.ENVIRONMENT == "production":
+            if "localhost" in self.DATABASE_URL or "127.0.0.1" in self.DATABASE_URL:
+                raise ValueError("DATABASE_URL must not target localhost/127.0.0.1 in production environment.")
+            if "localhost" in self.REDIS_URL or "127.0.0.1" in self.REDIS_URL:
+                raise ValueError("REDIS_URL must not target localhost/127.0.0.1 in production environment.")
+
+        # Check API Keys based on selected providers
+        if self.EMBEDDING_PROVIDER == "azure_openai":
+            if not self.AZURE_OPENAI_API_KEY:
+                raise ValueError("AZURE_OPENAI_KEY (or AZURE_OPENAI_API_KEY) must be set when EMBEDDING_PROVIDER is 'azure_openai'")
+            if not self.AZURE_OPENAI_ENDPOINT:
+                raise ValueError("AZURE_OPENAI_ENDPOINT must be set when EMBEDDING_PROVIDER is 'azure_openai'")
+
+        gemini_needed = any(
+            p == "gemini"
+            for p in [self.GENERATOR_PROVIDER, self.GRADER_PROVIDER, self.REWRITER_PROVIDER, self.ATTRIBUTOR_PROVIDER]
+        )
+        if gemini_needed and not self.GEMINI_API_KEY:
+            raise ValueError("GEMINI_API_KEY must be set when using Gemini-based providers")
+
+        return self
 
 # Global settings instance
 settings = Settings()

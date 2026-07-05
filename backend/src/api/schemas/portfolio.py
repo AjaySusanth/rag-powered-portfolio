@@ -6,6 +6,7 @@ structures returned by portfolio services.
 """
 
 from typing import List
+
 from pydantic import BaseModel, Field
 
 

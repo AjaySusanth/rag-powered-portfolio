@@ -1,7 +1,9 @@
 import pytest
-from src.retrieval.rrf import RRFFuser
-from src.models.retrieval_result import RetrievalResult
+
 from src.models.chunk import Chunk
+from src.models.retrieval_result import RetrievalResult
+from src.retrieval.rrf import RRFFuser
+
 
 def make_mock_chunk(chunk_id: str) -> Chunk:
     return Chunk(
@@ -101,9 +103,9 @@ def test_rrf_tie_breaking_rules():
     # Then chunk_id tie-breaker applies.
     chunk_x = make_mock_chunk("chunk-x")
     chunk_y = make_mock_chunk("chunk-y")
-    
+
     # Passing them in y then x to verify it sorts alphabetically
-    res2 = fuser.fuse(
+    fuser.fuse(
         [],
         [
             RetrievalResult(chunk=chunk_y, score=50.0),
@@ -163,7 +165,7 @@ def test_rrf_tie_breaking_rules():
     # Let's verify that the sort_key works exactly as expected.
     res_w = RetrievalResult(chunk=make_mock_chunk("chunk-w"), score=0.1, vector_rank=1, bm25_rank=1)
     res_z = RetrievalResult(chunk=make_mock_chunk("chunk-z"), score=0.1, vector_rank=1, bm25_rank=1)
-    
+
     # Since they have identical score, vector_rank, and bm25_rank, they should sort alphabetically: chunk-w then chunk-z
     res_list = [res_z, res_w]
     res_list.sort(key=lambda r: (-r.score, r.vector_rank if r.vector_rank is not None else float('inf'), r.bm25_rank if r.bm25_rank is not None else float('inf'), r.chunk.chunk_id))

@@ -22,16 +22,16 @@ async def filter_relevant_chunks(
 ) -> List[RetrievalResult]:
     """
     Filters a list of RetrievalResults by querying the provided grader.
-    
+
     If the number of relevant chunks after filtering is less than min_chunks,
     it falls back to the original results list to prevent empty/insufficient context.
-    
+
     Args:
         query: The user query string.
         results: The list of RetrievalResults from previous stages (RRF/Diversified).
         grader: An implementation of BaseGrader.
         min_chunks: Configurable minimum number of chunks to return. Falls back to original if below this.
-        
+
     Returns:
         A filtered list of RetrievalResult objects (or the original list on fallback).
     """

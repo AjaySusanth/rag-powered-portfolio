@@ -1,0 +1,38 @@
+# WHY THIS WAS CHOSEN:
+# Render Blueprint (render.yaml) is used to define infrastructure-as-code for Render. 
+# It enables one-click deployment and synchronization of services, environment variables, 
+# and auto-deploy settings. We configure the backend as a Docker web service, specifying 
+# the `/health` endpoint for readiness checks and listing all necessary environment variables.
+
+services:
+  - type: web
+    name: rag-portfolio-backend
+    env: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: EMBEDDING_PROVIDER
+        value: azure_openai
+      - key: GENERATOR_PROVIDER
+        value: gemini
+      - key: ALLOWED_ORIGINS
+        placeholder: "https://your-frontend-domain.vercel.app"
+      - key: DATABASE_URL
+        placeholder: "postgresql://user:password@neon-host:5432/portfolio?sslmode=require"
+      - key: REDIS_URL
+        placeholder: "rediss://default:password@upstash-host:6379"
+      - key: GEMINI_API_KEY
+        placeholder: "AIzaSy..."
+      - key: AZURE_OPENAI_KEY
+        placeholder: "your-azure-key"
+      - key: AZURE_OPENAI_ENDPOINT
+        placeholder: "https://your-endpoint.cognitiveservices.azure.com/"
+      - key: AZURE_OPENAI_API_VERSION
+        value: "2024-02-01"
+      - key: AZURE_OPENAI_EMBEDDING_DEPLOYMENT
+        value: "text-embedding-3-small"

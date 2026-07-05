@@ -6,10 +6,12 @@ By using a dictionary of (window_start_time, count) per IP address, we keep the 
 highly performant, and easy to test, satisfying all PRD constraints.
 """
 
-import time
 import math
+import time
 from typing import Dict, Tuple
-from fastapi import Request, HTTPException, status
+
+from fastapi import HTTPException, Request, status
+
 from src.config import settings
 
 
@@ -56,7 +58,7 @@ class RateLimiter:
         if count >= limit:
             time_remaining = int(math.ceil(start_time + window_size - now))
             time_remaining = max(1, time_remaining)  # Ensure it is at least 1 second
-            
+
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail="Too Many Requests. Please try again later.",

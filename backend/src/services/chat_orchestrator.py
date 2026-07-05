@@ -13,16 +13,22 @@ This ensures a clear, sequential streaming protocol flow (tokens -> citations ->
 import logging
 from typing import AsyncIterator, Optional
 
-from src.config import settings
-from src.api.schemas.chat import StreamTokenEvent, BaseStreamEvent, StreamErrorEvent, Citation, StreamCitationsEvent
+from src.api.schemas.chat import (
+    BaseStreamEvent,
+    Citation,
+    StreamCitationsEvent,
+    StreamErrorEvent,
+    StreamTokenEvent,
+)
 from src.cache.factory import create_cache_from_settings
+from src.config import settings
+from src.llm.factory import create_attributor_from_settings, create_generator_from_settings
+from src.llm.gemini_client import LLMError
+from src.retrieval.hybrid_retriever import retrieve
 from src.retrieval.project_detector import detect_project
 from src.retrieval.rewriters.factory import create_rewriter_from_settings
-from src.retrieval.hybrid_retriever import retrieve
-from src.services.prompt_builder import PromptBuilder, PromptBuildResult
+from src.services.prompt_builder import PromptBuilder
 from src.services.prompt_guard import PromptGuard
-from src.llm.factory import create_generator_from_settings, create_attributor_from_settings
-from src.llm.gemini_client import LLMError
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +37,7 @@ class ChatOrchestrator:
     """
     Orchestrates the lifecycle of a single user chat message.
     """
-    
+
     def __init__(self):
         self.cache = create_cache_from_settings()
 
@@ -42,11 +48,11 @@ class ChatOrchestrator:
     ) -> AsyncIterator[BaseStreamEvent]:
         """
         Processes a user query and yields a stream of typed events.
-        
+
         Args:
             query: The user's original query.
             session_id: Optional tracking identifier.
-            
+
         Yields:
             Subclasses of BaseStreamEvent (e.g. StreamTokenEvent or StreamErrorEvent).
         """
@@ -58,7 +64,7 @@ class ChatOrchestrator:
             return
 
         # 0. Prompt Injection Detection
-        guard_result = PromptGuard.analyze(query)
+        PromptGuard.analyze(query)
 
         # 0.5 Cache Lookup
         cached_response = await self.cache.get_chat_response(query)
@@ -145,7 +151,7 @@ class ChatOrchestrator:
                 attributor = create_attributor_from_settings()
                 logger.info("Executing post-generation citation attribution...")
                 supporting_ids = await attributor.attribute_citations(full_answer, build_result.chunks_used)
-                
+
                 # 1. Deduplicate supporting_ids returned by the LLM
                 seen_supporting = set()
                 deduped_supporting = []
@@ -153,17 +159,17 @@ class ChatOrchestrator:
                     if cid not in seen_supporting:
                         seen_supporting.add(cid)
                         deduped_supporting.append(cid)
-                
+
                 # 2. Filter and map back to RetrievalResult, ignoring unknown IDs safely
                 valid_chunks_map = {res.chunk.chunk_id: res for res in build_result.chunks_used if res.chunk.chunk_id}
-                
+
                 attributed_chunks = []
                 for cid in deduped_supporting:
                     if cid in valid_chunks_map:
                         attributed_chunks.append(valid_chunks_map[cid])
                     else:
                         logger.warning(f"Attributor returned unknown chunk ID: {cid}. Safely ignoring.")
-                
+
                 # 3. Apply fallback if no valid grounding chunks are returned (unless explicitly 0)
                 if attributed_chunks:
                     logger.info(f"Attribution complete. Filtered citations from {len(build_result.chunks_used)} -> {len(attributed_chunks)}.")
@@ -198,7 +204,7 @@ class ChatOrchestrator:
         except Exception as e:
             logger.error(f"Error compiling citations: {e}")
             yield StreamCitationsEvent(citations=[])
-            
+
         # 7. Cache the successful response
         if full_answer.strip():
             await self.cache.set_chat_response(query, full_answer, citations)

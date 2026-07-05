@@ -1,5 +1,5 @@
-import pytest
 from src.retrieval.project_detector import detect_project, normalize_text
+
 
 def test_normalize_text():
     assert normalize_text("Explain TalentForge") == "explain talentforge"
@@ -42,7 +42,7 @@ def test_detect_project_word_boundaries():
     assert detect_project("n8nner workflows") is None
 
 def test_detect_project_nested_aliases_consumption():
-    # 'reservation system' contains 'reservation'. 
+    # 'reservation system' contains 'reservation'.
     # Sorting by length and replacing matched spans prevents duplicate projects/confusion.
     assert detect_project("Explain the reservation system") == "reservation-system"
     # Even if they are in different order or separate, it should handle them.
@@ -54,7 +54,7 @@ def test_explicit_project_wins():
     explicit_project = "reservation-system"
     resolved_project = explicit_project if explicit_project is not None else detect_project(query)
     assert resolved_project == "reservation-system"
-    
+
     # Scenario B: No project is passed, auto-detection executes
     query = "Explain TalentForge"
     explicit_project = None

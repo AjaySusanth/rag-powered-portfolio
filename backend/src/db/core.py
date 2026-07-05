@@ -12,8 +12,10 @@ lists of floats directly as query arguments.
 
 import logging
 from typing import Optional
+
 import asyncpg
 from pgvector.asyncpg import register_vector
+
 from src.config import settings
 
 logger = logging.getLogger(__name__)

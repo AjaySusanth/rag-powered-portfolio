@@ -5,10 +5,10 @@ It takes a Document object and splits it into a list of Chunk objects using a
 two-pass heading-aware strategy:
   Pass 1 — Split the cleaned document at every Markdown heading line (# / ## / ###)
             so that chunks align with the document's native semantic sections.
-  Pass 2 — Track active headings using a stack to construct a fully qualified 
-            hierarchical path prefix. Pop siblings/sub-siblings as we navigate, 
-            avoiding sibling merge pollution. Do not emit standalone chunks for 
-            empty headings; instead, carry them forward to the next non-empty 
+  Pass 2 — Track active headings using a stack to construct a fully qualified
+            hierarchical path prefix. Pop siblings/sub-siblings as we navigate,
+            avoiding sibling merge pollution. Do not emit standalone chunks for
+            empty headings; instead, carry them forward to the next non-empty
             section as hierarchical context prepended to each sub-chunk.
   Pass 3 — Token-chunk each section independently using a sliding window. This
             guarantees that chunks never cross heading boundaries, and the
@@ -20,17 +20,18 @@ Deterministic SHA-256 IDs are generated to support idempotent upserts in the dat
 """
 
 import re
+from typing import Dict, List, Optional
+
 import tiktoken
-from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
 
-from src.models.document import Document
 from src.models.chunk import (
     Chunk,
-    generate_document_id,
     generate_chunk_id,
     generate_content_hash,
+    generate_document_id,
 )
+from src.models.document import Document
 
 # Minimum token count for a section's body text (excluding the heading itself)
 # before it gets folded into the previous chunk rather than emitted standalone.
@@ -128,7 +129,7 @@ def _sliding_window(
 def chunk_document(doc: Document) -> List[Chunk]:
     """
     Converts a Document into a list of structured, overlapping Chunks.
-    
+
     This function:
       1. Skips empty documents.
       2. Dynamically loads the layer configuration.
@@ -143,10 +144,10 @@ def chunk_document(doc: Document) -> List[Chunk]:
     # Retrieve layer configuration, defaulting to 'artifact' if layer is unknown
     layer_name = doc.layer.lower()
     config = LAYER_CONFIGS.get(layer_name, LAYER_CONFIGS["artifact"])
-    
+
     encoding = tiktoken.get_encoding("cl100k_base")
     sections = _split_by_headings(clean_text)
-    
+
     raw_chunks: List[_RawChunk] = []
     # Track the active heading path (stack of tuples: (level, heading_text))
     heading_stack: List[tuple] = []
@@ -159,11 +160,11 @@ def chunk_document(doc: Document) -> List[Chunk]:
             # Determine heading level by counting leading '#'
             level_match = re.match(r"^(#{1,3})\s", heading)
             level = len(level_match.group(1)) if level_match else 1
-            
+
             # Pop headings that are siblings or deeper (level >= current level)
             while heading_stack and heading_stack[-1][0] >= level:
                 heading_stack.pop()
-            
+
             # Push the current heading to the stack
             heading_stack.append((level, heading))
         else:

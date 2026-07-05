@@ -1,9 +1,10 @@
-import pytest
 from unittest.mock import AsyncMock, patch
 
-from src.retrieval.vector_retriever import retrieve
-from src.models.retrieval_result import RetrievalResult
+import pytest
+
 from src.models.chunk import Chunk
+from src.models.retrieval_result import RetrievalResult
+from src.retrieval.vector_retriever import retrieve
 
 
 @pytest.fixture
@@ -69,7 +70,7 @@ async def test_retrieve_success(mock_search, mock_embed, mock_db_rows):
     assert len(results) == 2
     assert isinstance(results[0], RetrievalResult)
     assert isinstance(results[0].chunk, Chunk)
-    
+
     assert results[0].score == 0.95
     assert results[0].chunk.chunk_id == "test-chunk-1"
     assert results[0].chunk.content == "This is a great chunk about backend development."
@@ -102,5 +103,5 @@ async def test_retrieve_no_matches(mock_search, mock_embed):
     mock_search.return_value = []
 
     results = await retrieve(query="something obscure", top_k=5)
-    
+
     assert results == []

@@ -1,8 +1,11 @@
-import pytest
 from unittest.mock import AsyncMock, patch
+
+import pytest
+
 from src.evaluation.retrieval_diagnostics import RetrievalDiagnostics
-from src.models.retrieval_result import RetrievalResult
 from src.models.chunk import Chunk
+from src.models.retrieval_result import RetrievalResult
+
 
 def make_mock_chunk(chunk_id: str, source_file: str) -> Chunk:
     return Chunk(
@@ -25,7 +28,7 @@ def make_mock_chunk(chunk_id: str, source_file: str) -> Chunk:
 @patch("src.retrieval.bm25_retriever.retrieve", new_callable=AsyncMock)
 async def test_diagnostics_failure_classification(mock_bm25_retrieve, mock_vector_retrieve):
     diagnostics = RetrievalDiagnostics(k=10)
-    
+
     dataset = {
         "project": "n8n",
         "questions": [
@@ -37,7 +40,7 @@ async def test_diagnostics_failure_classification(mock_bm25_retrieve, mock_vecto
             }
         ]
     }
-    
+
     # CASE 1: Missing from both retrievers
     # Expected: "expected-1.md". Let's retrieve files that do NOT match it.
     mock_vector_retrieve.return_value = [
@@ -46,26 +49,26 @@ async def test_diagnostics_failure_classification(mock_bm25_retrieve, mock_vecto
     mock_bm25_retrieve.return_value = [
         RetrievalResult(chunk=make_mock_chunk("c2", "other-2.md"), score=40.0)
     ]
-    
+
     summary = await diagnostics.analyze_dataset(dataset)
     assert len(summary.query_details) == 1
     failures = summary.query_details[0].failures
     assert len(failures) == 1
     assert failures[0].category == "Missing from both retrievers"
-    
+
     # CASE 2: Candidate starvation
     # Expected file "expected-1.md" is at rank 6 (index 5) in vector, and not present in BM25 (both > 5)
     v_results = [make_mock_chunk(f"v{i}", f"other-{i}.md") for i in range(5)] + [make_mock_chunk("exp", "expected-1.md")]
     b_results = [make_mock_chunk(f"b{i}", f"other-{i+10}.md") for i in range(5)]
-    
+
     mock_vector_retrieve.return_value = [RetrievalResult(chunk=c, score=0.9) for c in v_results]
     mock_bm25_retrieve.return_value = [RetrievalResult(chunk=c, score=40.0) for c in b_results]
-    
+
     summary = await diagnostics.analyze_dataset(dataset)
     failures = summary.query_details[0].failures
     assert len(failures) == 1
     assert failures[0].category == "Candidate starvation"
-    
+
     # CASE 3: Duplicate source domination
     # Expected file "expected-1.md" is at rank 5 in Vector (enters pool!)
     # But RRF fusion ranks it at position 10 because duplicates of "duplicate.md" fill the list
@@ -85,12 +88,12 @@ async def test_diagnostics_failure_classification(mock_bm25_retrieve, mock_vecto
     ]
     mock_vector_retrieve.return_value = [RetrievalResult(chunk=c, score=0.9) for c in v_results]
     mock_bm25_retrieve.return_value = [RetrievalResult(chunk=c, score=40.0) for c in b_results]
-    
+
     summary = await diagnostics.analyze_dataset(dataset)
     failures = summary.query_details[0].failures
     assert len(failures) == 1
     assert failures[0].category == "Duplicate source domination"
-    
+
     # CASE 4: Fusion ordering
     # Expected file is in the pool (e.g. rank 5 in Vector), but even after deduplication,
     # it sits at rank > 5 because there are 5 other unique files ahead of it.
@@ -106,7 +109,7 @@ async def test_diagnostics_failure_classification(mock_bm25_retrieve, mock_vecto
     ]
     mock_vector_retrieve.return_value = [RetrievalResult(chunk=c, score=0.9) for c in v_results]
     mock_bm25_retrieve.return_value = [RetrievalResult(chunk=c, score=40.0) for c in b_results]
-    
+
     summary = await diagnostics.analyze_dataset(dataset)
     failures = summary.query_details[0].failures
     assert len(failures) == 1

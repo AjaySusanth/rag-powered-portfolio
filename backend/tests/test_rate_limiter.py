@@ -1,7 +1,9 @@
-import pytest
 import time
 from unittest.mock import MagicMock, patch
-from fastapi import Request, HTTPException
+
+import pytest
+from fastapi import HTTPException, Request
+
 from src.api.rate_limiter import RateLimiter
 
 
@@ -93,7 +95,7 @@ def test_rate_limiter_client_isolation() -> None:
 
         # Client B's request succeeds independently
         limiter(req_b)
-        
+
         # Client B's next request is blocked
         with pytest.raises(HTTPException):
             limiter(req_b)

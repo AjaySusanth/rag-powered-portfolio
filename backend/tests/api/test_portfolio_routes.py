@@ -1,7 +1,8 @@
-import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
-from httpx import AsyncClient, ASGITransport
 from pathlib import Path
+from unittest.mock import patch
+
+import pytest
+from httpx import ASGITransport, AsyncClient
 
 from src.main import app
 from src.services.portfolio_service import PortfolioService
@@ -64,7 +65,7 @@ async def test_get_stack_success(clean_lru_cache) -> None:
 async def test_get_stack_missing(mock_project_root, clean_lru_cache) -> None:
     # Force service to look for stack.json in a non-existent folder
     mock_project_root.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value.exists.return_value = False
-    
+
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.get("/stack")
@@ -80,7 +81,7 @@ async def test_get_hire_success(clean_lru_cache) -> None:
         response = await client.get("/hire")
         assert response.status_code == 200
         data = response.json()
-        
+
         # Verify schema elements
         assert data["name"] == "Ajay Susanth"
         assert data["currently_available"] is True
@@ -100,7 +101,7 @@ async def test_get_hire_success(clean_lru_cache) -> None:
 async def test_get_hire_missing(mock_project_root, clean_lru_cache) -> None:
     # Force service to look for hire.json in a non-existent folder
     mock_project_root.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value.exists.return_value = False
-    
+
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.get("/hire")
@@ -113,7 +114,7 @@ async def test_get_hire_missing(mock_project_root, clean_lru_cache) -> None:
 async def test_get_hire_malformed_returns_500(mock_get_hire, clean_lru_cache) -> None:
     # Mock returning invalid data missing required fields to trigger ValidationError
     mock_get_hire.return_value = {"name": "Ajay Susanth"}  # Missing all other fields
-    
+
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.get("/hire")

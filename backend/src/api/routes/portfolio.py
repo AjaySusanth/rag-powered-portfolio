@@ -7,12 +7,10 @@ Returns the PDF directly using FileResponse, and deserializes stack JSON using P
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
-
 from pydantic import ValidationError
 
-from src.api.schemas.portfolio import StackResponse, HireResponse
+from src.api.schemas.portfolio import HireResponse, StackResponse
 from src.services.portfolio_service import PortfolioService
-
 
 router = APIRouter(tags=["Portfolio"])
 
@@ -26,7 +24,7 @@ async def get_resume() -> FileResponse:
     path = PortfolioService.get_resume_path()
     if not path.exists():
         raise HTTPException(status_code=404, detail="Resume PDF file not found.")
-    
+
     return FileResponse(
         path=path,
         media_type="application/pdf",

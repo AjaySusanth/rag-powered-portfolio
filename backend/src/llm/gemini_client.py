@@ -14,9 +14,11 @@ Why Temperature 0.0:
 """
 
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from google import genai
 from google.genai import types
+
 from src.config import settings
 
 logger = logging.getLogger(__name__)
@@ -51,7 +53,7 @@ _client: Optional[genai.Client] = None
 def get_gemini_client() -> genai.Client:
     """
     Returns the Google GenAI Client instance.
-    
+
     Why: Lazy initialization ensures config keys are loaded from settings at call time
     and allows for easier mocking during unit testing.
     """
@@ -75,7 +77,7 @@ def format_prompt(query: str, context_chunks: List[Dict[str, Any]]) -> str:
         heading = chunk.get("heading") or "No Heading"
         content = chunk.get("content", "")
         context_str += f"--- CONTEXT CHUNK {i+1} (Source: {source_file} > {heading}) ---\n{content}\n\n"
-        
+
     prompt = f"User Question: {query}\n\nRetrieved Context:\n{context_str}"
     return prompt
 
@@ -83,12 +85,12 @@ def format_prompt(query: str, context_chunks: List[Dict[str, Any]]) -> str:
 async def generate_answer(query: str, context_chunks: List[Dict[str, Any]]) -> str:
     """
     Asynchronously sends the query and context chunks to Gemini 2.0 Flash to generate an answer.
-    
+
     Why: The `.aio` context manager ensures clean async connection pooling and resource cleanup.
     """
     client = get_gemini_client()
     contents = format_prompt(query, context_chunks)
-    
+
     try:
         async with client.aio as aclient:
             response = await aclient.models.generate_content(
@@ -99,7 +101,7 @@ async def generate_answer(query: str, context_chunks: List[Dict[str, Any]]) -> s
                     temperature=0.0,
                 )
             )
-            
+
             # The returned text response
             return response.text or ""
     except Exception as e:

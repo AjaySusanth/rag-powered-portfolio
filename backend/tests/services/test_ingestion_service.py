@@ -12,16 +12,16 @@ We mock external services (GitHub API, Azure OpenAI Embeddings) to ensure the
 tests remain fast, deterministic, and runnable offline.
 """
 
-import pytest
-import asyncpg
-from unittest.mock import patch, MagicMock
-from pathlib import Path
+from unittest.mock import patch
 
-from src.config import settings, GLOBAL_PROJECT_NAME
-from src.services.ingestion_service import IngestionService
-from src.models.document import Document
+import asyncpg
+import pytest
+
+from src.config import GLOBAL_PROJECT_NAME, settings
 from src.db.core import close_db_pool, get_db_pool
 from src.db.init_db import init_db
+from src.models.document import Document
+from src.services.ingestion_service import IngestionService
 from src.vectorstore.pgvector_store import delete_project
 
 
@@ -84,7 +84,7 @@ async def test_ingest_global(mock_load_manual, mock_embed_chunks) -> None:
             metadata={"source": "manual"}
         )
     ]
-    
+
     # Mock embedding response
     mock_embed_chunks.return_value = [[0.1] * 1536]
 

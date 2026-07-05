@@ -7,14 +7,16 @@ Why HNSW:
   HNSW is a graph-based index for approximate nearest neighbor search. It offers high search recall
   and sub-second query latency even with high-dimensional embeddings. Unlike IVFFlat, it requires
   no training phase and performs optimally even as data is incrementally added.
-  
+
 Why Cosine Similarity:
   Cosine similarity (mapped via `<=>` cosine distance in pgvector) evaluates the angle between
   vectors, measuring semantic similarity independent of document/chunk length.
 """
 
 import logging
+
 import asyncpg
+
 from src.config import settings
 
 logger = logging.getLogger(__name__)
@@ -24,7 +26,7 @@ async def init_db() -> None:
     """
     Sets up the database by ensuring the vector extension is loaded,
     creating the `chunks` table, and establishing the HNSW index.
-    
+
     Why: A separate standalone connection is used here to avoid bootstrapping issues
     with connection pooling (since pgvector type registration requires the extension
     to exist before the pool is initialized).
@@ -35,7 +37,7 @@ async def init_db() -> None:
         # Enable pgvector extension
         logger.info("Enabling pgvector extension...")
         await conn.execute("CREATE EXTENSION IF NOT EXISTS vector;")
-        
+
         # Create table for chunks
         logger.info("Creating chunks table...")
         await conn.execute("""
@@ -56,7 +58,7 @@ async def init_db() -> None:
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
         """)
-        
+
         # Create HNSW index using cosine operators
         logger.info("Creating HNSW index on chunks.embedding...")
         await conn.execute("""

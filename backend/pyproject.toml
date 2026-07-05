@@ -1,0 +1,17 @@
+[tool.pytest.ini_options]
+# WHY: pytest is sometimes invoked from the repo root (e.g. in CI as
+# `python -m pytest backend/tests`). Without setting pythonpath, Python
+# cannot resolve `from src.xxx import ...` because `backend/` is not on
+# sys.path. Setting pythonpath = ["backend"] ensures `src` is importable
+# regardless of which directory pytest is launched from.
+pythonpath = ["backend"]
+asyncio_mode = "auto"
+testpaths = ["backend/tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]

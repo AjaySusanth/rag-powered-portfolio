@@ -1,9 +1,12 @@
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
-from src.models.retrieval_result import RetrievalResult
-from src.models.chunk import Chunk
-from src.services.citation_attributor import GeminiCitationAttributor
+
 from src.llm.gemini_client import LLMError
+from src.models.chunk import Chunk
+from src.models.retrieval_result import RetrievalResult
+from src.services.citation_attributor import GeminiCitationAttributor
+
 
 def make_mock_result(chunk_id: str, source_file: str) -> RetrievalResult:
     return RetrievalResult(
@@ -60,7 +63,7 @@ async def test_citation_attributor_api_failure_raises_llm_error() -> None:
         mock_get_client.return_value = mock_client
 
         attributor = GeminiCitationAttributor(model_name="gemini-3.1-flash-lite")
-        
+
         with pytest.raises(LLMError) as exc_info:
             await attributor.attribute_citations(
                 answer="Answer",

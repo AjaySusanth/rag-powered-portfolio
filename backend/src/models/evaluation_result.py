@@ -7,6 +7,7 @@ and clear contracts between the evaluator and the reporting layers.
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+
 @dataclass
 class QuestionResult:
     question_id: str

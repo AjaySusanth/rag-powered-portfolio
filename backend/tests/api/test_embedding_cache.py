@@ -1,11 +1,12 @@
-import pytest
-import struct
 import base64
-from unittest.mock import AsyncMock, patch, MagicMock
+import struct
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
 from src.cache.redis import RedisCache
 from src.config import settings
-from src.ingestion.embedder import embed_texts, EmbeddingError
-
+from src.ingestion.embedder import embed_texts
 
 # ---------------------------------------------------------------------------
 # Unit Tests: Key Generation & Serialization
@@ -14,7 +15,7 @@ from src.ingestion.embedder import embed_texts, EmbeddingError
 def test_generate_embedding_key_normalized() -> None:
     """Verifies that key generation is normalized and provider-agnostic."""
     cache = RedisCache(redis_url="redis://localhost:6379")
-    
+
     # Check that whitespace and casing differences produce the same key
     key1 = cache._generate_embedding_key(" Hello World   ")
     key2 = cache._generate_embedding_key("hello world")
@@ -22,7 +23,7 @@ def test_generate_embedding_key_normalized() -> None:
 
     # Check key format matches pattern: rag:embed:v1:<sha256>
     assert key1.startswith("rag:embed:v1:")
-    
+
     # Verify that different provider/model changes the key
     original_provider = settings.EMBEDDING_PROVIDER
     try:
@@ -36,15 +37,15 @@ def test_generate_embedding_key_normalized() -> None:
 def test_binary_serialization_struct_packing() -> None:
     """Verifies float vectors are encoded to Base64-packed bytes and decoded accurately."""
     original_vector = [0.123, -0.456, 0.789, 0.0]
-    
+
     # Pack
     packed_bytes = struct.pack(f"{len(original_vector)}f", *original_vector)
     b64_str = base64.b64encode(packed_bytes).decode("ascii")
-    
+
     # Unpack
     decoded_bytes = base64.b64decode(b64_str.encode("ascii"))
     unpacked_vector = list(struct.unpack(f"{len(decoded_bytes)//4}f", decoded_bytes))
-    
+
     # Assert tolerance parity
     assert len(unpacked_vector) == len(original_vector)
     for a, b in zip(unpacked_vector, original_vector):
@@ -56,7 +57,7 @@ def test_binary_serialization_struct_packing() -> None:
 async def test_redis_failure_degrades_gracefully(mock_get_client) -> None:
     """Verifies that Redis exceptions degrade gracefully to None/no-ops."""
     from redis.exceptions import ConnectionError
-    
+
     # Mock Redis client to raise ConnectionError on operations
     mock_redis = MagicMock()
     mock_redis.get.side_effect = ConnectionError("Could not connect to Redis")
@@ -66,13 +67,13 @@ async def test_redis_failure_degrades_gracefully(mock_get_client) -> None:
     mock_get_client.return_value = mock_redis
 
     cache = RedisCache(redis_url="redis://localhost:6379")
-    
+
     # get_embedding should return None
     assert await cache.get_embedding("test") is None
-    
+
     # get_embeddings should return list of Nones
     assert await cache.get_embeddings(["test1", "test2"]) == [None, None]
-    
+
     # set_embedding and set_embeddings should complete without raising errors
     await cache.set_embedding("test", [0.1, 0.2])
     await cache.set_embeddings(["test"], [[0.1, 0.2]])
@@ -94,7 +95,7 @@ async def test_embedding_pipeline_cache_hit_and_miss(mock_create_cache, mock_get
     # "cached-text" -> [0.5, 0.5]
     # "miss-text" -> None (cache miss)
     mock_cache = MagicMock()
-    
+
     async def mock_get_embeddings(texts):
         res = []
         for t in texts:
@@ -103,7 +104,7 @@ async def test_embedding_pipeline_cache_hit_and_miss(mock_create_cache, mock_get
             else:
                 res.append(None)
         return res
-        
+
     mock_cache.get_embeddings = mock_get_embeddings
     mock_cache.set_embeddings = AsyncMock()
     mock_create_cache.return_value = mock_cache
@@ -111,13 +112,13 @@ async def test_embedding_pipeline_cache_hit_and_miss(mock_create_cache, mock_get
     # 2. Setup Mock OpenAI Client
     mock_client = MagicMock()
     mock_response = MagicMock()
-    
+
     # Embedding API returns a structure with .data list of items having .embedding and .index
     item = MagicMock()
     item.index = 0
     item.embedding = [0.9, 0.9]
     mock_response.data = [item]
-    
+
     mock_client.embeddings.create = AsyncMock(return_value=mock_response)
     mock_get_client.return_value = mock_client
 
@@ -135,7 +136,7 @@ async def test_embedding_pipeline_cache_hit_and_miss(mock_create_cache, mock_get
         input=["miss-text"],
         model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT
     )
-    
+
     # Assert newly fetched "miss-text" was cached
     mock_cache.set_embeddings.assert_called_once_with(
         ["miss-text"],
@@ -162,12 +163,12 @@ async def test_embedding_pipeline_deduplicates_duplicate_chunks_in_batch(
     # 2. Setup Mock OpenAI Client
     mock_client = MagicMock()
     mock_response = MagicMock()
-    
+
     item = MagicMock()
     item.index = 0
     item.embedding = [0.1, 0.2, 0.3]
     mock_response.data = [item]
-    
+
     mock_client.embeddings.create = AsyncMock(return_value=mock_response)
     mock_get_client.return_value = mock_client
 

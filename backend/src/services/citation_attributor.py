@@ -1,17 +1,18 @@
 """
 WHY THIS WAS CHOSEN:
-This service implements post-generation citation attribution. It determines which of the retrieved 
-chunks directly support statements made in the generated answer, ensuring only accurate grounding 
+This service implements post-generation citation attribution. It determines which of the retrieved
+chunks directly support statements made in the generated answer, ensuring only accurate grounding
 sources are cited in the frontend rather than all retrieved candidate chunks.
 """
 
 import logging
 from typing import List
-from pydantic import BaseModel, Field
+
 from google.genai import types
+from pydantic import BaseModel, Field
 
 from src.config import settings
-from src.llm.gemini_client import get_gemini_client, LLMError
+from src.llm.gemini_client import LLMError, get_gemini_client
 from src.llm.interfaces import BaseCitationAttributor
 from src.models.retrieval_result import RetrievalResult
 
@@ -53,12 +54,12 @@ class GeminiCitationAttributor(BaseCitationAttributor):
             project = res.chunk.project or "unknown"
             heading = res.chunk.metadata.get("heading") if res.chunk.metadata else None
             content = res.chunk.content or ""
-            
+
             # Short preview/snippet to minimize latency and token usage
             preview = content[:200]
             if len(content) > 200:
                 preview += "..."
-                
+
             prompt += f"--- Chunk ID: {chunk_id} ---\n"
             prompt += f"Source File: {source}\n"
             prompt += f"Project: {project}\n"

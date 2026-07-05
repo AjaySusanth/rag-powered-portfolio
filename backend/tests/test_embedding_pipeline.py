@@ -12,20 +12,17 @@ It validates the full ingestion flow:
 
 import os
 from pathlib import Path
-from unittest.mock import AsyncMock, patch
-import pytest
+
 import asyncpg
-from src.config import settings
-from src.db.init_db import init_db
-from src.db.core import close_db_pool
-from src.models.document import Document
+import pytest
+
 from src.chunking.chunker import chunk_document
+from src.config import settings
+from src.db.core import close_db_pool
+from src.db.init_db import init_db
 from src.embedding.azure_openai_embedder import embed_chunks
-from src.vectorstore.pgvector_store import (
-    upsert_chunks,
-    similarity_search,
-    delete_project
-)
+from src.models.document import Document
+from src.vectorstore.pgvector_store import delete_project, similarity_search, upsert_chunks
 
 WORKSPACE_ROOT = Path(__file__).parent.parent.parent
 
@@ -56,7 +53,7 @@ async def test_pipeline_end_to_end_mocked() -> None:
 
     # 1. Initialize schema
     await init_db()
-    
+
     # 2. Clean up past test runs
     await delete_project("pipeline-test-resume")
     await delete_project("pipeline-test-decisions")
@@ -65,13 +62,13 @@ async def test_pipeline_end_to_end_mocked() -> None:
         # 3. Read and chunk local knowledge files
         resume_path = WORKSPACE_ROOT / "knowledge" / "resume.md"
         decisions_path = WORKSPACE_ROOT / "knowledge" / "talentforge" / "decisions.md"
-        
+
         assert resume_path.exists(), f"Missing test file: {resume_path}"
         assert decisions_path.exists(), f"Missing test file: {decisions_path}"
-        
+
         resume_text = resume_path.read_text(encoding="utf-8")
         decisions_text = decisions_path.read_text(encoding="utf-8")
-        
+
         resume_doc = Document(
             content=resume_text,
             project="pipeline-test-resume",
@@ -86,42 +83,42 @@ async def test_pipeline_end_to_end_mocked() -> None:
             source_type="manual",
             source_file="decisions.md"
         )
-        
+
         resume_chunks = chunk_document(resume_doc)
         decisions_chunks = chunk_document(decisions_doc)
-        
+
         assert len(resume_chunks) > 0
         assert len(decisions_chunks) > 0
-        
+
         # 4. Generate mocked embeddings
         mock_embedding = [0.1] * 1536
         resume_embeddings = [mock_embedding for _ in resume_chunks]
         decisions_embeddings = [mock_embedding for _ in decisions_chunks]
-        
+
         # 5. Upsert chunks into database
         await upsert_chunks(
             chunks=resume_chunks,
             embeddings=resume_embeddings
         )
-        
+
         await upsert_chunks(
             chunks=decisions_chunks,
             embeddings=decisions_embeddings
         )
-        
+
         # 6. Retrieve similar chunks and verify
         # Search specifically for a query within our resume project
         results = await similarity_search(mock_embedding, limit=5, project_filter="pipeline-test-resume")
         assert len(results) > 0
         assert all(r["project"] == "pipeline-test-resume" for r in results)
         assert results[0]["source_file"] == "resume.md"
-        
+
         # Search within decisions project
         results_decisions = await similarity_search(mock_embedding, limit=5, project_filter="pipeline-test-decisions")
         assert len(results_decisions) > 0
         assert all(r["project"] == "pipeline-test-decisions" for r in results_decisions)
         assert results_decisions[0]["source_file"] == "decisions.md"
-        
+
     finally:
         # Cleanup
         await delete_project("pipeline-test-resume")
@@ -152,10 +149,10 @@ async def test_pipeline_end_to_end_live() -> None:
     assert settings.AZURE_OPENAI_ENDPOINT, "Azure OpenAI endpoint is missing."
 
     print("\n--- Starting Live Ingestion Pipeline Integration Test ---")
-    
+
     # 1. Initialize schema
     await init_db()
-    
+
     # 2. Clean up test projects
     await delete_project("live-test-resume")
     await delete_project("live-test-decisions")
@@ -164,10 +161,10 @@ async def test_pipeline_end_to_end_live() -> None:
         # 3. Read raw files
         resume_path = WORKSPACE_ROOT / "knowledge" / "resume.md"
         decisions_path = WORKSPACE_ROOT / "knowledge" / "talentforge" / "decisions.md"
-        
+
         resume_text = resume_path.read_text(encoding="utf-8")
         decisions_text = decisions_path.read_text(encoding="utf-8")
-        
+
         # 4. Chunk files
         resume_doc = Document(
             content=resume_text,
@@ -183,29 +180,29 @@ async def test_pipeline_end_to_end_live() -> None:
             source_type="manual",
             source_file="decisions.md"
         )
-        
+
         resume_chunks = chunk_document(resume_doc)
         decisions_chunks = chunk_document(decisions_doc)
-        
+
         print(f"Produced {len(resume_chunks)} chunks for resume.md")
         print(f"Produced {len(decisions_chunks)} chunks for decisions.md")
-        
+
         # 5. Embed chunks using real Azure OpenAI API
         print("Calling Azure OpenAI to generate embeddings...")
         resume_embeddings = await embed_chunks(resume_chunks)
         decisions_embeddings = await embed_chunks(decisions_chunks)
-        
+
         assert len(resume_embeddings) == len(resume_chunks)
         assert len(decisions_embeddings) == len(decisions_chunks)
         assert len(resume_embeddings[0]) == 1536, "Embedding dimension must be 1536"
         print("Generated embeddings successfully.")
-        
+
         # 6. Upsert into database
         print("Saving to PostgreSQL...")
         await upsert_chunks(resume_chunks, resume_embeddings)
         await upsert_chunks(decisions_chunks, decisions_embeddings)
         print("Saved to PostgreSQL successfully.")
-        
+
         # 7. Query and search
         print("Running similarity search queries...")
         # Embed a natural language query using the API
@@ -213,17 +210,17 @@ async def test_pipeline_end_to_end_live() -> None:
         # Using the underlying embedder's single query wrapper for convenience
         from src.ingestion.embedder import embed_query
         query_embedding = await embed_query(query_text)
-        
+
         results = await similarity_search(query_embedding, limit=3, project_filter="live-test-resume")
         print(f"\nQuery: '{query_text}'")
         print("Top matches:")
         for r in results:
             heading = r['metadata'].get('heading', 'No Heading')
             print(f"- [Score: {r['similarity']:.4f}] heading: '{heading}' (file: {r['source_file']})")
-        
+
         assert len(results) > 0
         assert results[0]["similarity"] > 0.0, "Similarity score should be positive"
-        
+
     except Exception as e:
         print(f"Error during live test: {e}")
         raise

@@ -7,13 +7,14 @@ LLM calls, which significantly reduces latency and token cost.
 """
 
 import logging
-from typing import List, Optional, AsyncIterator, AsyncGenerator
-from google.genai import types
+from typing import AsyncGenerator, List, Optional
 
+from google.genai import types
 from pydantic import BaseModel, Field
+
 from src.config import settings
-from src.llm.gemini_client import get_gemini_client, LLMError
-from src.llm.interfaces import BaseGrader, ChunkGrade, BaseGenerator
+from src.llm.gemini_client import LLMError, get_gemini_client
+from src.llm.interfaces import BaseGenerator, BaseGrader, ChunkGrade
 from src.models.retrieval_result import RetrievalResult
 
 logger = logging.getLogger(__name__)

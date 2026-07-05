@@ -7,8 +7,10 @@ enabling easy testing and provider swapping.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional, Literal, AsyncIterator, AsyncGenerator
+from typing import AsyncGenerator, List, Literal, Optional
+
 from pydantic import BaseModel, Field
+
 from src.models.retrieval_result import RetrievalResult
 
 
@@ -40,11 +42,11 @@ class BaseGrader(ABC):
     async def grade(self, query: str, results: List[RetrievalResult]) -> List[ChunkGrade]:
         """
         Batch grade an ordered list of retrieved chunks against a query.
-        
+
         Args:
             query: The user query string.
             results: The list of RetrievalResult objects to grade.
-            
+
         Returns:
             A list of ChunkGrade results, one for each input chunk.
         """

@@ -8,12 +8,13 @@ into mutually exclusive categories to isolate the exact bottleneck in the retrie
 
 import asyncio
 import logging
-from dataclasses import dataclass, asdict
-from typing import List, Dict, Any, Optional, Set
-from src.retrieval import vector_retriever, bm25_retriever
-from src.retrieval.rrf import RRFFuser
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Set
+
 from src.models.retrieval_result import RetrievalResult
+from src.retrieval import bm25_retriever, vector_retriever
 from src.retrieval.project_detector import detect_project
+from src.retrieval.rrf import RRFFuser
 
 logger = logging.getLogger(__name__)
 
@@ -77,50 +78,50 @@ class RetrievalDiagnostics:
         """
         project = dataset["project"]
         questions = dataset["questions"]
-        
+
         query_details: List[QueryDiagnostics] = []
-        
+
         for q in questions:
             q_id = q["id"]
             question_text = q["question"]
             expected_sources = q["expected_sources"]
             minimum_match = q.get("minimum_match", 1)
-            
+
             # 1. Fetch top-20 candidates concurrently
             resolved_project = project if project is not None else detect_project(question_text)
             vector_task = vector_retriever.retrieve(query=question_text, top_k=20, project=resolved_project)
             bm25_task = bm25_retriever.retrieve(query=question_text, top_k=20, project=resolved_project)
             vector_20, bm25_20 = await asyncio.gather(vector_task, bm25_task)
-            
+
             # 2. Compute candidate overlap metrics
             vector_ids = {res.chunk.chunk_id for res in vector_20}
             bm25_ids = {res.chunk.chunk_id for res in bm25_20}
             overlap_count = len(vector_ids & bm25_ids)
             union_count = len(vector_ids | bm25_ids)
             jaccard_overlap = overlap_count / union_count if union_count > 0 else 0.0
-            
+
             # 3. Fuse using RRF
             fused_all = self.fuser.fuse(vector_20, bm25_20)
-            
+
             # Identify top-5 fused sources
             top_5_fused = fused_all[:5]
             top_5_sources = [res.chunk.source_file for res in top_5_fused]
-            
+
             # Calculate duplicate density in top-5 (chunks per unique source)
             unique_top_5_sources = set(top_5_sources)
             duplicate_density = len(top_5_sources) / len(unique_top_5_sources) if unique_top_5_sources else 1.0
-            
+
             # Determine if query succeeded (minimum match met in top-5)
             retrieved_expected = [src for src in top_5_sources if src in expected_sources]
             unique_retrieved_expected = set(retrieved_expected)
             is_hit = len(unique_retrieved_expected) >= minimum_match
-            
+
             failures: List[FailureDetail] = []
-            
+
             if not is_hit:
                 # Find which expected sources were missed in the top 5
                 missed_sources = [src for src in expected_sources if src not in unique_retrieved_expected]
-                
+
                 for missed_src in missed_sources:
                     # Trace ranking state of this missed source in the fused list
                     fused_match = None
@@ -128,7 +129,7 @@ class RetrievalDiagnostics:
                         if res.chunk.source_file == missed_src:
                             fused_match = (rank_idx + 1, res)
                             break
-                            
+
                     # 1. Missing from both retrievers
                     if fused_match is None:
                         failures.append(FailureDetail(
@@ -144,13 +145,13 @@ class RetrievalDiagnostics:
                         rrf_rank, res = fused_match
                         vr = res.vector_rank
                         br = res.bm25_rank
-                        
+
                         # 2. Candidate starvation
                         # Starvation occurs if the file was retrieved but both of its component ranks
                         # are beyond the top 5 limit (i.e. neither retriever would have fed it in a top-5 candidate run)
                         v_starved = vr is None or vr > 5
                         b_starved = br is None or br > 5
-                        
+
                         if v_starved and b_starved:
                             failures.append(FailureDetail(
                                 source_file=missed_src,
@@ -170,14 +171,14 @@ class RetrievalDiagnostics:
                                 if r.chunk.source_file not in seen_sources:
                                     seen_sources.add(r.chunk.source_file)
                                     dedup_fused.append(r)
-                                    
+
                             # Find rank in deduplicated list
                             dedup_rank = None
                             for idx, r in enumerate(dedup_fused):
                                 if r.chunk.source_file == missed_src:
                                     dedup_rank = idx + 1
                                     break
-                                    
+
                             # 3. Fusion ordering
                             # If even after deduplication it remains outside top 5, RRF simply ranked it too low
                             if dedup_rank is None or dedup_rank > 5:
@@ -202,7 +203,7 @@ class RetrievalDiagnostics:
                                     bm25_rank=br,
                                     rrf_rank=rrf_rank
                                 ))
-                                
+
             query_details.append(QueryDiagnostics(
                 question_id=q_id,
                 question=question_text,
@@ -213,27 +214,27 @@ class RetrievalDiagnostics:
                 failures=failures,
                 top_5_sources=top_5_sources
             ))
-            
+
         # 4. Compute global aggregations
         total_queries = len(questions)
         failed_queries = sum(1 for qd in query_details if not qd.is_hit)
-        
+
         category_counts = {
             "Missing from both retrievers": 0,
             "Candidate starvation": 0,
             "Fusion ordering": 0,
             "Duplicate source domination": 0
         }
-        
+
         for qd in query_details:
             for f in qd.failures:
                 if f.category in category_counts:
                     category_counts[f.category] += 1
-                    
+
         avg_overlap = sum(qd.overlap_count for qd in query_details) / total_queries if total_queries > 0 else 0.0
         avg_jaccard = sum(qd.jaccard_overlap for qd in query_details) / total_queries if total_queries > 0 else 0.0
         avg_dup_density = sum(qd.duplicate_density for qd in query_details) / total_queries if total_queries > 0 else 0.0
-        
+
         # Determine top recommendation based on the dominant failure mode
         dominant_mode = max(category_counts, key=category_counts.get)
         if category_counts[dominant_mode] == 0:
@@ -246,7 +247,7 @@ class RetrievalDiagnostics:
             top_rec = "Tune RRF parameters or investigate fusion strategy."
         else:
             top_rec = "Source Diversification (prevent duplicate source files from dominating the Top-K)."
-            
+
         return DiagnosticsSummary(
             project=project,
             total_queries=total_queries,

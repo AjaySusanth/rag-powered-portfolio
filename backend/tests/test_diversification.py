@@ -1,7 +1,7 @@
-import pytest
-from src.models.retrieval_result import RetrievalResult
 from src.models.chunk import Chunk
+from src.models.retrieval_result import RetrievalResult
 from src.retrieval.diversification import diversify_by_source
+
 
 def make_mock_chunk(chunk_id: str, source_file: str) -> Chunk:
     return Chunk(

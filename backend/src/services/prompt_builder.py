@@ -10,7 +10,9 @@ logic in the orchestrator, ensuring that citations perfectly match only the docu
 """
 
 from typing import List
+
 from pydantic import BaseModel
+
 from src.models.retrieval_result import RetrievalResult
 
 
@@ -40,12 +42,12 @@ class PromptBuilder:
     def build(cls, original_query: str, chunks: List[RetrievalResult], max_chunks: int = 15) -> PromptBuildResult:
         """
         Assembles and formats the final prompt text.
-        
+
         Args:
             original_query: The original user question.
             chunks: The filtered RetrievalResults to assemble as context.
             max_chunks: Upper limit of chunks to include in the context.
-            
+
         Returns:
             A PromptBuildResult containing the structured string prompt and the list of chunks used.
         """

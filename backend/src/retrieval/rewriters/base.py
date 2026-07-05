@@ -1,14 +1,16 @@
 """
 WHY THIS WAS CHOSEN:
-We define a provider-agnostic abstract base class (BaseQueryRewriter) to decouple our 
-higher-level workflows (like evaluation, API handlers, or chat pipelines) from specific 
-LLM API client implementations. This makes it easy to swap rewriter models or use a mock 
+We define a provider-agnostic abstract base class (BaseQueryRewriter) to decouple our
+higher-level workflows (like evaluation, API handlers, or chat pipelines) from specific
+LLM API client implementations. This makes it easy to swap rewriter models or use a mock
 rewriter for deterministic testing.
 """
 
 from abc import ABC, abstractmethod
 from typing import Optional
+
 from src.models.rewrite_result import RewriteResult
+
 
 class BaseQueryRewriter(ABC):
     """

@@ -14,9 +14,9 @@ import logging
 from typing import List, Optional
 
 from src.embedding.azure_openai_embedder import embed_query
-from src.vectorstore.pgvector_store import similarity_search
-from src.models.retrieval_result import RetrievalResult
 from src.models.chunk import Chunk
+from src.models.retrieval_result import RetrievalResult
+from src.vectorstore.pgvector_store import similarity_search
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ async def retrieve(
 ) -> List[RetrievalResult]:
     """
     Executes a vector similarity search for the given natural language query.
-    
+
     Pipeline:
     1. Embed the query using Azure OpenAI.
     2. Search the pgvector store for the closest `top_k` matches (optionally scoped to a project).
@@ -42,20 +42,20 @@ async def retrieve(
     try:
         # 1. Embed the query
         query_vector = await embed_query(query)
-        
+
         # 2. Execute pgvector similarity search
         rows = await similarity_search(
             query_embedding=query_vector,
             limit=top_k,
             project_filter=project
         )
-        
+
         # 3. Reconstruct models
         results: List[RetrievalResult] = []
         for row in rows:
             # Extract the similarity score injected by the pgvector query
             score = row.pop("similarity", 0.0)
-            
+
             # Map remaining database fields to the Chunk dataclass
             chunk = Chunk(
                 chunk_id=row.get("chunk_id", ""),
@@ -71,9 +71,9 @@ async def retrieve(
                 char_count=row.get("char_count", 0),
                 metadata=row.get("metadata", {})
             )
-            
+
             results.append(RetrievalResult(chunk=chunk, score=score))
-            
+
         return results
 
     except Exception as e:

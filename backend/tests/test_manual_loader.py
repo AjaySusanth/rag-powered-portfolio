@@ -9,8 +9,12 @@ metadata correctly without needing to access the live filesystem during tests.
 """
 
 import pytest
-from pathlib import Path
-from src.ingestion.manual_loader import discover_projects, load_manual_documents, ManualIngestionError
+
+from src.ingestion.manual_loader import (
+    ManualIngestionError,
+    discover_projects,
+    load_manual_documents,
+)
 from src.models.document import Document
 
 
@@ -21,14 +25,14 @@ def test_discover_projects(tmp_path):
     """
     knowledge_dir = tmp_path / "knowledge"
     knowledge_dir.mkdir()
-    
+
     # Add project subdirectories
     (knowledge_dir / "talentforge").mkdir()
     (knowledge_dir / "n8n-aks-platform").mkdir()
-    
+
     # Add files at the root (should not count as project directories)
     (knowledge_dir / "resume.md").write_text("resume", encoding="utf-8")
-    
+
     projects = discover_projects(knowledge_dir)
     assert projects == ["n8n-aks-platform", "talentforge"]
 
@@ -48,13 +52,13 @@ def test_load_manual_documents_success(tmp_path):
     """
     knowledge_dir = tmp_path / "knowledge"
     knowledge_dir.mkdir()
-    
+
     # 1. Root global identity files
     (knowledge_dir / "resume.md").write_text("Resume Content", encoding="utf-8")
     (knowledge_dir / "about-me.md").write_text("About Me Content", encoding="utf-8")
     (knowledge_dir / "faq.md").write_text("FAQ Content", encoding="utf-8")
     (knowledge_dir / "ignored_root.txt").write_text("Text file", encoding="utf-8")  # Unsupported extension
-    
+
     # 2. Project subdirectory files
     project_dir = knowledge_dir / "talentforge"
     project_dir.mkdir()
@@ -63,7 +67,7 @@ def test_load_manual_documents_success(tmp_path):
     (project_dir / "challenges.md").write_text("Challenges Content", encoding="utf-8")
     (project_dir / "lessons-learned.md").write_text("Lessons Learned Content", encoding="utf-8")
     (project_dir / "ingest.yml").write_text("yaml content", encoding="utf-8")  # Unsupported extension
-    
+
     # Nested folder under project
     nested_dir = project_dir / "nested"
     nested_dir.mkdir()
@@ -72,7 +76,7 @@ def test_load_manual_documents_success(tmp_path):
     # Load manual documents for project "__global__"
     global_documents = load_manual_documents("__global__", knowledge_dir)
     assert len(global_documents) == 3
-    
+
     # Verify file types ignored in global load
     global_unsupported = [doc for doc in global_documents if doc.source_file.endswith(".txt")]
     assert len(global_unsupported) == 0
@@ -87,17 +91,17 @@ def test_load_manual_documents_success(tmp_path):
     # Load manual documents for project "talentforge"
     project_documents = load_manual_documents("talentforge", knowledge_dir)
     assert len(project_documents) == 5
-    
+
     # Verify file types ignored in project load
     project_unsupported = [doc for doc in project_documents if doc.source_file.endswith(".yml")]
     assert len(project_unsupported) == 0
-    
+
     # Check specific project files
     for doc in project_documents:
         assert doc.project == "talentforge"
         assert doc.source_type == "manual"
         assert doc.metadata == {"source": "manual", "original_file": doc.source_file}
-        
+
         if doc.source_file == "talentforge/nested/deep_doc.md":
             # Any file not explicitly listed in DESIGN_FILES defaults to 'artifact' layer
             assert doc.layer == "artifact"
@@ -135,7 +139,7 @@ def test_merge_github_and_manual_documents():
             source_file="src/utils.py"
         )
     ]
-    
+
     manual_docs = [
         Document(
             content="Manual resume",
@@ -152,7 +156,7 @@ def test_merge_github_and_manual_documents():
             source_file="talentforge/architecture.md"
         )
     ]
-    
+
     combined = github_docs + manual_docs
     assert len(combined) == 4
     assert combined[0].source_type == "github"

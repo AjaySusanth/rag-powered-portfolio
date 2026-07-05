@@ -8,9 +8,11 @@ Since `pytest-asyncio` is not in requirements, we leverage the pre-installed `an
 with `@pytest.mark.anyio` to execute async test coroutines cleanly.
 """
 
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from src.ingestion.embedder import embed_texts, embed_query, EmbeddingError
+
+from src.ingestion.embedder import EmbeddingError, embed_query, embed_texts
 
 
 @pytest.fixture(autouse=True)
@@ -55,7 +57,7 @@ async def test_embed_texts_success() -> None:
         assert len(results) == 2
         assert results[0] == pytest.approx([0.1] * 1536)
         assert results[1] == pytest.approx([0.2] * 1536)
-        
+
         # Verify call parameters
         mock_client.embeddings.create.assert_called_once()
 
@@ -66,7 +68,7 @@ async def test_embed_texts_empty() -> None:
     with patch("src.ingestion.embedder.get_azure_client") as mock_get_client:
         mock_client = AsyncMock()
         mock_get_client.return_value = mock_client
-        
+
         results = await embed_texts([])
         assert results == []
         mock_client.embeddings.create.assert_not_called()

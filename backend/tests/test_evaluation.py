@@ -4,15 +4,15 @@ This test suite verifies the correctness of the dataset validation rules and eva
 (Recall@K, Hit Rate, MRR, Layer Recall, Category Accuracy) under various scenarios.
 Mocking the database pool and retriever allows testing these features in isolation.
 """
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from typing import List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from src.evaluation.dataset_validator import DatasetValidator, DatasetValidationError
+import pytest
+
+from src.evaluation.dataset_validator import DatasetValidationError, DatasetValidator
 from src.evaluation.retrieval_evaluator import RetrievalEvaluator, Retriever
-from src.models.retrieval_result import RetrievalResult
 from src.models.chunk import Chunk
-from src.models.evaluation_result import EvaluationResult
+from src.models.retrieval_result import RetrievalResult
 
 
 # A Mock Retriever implementation
@@ -105,18 +105,18 @@ async def test_knowledge_base_validation_missing_files(mock_get_pool, valid_data
     # Mock database to return only one of the files
     mock_conn = AsyncMock()
     mock_conn.fetch.return_value = [{"source_file": "src/ranking.py"}]
-    
+
     mock_context_manager = AsyncMock()
     mock_context_manager.__aenter__.return_value = mock_conn
-    
+
     mock_pool = AsyncMock()
     mock_pool.acquire = MagicMock(return_value=mock_context_manager)
     mock_get_pool.return_value = mock_pool
 
     with pytest.raises(DatasetValidationError, match="expected source files are missing"):
         await DatasetValidator.validate_knowledge_base(
-            "talentforge", 
-            valid_dataset_data["questions"], 
+            "talentforge",
+            valid_dataset_data["questions"],
             db_check=True
         )
 
@@ -130,18 +130,18 @@ async def test_knowledge_base_validation_success(mock_get_pool, valid_dataset_da
         {"source_file": "src/ranking.py"},
         {"source_file": "ci.yml"}
     ]
-    
+
     mock_context_manager = AsyncMock()
     mock_context_manager.__aenter__.return_value = mock_conn
-    
+
     mock_pool = AsyncMock()
     mock_pool.acquire = MagicMock(return_value=mock_context_manager)
     mock_get_pool.return_value = mock_pool
 
     # Should not raise an error
     await DatasetValidator.validate_knowledge_base(
-        "talentforge", 
-        valid_dataset_data["questions"], 
+        "talentforge",
+        valid_dataset_data["questions"],
         db_check=True
     )
 

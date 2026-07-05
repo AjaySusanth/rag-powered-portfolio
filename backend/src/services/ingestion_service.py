@@ -7,18 +7,18 @@ and the administrative HTTP route (POST /ingest) can invoke the same logic witho
 """
 
 import time
-from pathlib import Path
+from pathlib import Path  # noqa: F401
 from typing import List
 
-from src.config import PROJECT_ROOT, GLOBAL_PROJECT_NAME
+from src.api.schemas.admin import IngestSummary
+from src.chunking.chunker import chunk_document
+from src.config import GLOBAL_PROJECT_NAME, PROJECT_ROOT
+from src.db.init_db import init_db
+from src.embedding.azure_openai_embedder import embed_chunks
 from src.ingestion.github_fetcher import fetch_github_repository
 from src.ingestion.manual_loader import load_manual_documents
-from src.chunking.chunker import chunk_document
-from src.embedding.azure_openai_embedder import embed_chunks
-from src.db.init_db import init_db
-from src.vectorstore.pgvector_store import upsert_chunks, delete_project
 from src.retrieval.bm25_retriever import index_instance
-from src.api.schemas.admin import IngestSummary
+from src.vectorstore.pgvector_store import delete_project, upsert_chunks
 
 
 class IngestionService:
@@ -31,17 +31,17 @@ class IngestionService:
     async def ingest_project(project_name_raw: str) -> IngestSummary:
         """
         Triggers the full ingestion pipeline for the specified project.
-        
+
         Args:
             project_name_raw: Raw name of the project to ingest.
-            
+
         Returns:
             An IngestSummary containing statistics and errors (if any) about the run.
         """
         start_time = time.time()
         project_name = project_name_raw.strip().lower()
         knowledge_dir = PROJECT_ROOT / "knowledge"
-        
+
         errors: List[str] = []
 
         # 1. & 2. Fetch and load documents depending on target namespace
@@ -56,7 +56,7 @@ class IngestionService:
             yaml_path = PROJECT_ROOT / "knowledge" / project_name / "ingest.yml"
             if not yaml_path.exists():
                 raise FileNotFoundError(f"Configuration ingest.yml not found at: {yaml_path}")
-            
+
             # Fetch documents from GitHub
             github_documents = await fetch_github_repository(str(yaml_path))
             # Load project-specific manual documents
