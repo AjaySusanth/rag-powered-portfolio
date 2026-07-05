@@ -1,7 +1,14 @@
 # WHY THIS WAS CHOSEN:
-# This Dockerfile uses a multi-stage build to compile dependencies and creates a minimal, 
+# This Dockerfile uses a multi-stage build to compile dependencies and creates a minimal,
 # secure final image based on Python 3.12-slim. It implements a non-root user for security
 # and uses a built-in Python-based HEALTHCHECK to avoid installing curl/wget.
+#
+# WHY /install instead of --user:
+# Using `pip install --prefix=/install` writes packages to a fixed, predictable path
+# that can be cleanly copied to the runner stage. The `--user` flag writes to
+# /root/.local in the builder, but copying that to /home/appuser/.local causes
+# Python's site-packages resolver to miss the packages at runtime because the
+# ownership transfer changes the expected path structure.
 
 # Stage 1: Build dependencies
 FROM python:3.12-slim AS builder
@@ -13,7 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
 # Stage 2: Final minimal runtime image
 FROM python:3.12-slim AS runner
@@ -29,13 +36,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN groupadd -g 10001 appgroup && \
     useradd -u 10001 -g appgroup -d /app -s /sbin/nologin appuser
 
-# Copy installed Python packages from builder stage
-COPY --from=builder /root/.local /home/appuser/.local
+# Copy installed Python packages from builder stage into the system Python path
+COPY --from=builder /install /usr/local
+
 COPY --chown=appuser:appgroup src/ /app/src/
 COPY --chown=appuser:appgroup data/ /app/data/
 
-# Adjust paths and permissions
-ENV PATH=/home/appuser/.local/bin:$PATH
 ENV PYTHONPATH=/app
 
 # Switch to non-root user
