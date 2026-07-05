@@ -46,6 +46,7 @@
 }
 
 :root {
+  color-scheme: light;
   --background: #FFFFFF;
   --foreground: #0F1115;
   --card: #FFFFFF;
@@ -80,6 +81,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: #0B0E14;
   --foreground: #E6E8EB;
   --card: #161A22;
@@ -119,4 +121,22 @@
   html {
     @apply font-sans h-full antialiased scroll-smooth;
   }
+}
+
+/* 
+  Forced Dark Mode Mitigation:
+  Forced dark mode engines (like Brave's Auto Dark Mode) lag during CSS color transitions,
+  causing a temporary white/uninverted flash. Disabling transition duration on interactive
+  elements ensures instantaneous state switching, eliminating color-inversion lag.
+*/
+button,
+a,
+[role="button"],
+button *,
+a *,
+.transition-all,
+.transition-colors {
+  transition: none !important;
+  transition-duration: 0ms !important;
+  transition-delay: 0ms !important;
 }

@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 
 export function useAutoScroll(dependency: any) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [isUserScrolled, setIsUserScrolled] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
 
     const handleScroll = () => {
-      const threshold = 100; // threshold in px to detect if user manually scrolled up
+      const threshold = 60; // Threshold to detect manual user scroll-up
       const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
       setIsUserScrolled(distanceFromBottom > threshold);
     };
@@ -24,9 +26,12 @@ export function useAutoScroll(dependency: any) {
     const el = scrollRef.current;
     if (!el || isUserScrolled) return;
 
-    // Pin scroll position directly to the bottom (snappy for fast token streaming)
-    el.scrollTop = el.scrollHeight;
-  }, [dependency, isUserScrolled]);
+    // Smoothly scroll to bottom, respecting prefers-reduced-motion
+    el.scrollTo({
+      top: el.scrollHeight,
+      behavior: shouldReduceMotion ? "auto" : "smooth",
+    });
+  }, [dependency, isUserScrolled, shouldReduceMotion]);
 
   return { scrollRef, isUserScrolled };
 }

@@ -11,7 +11,7 @@ export function SummaryStrip() {
         {ROLE_BADGES.map((role) => (
           <span
             key={role}
-            className="inline-flex items-center px-3 py-1 rounded-full bg-primary/5 text-primary border border-primary/15 dark:bg-primary/10 dark:text-primary-foreground text-xs font-bold"
+            className="inline-flex items-center px-3 py-1 rounded-full bg-primary/5 text-primary border border-primary/15 dark:bg-primary/10 dark:text-primary text-xs font-bold"
           >
             {role}
           </span>

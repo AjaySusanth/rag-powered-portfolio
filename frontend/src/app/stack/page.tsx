@@ -7,8 +7,8 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { TechCategory } from "@/components/stack/TechCategory";
 import { fetchStack } from "@/services/api/portfolio";
 import { StackResponse } from "@/types/portfolio";
-import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { StackSkeleton } from "@/components/common/Skeleton";
+import { StatusState } from "@/components/common/StatusState";
 
 export default function StackPage() {
   const [data, setData] = useState<StackResponse | null>(null);
@@ -40,27 +40,15 @@ export default function StackPage() {
       />
 
       <div className="mt-8 max-w-5xl mx-auto w-full">
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-20 space-y-2">
-            <Loader2 className="h-8 w-8 text-primary animate-spin" />
-            <span className="text-xs text-muted-foreground font-medium">Fetching stack configurations...</span>
-          </div>
-        )}
+        {loading && <StackSkeleton />}
 
         {error && (
-          <div className="flex flex-col items-center justify-center py-16 border border-rose-500/15 bg-rose-500/5 rounded-2xl p-6 text-center space-y-4">
-            <AlertCircle className="h-8 w-8 text-rose-500" />
-            <div>
-              <h3 className="text-sm font-bold text-foreground">API Connection Issue</h3>
-              <p className="text-xs text-muted-foreground mt-1 max-w-md">
-                Unable to establish a connection with the backend portfolio service. Please verify that the backend application is running.
-              </p>
-            </div>
-            <Button onClick={loadData} size="sm" className="gap-1.5 font-semibold cursor-pointer">
-              <RefreshCw className="h-3.5 w-3.5" />
-              Retry Connection
-            </Button>
-          </div>
+          <StatusState
+            type="error"
+            title="Failed to Load Technology Stack"
+            description="We were unable to fetch the technology inventory. Please verify that the API backend server is running."
+            onRetry={loadData}
+          />
         )}
 
         {!loading && !error && data && (

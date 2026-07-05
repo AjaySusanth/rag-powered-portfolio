@@ -17,12 +17,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://portfolio.ajaysusanth.dev"),
   title: "Ajay Susanth | RAG-Powered Developer Portfolio",
   description: "Explore the engineering portfolio of Ajay Susanth, featuring a production-grade RAG pipeline, pgvector semantic search, and robust systems architecture.",
   openGraph: {
     title: "Ajay Susanth | RAG-Powered Developer Portfolio",
     description: "Explore the engineering portfolio of Ajay Susanth, featuring a production-grade RAG pipeline, pgvector semantic search, and robust systems architecture.",
-    url: "https://ajaysusanth.com",
+    url: "https://portfolio.ajaysusanth.dev",
     siteName: "Ajay Susanth Portfolio",
     type: "website",
     locale: "en_US",
@@ -32,13 +33,22 @@ export const metadata: Metadata = {
     title: "Ajay Susanth | RAG-Powered Developer Portfolio",
     description: "Explore the engineering portfolio of Ajay Susanth, featuring a production-grade RAG pipeline, pgvector semantic search, and robust systems architecture.",
   },
+  robots: {
+    index: true,
+    follow: true,
+  },
   icons: {
     icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0B0E14",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0B0E14" },
+    { media: "(prefers-color-scheme: light)", color: "#FFFFFF" },
+  ],
+  colorScheme: "dark light",
   width: "device-width",
   initialScale: 1,
 };

@@ -21,19 +21,19 @@ export function AvailabilityCard({
         <h3 className="font-bold text-foreground text-xs uppercase tracking-wider">Availability & Status</h3>
       </div>
       <div className="space-y-3.5 text-xs">
-        <div className="flex items-center gap-2">
+        <div className="flex items-start gap-3">
           {currentlyAvailable ? (
-            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-semibold border border-emerald-500/20">
-              <CheckCircle2 className="h-3 w-3" />
+            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-semibold border border-emerald-500/20 shrink-0 whitespace-nowrap">
+              <CheckCircle2 className="h-3.5 w-3.5" />
               Open for Offers
             </span>
           ) : (
-            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 font-semibold border border-amber-500/20">
-              <AlertCircle className="h-3 w-3" />
+            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 font-semibold border border-amber-500/20 shrink-0 whitespace-nowrap">
+              <AlertCircle className="h-3.5 w-3.5" />
               Passive Search
             </span>
           )}
-          <span className="text-muted-foreground">{status}</span>
+          <span className="text-muted-foreground leading-relaxed pt-0.5">{status}</span>
         </div>
         <div>
           <span className="font-bold text-foreground/90 block mb-1">Employment Types:</span>
