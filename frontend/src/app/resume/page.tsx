@@ -5,9 +5,12 @@ import dynamic from "next/dynamic";
 import { PageContainer } from "@/components/common/PageContainer";
 import { PageHeader } from "@/components/common/PageHeader";
 
+import { ResumeSkeleton } from "@/components/common/Skeleton";
+
 // Dynamically load the client-only PDF viewer
 const ResumeViewer = dynamic(() => import("@/components/resume/ResumeViewer"), {
   ssr: false,
+  loading: () => <ResumeSkeleton />,
 });
 
 export default function ResumePage() {

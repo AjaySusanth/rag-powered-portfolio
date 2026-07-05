@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Mail, Globe, Download } from "lucide-react";
+import { Mail, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -56,10 +56,6 @@ export function ContactCard({ email, linkedin, github, portfolio, resumeUrl }: C
           <a href={github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-muted-foreground hover:text-primary transition-colors">
             <GithubIcon />
             <span>GitHub Profile</span>
-          </a>
-          <a href={portfolio} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-muted-foreground hover:text-primary transition-colors">
-            <Globe className="h-4 w-4 shrink-0 text-muted-foreground/75" />
-            <span>Portfolio Web</span>
           </a>
         </div>
         <div className="pt-3.5 border-t border-border/45">

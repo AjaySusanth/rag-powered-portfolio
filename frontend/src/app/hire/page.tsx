@@ -9,8 +9,8 @@ import { PreferenceCard } from "@/components/hire/PreferenceCard";
 import { ContactCard } from "@/components/hire/ContactCard";
 import { fetchHire, getResumeUrl } from "@/services/api/portfolio";
 import { HireResponse } from "@/types/portfolio";
-import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { HireSkeleton } from "@/components/common/Skeleton";
+import { StatusState } from "@/components/common/StatusState";
 
 export default function HirePage() {
   const [data, setData] = useState<HireResponse | null>(null);
@@ -42,27 +42,15 @@ export default function HirePage() {
       />
 
       <div className="mt-8 max-w-5xl mx-auto w-full">
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-20 space-y-2">
-            <Loader2 className="h-8 w-8 text-primary animate-spin" />
-            <span className="text-xs text-muted-foreground font-medium">Fetching details...</span>
-          </div>
-        )}
+        {loading && <HireSkeleton />}
 
         {error && (
-          <div className="flex flex-col items-center justify-center py-16 border border-rose-500/15 bg-rose-500/5 rounded-2xl p-6 text-center space-y-4">
-            <AlertCircle className="h-8 w-8 text-rose-500" />
-            <div>
-              <h3 className="text-sm font-bold text-foreground">API Connection Issue</h3>
-              <p className="text-xs text-muted-foreground mt-1 max-w-md">
-                Unable to retrieve hiring preferences. Please verify that the backend API service is running.
-              </p>
-            </div>
-            <Button onClick={loadData} size="sm" className="gap-1.5 font-semibold cursor-pointer">
-              <RefreshCw className="h-3.5 w-3.5" />
-              Retry Connection
-            </Button>
-          </div>
+          <StatusState
+            type="error"
+            title="Failed to Load Preferences"
+            description="We were unable to retrieve employment preferences. Please check if the portfolio service is online."
+            onRetry={loadData}
+          />
         )}
 
         {!loading && !error && data && (

@@ -40,11 +40,11 @@ export function Sidebar({ isMobile, isOpen, onClose, className, ...props }: Side
             className={cn(
               "flex items-center gap-3.5 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               isActive
-                ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-foreground shadow-[inset_3px_0_0_0_currentColor]"
+                ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary shadow-[inset_3px_0_0_0_currentColor]"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
             )}
           >
-            <Icon className={cn("h-4.5 w-4.5", isActive ? "text-primary dark:text-primary-foreground" : "text-muted-foreground")} />
+            <Icon className={cn("h-4.5 w-4.5", isActive ? "text-primary dark:text-primary" : "text-muted-foreground")} />
             {item.label}
           </Link>
         );

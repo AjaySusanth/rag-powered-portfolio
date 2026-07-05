@@ -1,8 +1,9 @@
 import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, FileText, Layers, Mail, FolderGit } from "lucide-react";
+import { FileText, Layers, Mail, FolderGit } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { StatusState } from "@/components/common/StatusState";
 
 interface OfflineStateProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -15,21 +16,13 @@ export function OfflineState({ className, ...props }: OfflineStateProps) {
   ];
 
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center justify-center text-center p-6 border border-warning/20 bg-warning/5 rounded-xl max-w-lg mx-auto backdrop-blur-sm",
-        className
-      )}
-      {...props}
-    >
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning/10 text-warning mb-4">
-        <AlertCircle className="h-6 w-6" />
-      </div>
-      <h3 className="text-lg font-bold text-foreground mb-2">AI Assistant Offline</h3>
-      <p className="text-sm text-muted-foreground mb-6 leading-relaxed max-w-sm">
-        AI assistant is temporarily unavailable. You can still explore my portfolio.
-      </p>
-      <div className="flex flex-wrap justify-center gap-2">
+    <div className={cn("space-y-5 w-full max-w-lg mx-auto", className)} {...props}>
+      <StatusState
+        type="offline"
+        title="AI Assistant Offline"
+        description="The AI Portfolio Assistant is temporarily unavailable. You can still explore static portfolio sections using the links below."
+      />
+      <div className="flex flex-wrap justify-center gap-2.5">
         {offlineLinks.map((link) => {
           const Icon = link.icon;
           return (
@@ -37,7 +30,7 @@ export function OfflineState({ className, ...props }: OfflineStateProps) {
               key={link.href}
               variant="outline"
               size="sm"
-              className="gap-2 hover:bg-muted"
+              className="gap-1.5 hover:bg-muted text-xs font-semibold cursor-pointer"
               render={<Link href={link.href} />}
               nativeButton={false}
             >

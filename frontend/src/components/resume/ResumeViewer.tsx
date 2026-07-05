@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { getResumeUrl } from "@/services/api/portfolio";
-import { Download, Printer, Loader2, AlertCircle } from "lucide-react";
+import { Download, Printer, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { StatusState } from "@/components/common/StatusState";
 
 // Configure local CDN worker source
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -85,19 +86,16 @@ export default function ResumeViewer() {
         )}
 
         {error ? (
-          <div className="flex flex-col items-center justify-center p-6 text-center space-y-3">
-            <AlertCircle className="h-8 w-8 text-rose-500" />
-            <h3 className="text-sm font-bold text-foreground">Preview Rendering Unavailable</h3>
-            <p className="text-xs text-muted-foreground max-w-sm">
-              Your browser security sandboxing or network policies blocked PDF.js canvas generation. You can still download the resume file directly to view or print it.
-            </p>
-            <a href={pdfUrl} download="Ajay_Susanth_Resume.pdf">
-              <Button size="sm" className="gap-1.5 font-semibold">
-                <Download className="h-3.5 w-3.5" />
-                Download Resume
-              </Button>
-            </a>
-          </div>
+          <StatusState
+            type="error"
+            title="Preview Rendering Unavailable"
+            description="Your browser security sandboxing or network policies blocked PDF.js canvas generation. You can still download the resume file directly to view or print it."
+            onRetry={() => {
+              setError(null);
+              setLoading(true);
+            }}
+            retryText="Reload Viewer"
+          />
         ) : (
           pdfUrl && (
             <Document
