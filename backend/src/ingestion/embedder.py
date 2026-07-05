@@ -13,9 +13,11 @@ Why Azure OpenAI:
 
 import logging
 from typing import List, Optional
+
 from openai import AsyncAzureOpenAI
-from src.config import settings
+
 from src.cache.factory import create_cache_from_settings
+from src.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +46,7 @@ _client: Optional[AsyncAzureOpenAI] = None
 def get_azure_client() -> AsyncAzureOpenAI:
     """
     Returns the AsyncAzureOpenAI client instance.
-    
+
     Why: Lazy initialization ensures settings are fully loaded before client instantiation
     and allows for easier mocking/testing.
     """
@@ -67,7 +69,7 @@ def get_azure_client() -> AsyncAzureOpenAI:
 async def embed_texts(texts: List[str], batch_size: int = 100) -> List[List[float]]:
     """
     Generates 1536-dimensional embeddings for a list of text strings.
-    
+
     Checks the Redis cache first. For cache misses, delegates to the Azure OpenAI client.
     Deduplicates identical strings within the same batch to avoid redundant API calls.
     """

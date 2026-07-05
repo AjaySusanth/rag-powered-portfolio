@@ -7,6 +7,7 @@ Defining this in the models package keeps our data schemas separated from retrie
 
 from pydantic import BaseModel, Field
 
+
 class RewriteResult(BaseModel):
     """
     Encapsulates the structured output of the query rewriter.

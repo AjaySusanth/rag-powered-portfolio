@@ -6,6 +6,7 @@ sharing the contract between the CLI tool and the HTTP endpoint.
 """
 
 from typing import List
+
 from pydantic import BaseModel, Field
 
 

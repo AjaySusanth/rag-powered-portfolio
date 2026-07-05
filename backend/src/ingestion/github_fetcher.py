@@ -11,12 +11,13 @@ We fetch raw file data using the GitHub Blobs API via the 'application/vnd.githu
 media type, which bypasses path-encoding edge cases and base64 parsing overhead.
 """
 
-import logging
-import yaml
-import httpx
 import asyncio
+import logging
 from pathlib import Path, PurePosixPath
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
+import httpx
+import yaml
 
 from src.config import settings
 from src.models.document import Document, determine_document_layer
@@ -56,27 +57,27 @@ def parse_ingest_yaml(yaml_path: str) -> Dict[str, Any]:
     try:
         with open(yaml_path, 'r', encoding='utf-8') as f:
             data = yaml.safe_load(f)
-            
+
         if not data:
             raise GitHubIngestionError(f"Configuration file is empty: {yaml_path}")
-            
+
         project = data.get("project")
         github_repo = data.get("github_repo")
-        
+
         if not project or not github_repo:
             raise GitHubIngestionError(
                 f"Missing required fields 'project' or 'github_repo' in {yaml_path}"
             )
-            
+
         # Ensure we have lists for globs
         auto_ingest = data.get("auto_ingest") or []
         ignore = data.get("ignore") or []
-        
+
         if isinstance(auto_ingest, str):
             auto_ingest = [auto_ingest]
         if isinstance(ignore, str):
             ignore = [ignore]
-            
+
         return {
             "project": project,
             "github_repo": github_repo,
@@ -101,18 +102,18 @@ def expand_pattern(pattern: str, max_depth: int) -> List[str]:
     """
     Recursively expands double asterisks (**) into different combinations of '*'
     to allow standard pathlib.PurePosixPath.match() to evaluate it correctly.
-    
+
     Explanation of approach:
     Since Python <3.13 PurePosixPath.match() does not recursively match '**' inside paths,
     we expand any '**' in the pattern into 0 to max_depth segments of '*' (e.g. '', '*', '*/*', etc.).
     """
     if '**' not in pattern:
         return [pattern]
-        
+
     parts = pattern.split('**', 1)
     prefix = parts[0]
     suffix = parts[1]
-    
+
     results = []
     for k in range(max_depth + 1):
         if k == 0:
@@ -128,7 +129,7 @@ def expand_pattern(pattern: str, max_depth: int) -> List[str]:
         else:
             stars = '/'.join(['*'] * k)
             expanded = prefix + stars + suffix
-            
+
         # Recursively expand remaining '**' in the suffix
         results.extend(expand_pattern(expanded, max_depth))
     return results
@@ -141,17 +142,17 @@ def match_pattern(path: str, pattern: str) -> bool:
     """
     p = PurePosixPath(path)
     max_depth = len(p.parts)
-    
+
     # We expand '**' in the pattern based on the path's depth
     expanded_patterns = expand_pattern(pattern, max_depth)
-    
+
     for ep in set(expanded_patterns):
         # Normalize double slashes
         while '//' in ep:
             ep = ep.replace('//', '/')
         if p.match(ep):
             return True
-            
+
     return False
 
 
@@ -164,12 +165,12 @@ def _match_path(path: str, includes: List[str], ignores: List[str]) -> bool:
     for ignore in ignores:
         if match_pattern(path, ignore):
             return False
-            
+
     # 2. Check inclusions
     for include in includes:
         if match_pattern(path, include):
             return True
-            
+
     return False
 
 
@@ -183,16 +184,16 @@ async def fetch_github_repository(yaml_path: str) -> List[Document]:
     repo = config["github_repo"]
     includes = config["auto_ingest"]
     ignores = config["ignore"]
-    
+
     # Prepare headers for GitHub API
     headers = {
         "Accept": "application/vnd.github.v3+json",
         "User-Agent": "antigravity-portfolio-ingester"
     }
-    
+
     if settings.GITHUB_TOKEN:
         headers["Authorization"] = f"token {settings.GITHUB_TOKEN}"
-        
+
     async with httpx.AsyncClient(timeout=30.0) as client:
         # 1. Fetch repository information to find the default branch
         repo_url = f"https://api.github.com/repos/{repo}"
@@ -211,10 +212,10 @@ async def fetch_github_repository(yaml_path: str) -> List[Document]:
             resp.raise_for_status()
         except httpx.HTTPError as e:
             raise GitHubIngestionError(f"Failed to fetch repository metadata for {repo}: {e}")
-            
+
         repo_data = resp.json()
         default_branch = repo_data.get("default_branch", "main")
-        
+
         # 2. Fetch the file tree recursively
         tree_url = f"https://api.github.com/repos/{repo}/git/trees/{default_branch}?recursive=1"
         try:
@@ -222,26 +223,26 @@ async def fetch_github_repository(yaml_path: str) -> List[Document]:
             resp.raise_for_status()
         except httpx.HTTPError as e:
             raise GitHubIngestionError(f"Failed to fetch file tree for {repo}: {e}")
-            
+
         tree_data = resp.json()
         tree = tree_data.get("tree", [])
-        
+
         # 3. Filter files using inclusions, ignores, and binary checks
         matched_items = []
-        
+
         # Keep track of which inclusion patterns matched something
         matched_patterns = {pattern: False for pattern in includes}
-        
+
         for item in tree:
             if item.get("type") != "blob":
                 continue
-                
+
             path = item.get("path", "")
-            
+
             # Skip common binary extensions
             if is_binary_file(path):
                 continue
-                
+
             # Check pattern match
             is_matched = False
             for include in includes:
@@ -255,20 +256,20 @@ async def fetch_github_repository(yaml_path: str) -> List[Document]:
                     if not should_ignore:
                         is_matched = True
                         matched_patterns[include] = True
-                        
+
             if is_matched:
                 matched_items.append((path, item.get("sha")))
-                
+
         # Log include patterns that matched zero files
         for pattern, matched in matched_patterns.items():
             if not matched:
                 logger.warning(
                     f"Glob pattern '{pattern}' matched zero files in repository '{repo}'."
                 )
-                
+
         # 4. Fetch file contents concurrently using the blob API with a concurrency limit
         sem = asyncio.Semaphore(10)
-        
+
         async def fetch_file(path: str, sha: str) -> Optional[Document]:
             async with sem:
                 blob_url = f"https://api.github.com/repos/{repo}/git/blobs/{sha}"
@@ -277,11 +278,11 @@ async def fetch_github_repository(yaml_path: str) -> List[Document]:
                 # on some blob requests (notably empty files like e69de29b).
                 blob_headers = headers.copy()
                 blob_headers["Accept"] = "application/vnd.github+json"
-                
+
                 try:
                     resp = await client.get(blob_url, headers=blob_headers)
                     resp.raise_for_status()
-                    
+
                     blob_data = resp.json()
                     encoding = blob_data.get("encoding")
                     raw_content = blob_data.get("content", "")
@@ -316,10 +317,10 @@ async def fetch_github_repository(yaml_path: str) -> List[Document]:
                     logger.error(f"Failed to fetch content for file {path} (SHA: {sha}): {e}")
                     return None
 
-                    
+
         tasks = [fetch_file(path, sha) for path, sha in matched_items]
         results = await asyncio.gather(*tasks)
-        
+
         # Filter out None results
         documents = [doc for doc in results if doc is not None]
         return documents

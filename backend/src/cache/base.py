@@ -6,7 +6,8 @@ It ensures that the ChatOrchestrator can interact with any cache implementation
 """
 
 from abc import ABC, abstractmethod
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
+
 from src.api.schemas.chat import Citation
 
 

@@ -3,21 +3,17 @@ DESIGN DECISION:
 This test file validates the in-memory BM25 retrieval engine, ensuring tokenization correctness,
 search ranking quality, metadata filtering behavior, and compliance with the canonical RetrievalResult schema.
 
-We mock the PostgreSQL database dependency (`get_all_chunks`) to run these unit tests in-process 
+We mock the PostgreSQL database dependency (`get_all_chunks`) to run these unit tests in-process
 without requiring a live database or Docker container, keeping execution times fast.
 """
 
-import pytest
 from unittest.mock import AsyncMock, patch
 
-from src.retrieval.bm25_retriever import (
-    tokenize_code,
-    BM25Index,
-    retrieve,
-    index_instance
-)
-from src.models.retrieval_result import RetrievalResult
+import pytest
+
 from src.models.chunk import Chunk
+from src.models.retrieval_result import RetrievalResult
+from src.retrieval.bm25_retriever import BM25Index, index_instance, retrieve, tokenize_code
 
 
 def test_tokenizer_basic():
@@ -58,11 +54,11 @@ async def test_empty_corpus_handling(mock_get_all_chunks):
     without raising exceptions and returns empty lists for searches.
     """
     mock_get_all_chunks.return_value = []
-    
+
     # Instantiate a clean index to isolate test state
     test_index = BM25Index()
     await test_index.refresh_index()
-    
+
     results = test_index.search("auth")
     assert results == []
 
@@ -124,20 +120,20 @@ async def test_retrieval_ordering_and_shape(mock_get_all_chunks, mock_db_chunks)
     and returns correctly typed RetrievalResult / Chunk objects.
     """
     mock_get_all_chunks.return_value = mock_db_chunks
-    
+
     test_index = BM25Index()
     await test_index.refresh_index()
-    
+
     # Query matching chunk 1 heavily ("authMiddleware", "JWT", "authorization")
     results = test_index.search("JWT auth authorization", top_k=2)
-    
+
     assert len(results) == 1  # Only chunk 1 should have a score > 0
     assert isinstance(results[0], RetrievalResult)
     assert isinstance(results[0].chunk, Chunk)
-    
+
     assert results[0].chunk.chunk_id == "chunk-1"
     assert results[0].score > 0.0
-    
+
     # Query matching chunk 2 ("kubernetes", "service")
     results2 = test_index.search("kubernetes deployment name", top_k=5)
     assert len(results2) == 1
@@ -153,16 +149,16 @@ async def test_project_filtering_parity(mock_get_all_chunks, mock_db_chunks):
     __global__ bug limitation.
     """
     mock_get_all_chunks.return_value = mock_db_chunks
-    
+
     test_index = BM25Index()
     await test_index.refresh_index()
-    
+
     # Querying "backend developer" with no project filter
     results_no_filter = test_index.search("backend developer", project=None)
     assert len(results_no_filter) == 2
     # chunk-3 (resume) and chunk-1 (authMiddleware for authorization)
     assert {r.chunk.chunk_id for r in results_no_filter} == {"chunk-1", "chunk-3"}
-    
+
     # Querying "backend developer" filtered to project "n8n"
     # Should exclude chunk-3 because it is in "__global__" project, mirroring pgvector behavior.
     results_filtered = test_index.search("backend developer", project="n8n")
@@ -174,15 +170,15 @@ async def test_project_filtering_parity(mock_get_all_chunks, mock_db_chunks):
 @patch("src.retrieval.bm25_retriever.get_all_chunks", new_callable=AsyncMock)
 async def test_lazy_initialization(mock_get_all_chunks, mock_db_chunks):
     """
-    Verifies that calling the module-level `retrieve()` function automatically triggers 
+    Verifies that calling the module-level `retrieve()` function automatically triggers
     lazy initialization of the default `index_instance` singleton if not yet initialized.
     """
     mock_get_all_chunks.return_value = mock_db_chunks
-    
+
     # Force state back to uninitialized for testing lazy init
     index_instance._is_initialized = False
     index_instance.bm25 = None
-    
+
     results = await retrieve("kubernetes", project="n8n")
     assert len(results) == 1
     assert results[0].chunk.chunk_id == "chunk-2"

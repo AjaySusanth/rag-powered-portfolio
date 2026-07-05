@@ -11,7 +11,6 @@ from fastapi import APIRouter, HTTPException
 from src.api.schemas.admin import IngestRequest, IngestResponse
 from src.services.ingestion_service import IngestionService
 
-
 router = APIRouter(tags=["Admin"])
 
 

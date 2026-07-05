@@ -7,11 +7,12 @@ Using a central Settings class prevents configuration fragmentation and hardcode
 ensuring security and consistency across the database and OpenAI integrations.
 """
 
-from typing import Optional, List
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field, field_validator, model_validator
 from pathlib import Path
+from typing import List, Optional
 from urllib.parse import urlparse
+
+from pydantic import Field, field_validator, model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Resolve the absolute path to the project root where .env resides
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -190,7 +191,7 @@ class Settings(BaseSettings):
                 raise ValueError("DATABASE_URL must not target localhost/127.0.0.1 in production environment.")
             if "localhost" in self.REDIS_URL or "127.0.0.1" in self.REDIS_URL:
                 raise ValueError("REDIS_URL must not target localhost/127.0.0.1 in production environment.")
-        
+
         # Check API Keys based on selected providers
         if self.EMBEDDING_PROVIDER == "azure_openai":
             if not self.AZURE_OPENAI_API_KEY:
@@ -199,7 +200,7 @@ class Settings(BaseSettings):
                 raise ValueError("AZURE_OPENAI_ENDPOINT must be set when EMBEDDING_PROVIDER is 'azure_openai'")
 
         gemini_needed = any(
-            p == "gemini" 
+            p == "gemini"
             for p in [self.GENERATOR_PROVIDER, self.GRADER_PROVIDER, self.REWRITER_PROVIDER, self.ATTRIBUTOR_PROVIDER]
         )
         if gemini_needed and not self.GEMINI_API_KEY:

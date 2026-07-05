@@ -11,14 +11,15 @@ CORS origins are dynamically set based on the environment to ensure security in 
 
 import logging
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.config import settings
-from src.api.routes import chat, portfolio, admin
-from src.db.core import get_db_pool, close_db_pool
+from src.api.routes import admin, chat, portfolio
 from src.cache.factory import create_cache_from_settings
 from src.cache.redis import RedisCache
+from src.config import settings
+from src.db.core import close_db_pool, get_db_pool
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)

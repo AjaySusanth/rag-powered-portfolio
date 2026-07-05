@@ -6,8 +6,10 @@ preventing the test suite from making real external network calls to Gemini.
 """
 
 from typing import Dict, Optional
+
 from src.models.rewrite_result import RewriteResult
 from src.retrieval.rewriters.base import BaseQueryRewriter
+
 
 class MockQueryRewriter(BaseQueryRewriter):
     """
@@ -16,7 +18,7 @@ class MockQueryRewriter(BaseQueryRewriter):
     def __init__(self, rewrites: Optional[Dict[str, RewriteResult]] = None):
         """
         Initializes the mock rewriter.
-        
+
         Args:
             rewrites: Optional dictionary mapping input queries to their expected RewriteResult.
         """
@@ -29,7 +31,7 @@ class MockQueryRewriter(BaseQueryRewriter):
         """
         if query in self.rewrites:
             return self.rewrites[query]
-            
+
         # Default fallback: return the original query as-is
         return RewriteResult(
             rewritten_query=query,

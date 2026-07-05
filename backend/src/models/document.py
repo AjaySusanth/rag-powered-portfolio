@@ -48,19 +48,19 @@ class Document:
 def determine_document_layer(source_file: str, source_type: str) -> str:
     """
     Determines the document layer based on the filename and source type.
-    
+
     Identity and design layers are exclusively hand-authored files with known semantic
     purposes. Everything else defaults to the artifact layer.
     """
     if not source_file:
         return "artifact"
-        
+
     # Get the basename of the file path (e.g., 'path/to/resume.md' -> 'resume.md')
     filename = source_file.split("/")[-1].split("\\")[-1].lower()
-    
+
     if filename in IDENTITY_FILES:
         return "identity"
     if filename in DESIGN_FILES:
         return "design"
-        
+
     return "artifact"

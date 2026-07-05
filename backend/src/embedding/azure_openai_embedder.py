@@ -10,8 +10,10 @@ and returns them. It guarantees that chunks[i] corresponds exactly to embeddings
 
 import logging
 from typing import List
+
+from src.ingestion.embedder import embed_query as raw_embed_query
+from src.ingestion.embedder import embed_texts
 from src.models.chunk import Chunk
-from src.ingestion.embedder import embed_texts, embed_query as raw_embed_query
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +21,7 @@ logger = logging.getLogger(__name__)
 async def embed_chunks(chunks: List[Chunk], batch_size: int = 100) -> List[List[float]]:
     """
     Generates 1536-dimensional embeddings for a list of Chunk objects.
-    
+
     Extracts text from each Chunk and passes it to the underlying Azure OpenAI embedder.
     The order of returned embeddings is guaranteed to match the input chunks list.
     """
@@ -32,13 +34,13 @@ async def embed_chunks(chunks: List[Chunk], batch_size: int = 100) -> List[List[
     try:
         # Delegate to the existing batch-aware embedding function
         embeddings = await embed_texts(texts, batch_size=batch_size)
-        
+
         # Guard check to ensure alignment was preserved
         if len(embeddings) != len(chunks):
             raise ValueError(
                 f"Embedding count mismatch: generated {len(embeddings)} for {len(chunks)} chunks."
             )
-            
+
         return embeddings
     except Exception as e:
         logger.error(f"Failed to generate embeddings for chunks batch: {e}")

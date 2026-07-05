@@ -5,12 +5,13 @@ It uses a MockGrader that implements the BaseGrader interface to avoid making re
 allowing us to test filtering and fallback behaviors deterministically.
 """
 
-import pytest
 from typing import List
 
-from src.models.retrieval_result import RetrievalResult
-from src.models.chunk import Chunk
+import pytest
+
 from src.llm.interfaces import BaseGrader, ChunkGrade
+from src.models.chunk import Chunk
+from src.models.retrieval_result import RetrievalResult
 from src.retrieval.retrieval_grader import filter_relevant_chunks
 
 

@@ -1,20 +1,21 @@
 """
 DESIGN DECISION:
 This module implements BM25 keyword-based retrieval.
-We choose an in-process, in-memory BM25 index using the `rank-bm25` library to comply with the 
+We choose an in-process, in-memory BM25 index using the `rank-bm25` library to comply with the
 PRD requirement of low-latency retrieval with no network hop.
 
 To support code-heavy Layer 3 documents (e.g. YAML, source files), standard whitespace tokenization is insufficient.
 We implement a custom regex-based tokenizer that splits camelCase identifiers and punctuation (like '.' or '_'),
 ensuring query matches succeed against components of longer technical identifiers.
 
-State is encapsulated in a singleton `BM25Index` class to keep the module-level globals clean, 
+State is encapsulated in a singleton `BM25Index` class to keep the module-level globals clean,
 providing a thread-safe-like wrapper to initialize, refresh, and query the index.
 """
 
-import re
 import logging
+import re
 from typing import List, Optional
+
 from rank_bm25 import BM25Okapi
 
 from src.models.chunk import Chunk
@@ -27,12 +28,12 @@ logger = logging.getLogger(__name__)
 def tokenize_code(text: str) -> List[str]:
     """
     Tokenizes a string, optimized for code and technical documents.
-    
+
     BM25 Tokenization Concept:
-    Unlike natural language tokenization which only splits on whitespace, code tokenization must break down 
-    complex identifiers. For example, 'authMiddleware' or 'app.kubernetes.io/name' contain multiple terms 
+    Unlike natural language tokenization which only splits on whitespace, code tokenization must break down
+    complex identifiers. For example, 'authMiddleware' or 'app.kubernetes.io/name' contain multiple terms
     that a user might search for individually.
-    
+
     This function:
     1. Splits camelCase patterns (e.g., 'authMiddleware' -> 'auth Middleware') using regex.
     2. Replaces all non-alphanumeric characters with spaces to split on punctuation ('.', '/', '-', '_', etc.).
@@ -40,20 +41,20 @@ def tokenize_code(text: str) -> List[str]:
     """
     if not text:
         return []
-        
+
     # 1. Insert space before capitals to split camelCase/PascalCase
     # e.g., 'authMiddleware' -> 'auth Middleware', 'HTTPResponse' -> 'HTTP Response'
     s1 = re.sub(r'([a-z0-9])([A-Z])', r'\1 \2', text)
     s2 = re.sub(r'([A-Z]+)([A-Z][a-z])', r'\1 \2', s1)
-    
+
     # Insert space between letters and numbers
     # e.g., 'Token123' -> 'Token 123', '123Token' -> '123 Token'
     s3 = re.sub(r'([a-zA-Z])([0-9])', r'\1 \2', s2)
     s4 = re.sub(r'([0-9])([a-zA-Z])', r'\1 \2', s3)
-    
+
     # 2. Split on punctuation by replacing any non-alphanumeric character with a space
     s5 = re.sub(r'[^a-zA-Z0-9\s]', ' ', s4)
-    
+
     # 3. Lowercase and split on whitespace to get clean tokens
     tokens = [t.lower() for t in s5.split() if t]
     return tokens
@@ -62,9 +63,9 @@ def tokenize_code(text: str) -> List[str]:
 class BM25Index:
     """
     In-memory representation of the BM25 index.
-    
+
     Concept:
-    BM25 (Best Matching 25) is a ranking function used by search engines to estimate the relevance 
+    BM25 (Best Matching 25) is a ranking function used by search engines to estimate the relevance
     of documents to a given search query. It is based on term frequency (TF) and inverse document frequency (IDF).
     This class maintains the corpus, tokenized representation, metadata mappings, and the raw BM25Okapi object.
     """
@@ -82,7 +83,7 @@ class BM25Index:
         try:
             logger.info("Refreshing BM25 in-memory index from database...")
             db_chunks = await get_all_chunks()
-            
+
             # Map database dictionaries back to Chunk objects
             chunks = []
             for row in db_chunks:
@@ -102,7 +103,7 @@ class BM25Index:
                         metadata=row.get("metadata", {})
                     )
                 )
-            
+
             if not chunks:
                 logger.warning("No chunks found in database. Initializing BM25 index with empty corpus.")
                 self.corpus = []
@@ -112,13 +113,13 @@ class BM25Index:
                 return
 
             tokenized_corpus = [tokenize_code(chunk.content) for chunk in chunks]
-            
+
             self.corpus = chunks
             self.tokenized_corpus = tokenized_corpus
             self.bm25 = BM25Okapi(tokenized_corpus)
             self._is_initialized = True
             logger.info(f"BM25 index successfully refreshed with {len(chunks)} chunks.")
-            
+
         except Exception as e:
             logger.error(f"Failed to refresh BM25 index: {e}")
             raise
@@ -156,7 +157,7 @@ class BM25Index:
             # we only keep items matching that project, potentially ignoring global resume/faq items).
             if project is not None and chunk.project != project:
                 continue
-            
+
             # BM25 scores can be 0 or slightly negative; we only include positive score matches
             # to remain high signal, or keep everything matching project with positive scores.
             if score > 0.0:
@@ -178,7 +179,7 @@ async def retrieve(
 ) -> List[RetrievalResult]:
     """
     Retrieves chunks matching the natural language query using the BM25 index.
-    
+
     Why:
     Acts as the public interface for the BM25 retriever path, matching the signature
     of the vector retriever.
@@ -186,5 +187,5 @@ async def retrieve(
     # Lazy-init the index if it hasn't been initialized yet.
     if not index_instance._is_initialized:
         await index_instance.refresh_index()
-        
+
     return index_instance.search(query=query, top_k=top_k, project=project)

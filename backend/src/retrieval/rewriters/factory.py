@@ -11,6 +11,7 @@ from src.retrieval.rewriters.base import BaseQueryRewriter
 from src.retrieval.rewriters.gemini import GeminiQueryRewriter
 from src.retrieval.rewriters.mock import MockQueryRewriter
 
+
 def create_rewriter_from_settings() -> BaseQueryRewriter:
     """
     Creates and returns a BaseQueryRewriter instance based on application settings.

@@ -1,16 +1,21 @@
 """
 WHY THIS WAS CHOSEN:
 This module contains the RetrievalEvaluator, which drives the evaluation pipeline.
-It takes a retriever implementation (decoupled via Python Protocol), executes queries 
-defined in validation-safe datasets, and calculates granular IR metrics (Recall@K, Hit Rate, MRR, 
+It takes a retriever implementation (decoupled via Python Protocol), executes queries
+defined in validation-safe datasets, and calculates granular IR metrics (Recall@K, Hit Rate, MRR,
 Average Similarity, Layer Recall, Category Accuracy) alongside detailed failure logs.
 """
-from typing import List, Dict, Any, Optional, Protocol
+from typing import Any, Dict, List, Optional, Protocol
+
+from src.evaluation.dataset_validator import DatasetValidator
 from src.models.evaluation_result import (
-    EvaluationResult, QuestionResult, CategoryMetrics, LayerMetrics
+    CategoryMetrics,
+    EvaluationResult,
+    LayerMetrics,
+    QuestionResult,
 )
 from src.models.retrieval_result import RetrievalResult
-from src.evaluation.dataset_validator import DatasetValidator
+
 
 class Retriever(Protocol):
     async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
@@ -22,9 +27,9 @@ class RetrievalEvaluator:
         self.retriever = retriever
 
     async def evaluate_dataset(
-        self, 
-        dataset: Dict[str, Any], 
-        top_k: int = 5, 
+        self,
+        dataset: Dict[str, Any],
+        top_k: int = 5,
         db_check: bool = True
     ) -> EvaluationResult:
         """
@@ -32,7 +37,7 @@ class RetrievalEvaluator:
         """
         # Validate schema first
         DatasetValidator.validate_schema(dataset)
-        
+
         project = dataset.get("project")
         # Validate expected sources exist in the database (can be bypassed for tests)
         await DatasetValidator.validate_knowledge_base(project, dataset["questions"], db_check=db_check)
@@ -49,8 +54,8 @@ class RetrievalEvaluator:
 
             # Invoke retriever
             retrieved = await self.retriever.retrieve(
-                query=question_text, 
-                top_k=top_k, 
+                query=question_text,
+                top_k=top_k,
                 project=project
             )
 
@@ -115,11 +120,11 @@ class RetrievalEvaluator:
             ))
 
         total_questions = len(question_results)
-        
+
         # 1. Compute Global Metrics
         hits = sum(1 for r in question_results if r.is_hit)
         hit_rate = hits / total_questions if total_questions > 0 else 0.0
-        
+
         global_recalls = [
             len(set(r.retrieved_sources) & set(r.expected_sources)) / len(r.expected_sources)
             for r in question_results
@@ -194,7 +199,7 @@ class RetrievalEvaluator:
             for r, indices in layer_results:
                 expected_sources_in_layer = [r.expected_sources[i] for i in indices]
                 retrieved_in_layer = [src for src in r.retrieved_sources if src in expected_sources_in_layer]
-                
+
                 unique_retrieved_in_layer = set(retrieved_in_layer)
                 recall_in_layer = len(unique_retrieved_in_layer) / len(expected_sources_in_layer)
                 layer_recalls.append(recall_in_layer)
@@ -208,7 +213,7 @@ class RetrievalEvaluator:
                         first_rank_in_layer = idx + 1
                         layer_similarities.append(r.similarity_scores[idx])
                         break
-                
+
                 layer_mrrs.append(1.0 / first_rank_in_layer if first_rank_in_layer else 0.0)
 
             layer_hit_rate = layer_hits / layer_total

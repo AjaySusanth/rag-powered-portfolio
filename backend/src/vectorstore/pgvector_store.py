@@ -14,7 +14,8 @@ It supports:
 
 import json
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from src.db.core import get_db_pool
 from src.models.chunk import Chunk
 
@@ -33,7 +34,7 @@ async def upsert_chunks(
     """
     Saves a batch of Chunk objects and their corresponding embeddings into the database.
     If a chunk with the same chunk_id already exists, it updates fields in-place.
-    
+
     Why: ON CONFLICT (chunk_id) DO UPDATE is used because chunk_id is a deterministic hash
     of the source file and chunk index, making re-ingestion idempotent.
     """
@@ -105,7 +106,7 @@ async def similarity_search(
     """
     Searches the vector store for closest chunks to the query embedding using cosine similarity.
     Optionally filters by project.
-    
+
     Why: Cosine distance (<=>) measures angular similarity. We return 1 - distance
     as the 'similarity' score.
     """
@@ -123,7 +124,7 @@ async def similarity_search(
         pool = await get_db_pool()
         async with pool.acquire() as conn:
             rows = await conn.fetch(query, query_embedding, limit, project_filter)
-            
+
             results = []
             for row in rows:
                 row_dict = dict(row)
@@ -181,7 +182,7 @@ async def get_all_chunks() -> List[Dict[str, Any]]:
         pool = await get_db_pool()
         async with pool.acquire() as conn:
             rows = await conn.fetch(query)
-            
+
             results = []
             for row in rows:
                 row_dict = dict(row)

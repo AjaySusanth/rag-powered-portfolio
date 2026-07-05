@@ -4,29 +4,29 @@ Implements a Redis-backed response cache to reduce latency and LLM costs.
 It catches Redis exceptions to ensure that Redis unavailibility degrades gracefully
 to a cache miss, keeping the core chat functionality resilient.
 
-The cache key incorporates the normalized query, the prompt version, and the 
+The cache key incorporates the normalized query, the prompt version, and the
 generator provider, ensuring that future prompt or model changes invalidate old cache entries.
 """
 
+import base64
 import hashlib
 import json
 import struct
-import base64
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
 
 from redis.asyncio import Redis, from_url
 from redis.exceptions import RedisError
 
+from src.api.schemas.chat import Citation
 from src.cache.base import BaseCache
 from src.config import settings
-from src.api.schemas.chat import Citation
 
 
 class RedisCache(BaseCache):
     """
     Redis implementation of the BaseCache for chat responses.
     """
-    
+
     def __init__(self, redis_url: str):
         self.redis_url = redis_url
         self._redis: Optional[Redis] = None
@@ -140,7 +140,7 @@ class RedisCache(BaseCache):
             client = await self._get_client()
             keys = [self._generate_embedding_key(t) for t in texts]
             results = await client.mget(keys)
-            
+
             embeddings: List[Optional[List[float]]] = []
             for data in results:
                 if data:

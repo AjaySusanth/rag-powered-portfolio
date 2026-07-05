@@ -1,12 +1,13 @@
 """
 WHY THIS WAS CHOSEN:
-This module implements the DatasetValidator, which enforces schema rules and verifies 
+This module implements the DatasetValidator, which enforces schema rules and verifies
 that all expected source files exist in the indexed database for a given project.
 Enforcing validation prevents execution of outdated or malformed test cases, providing
 fast feedback and preserving dataset integrity.
 """
-from typing import Dict, Any, List, Optional
 import logging
+from typing import Any, Dict, List, Optional
+
 from src.db.core import get_db_pool
 
 logger = logging.getLogger(__name__)
@@ -27,11 +28,11 @@ class DatasetValidator:
         """
         if not data:
             raise DatasetValidationError("Dataset is empty.")
-            
+
         project = data.get("project")
         if "project" in data and (not project or not isinstance(project, str) or not project.strip()):
             raise DatasetValidationError("Dataset 'project' field cannot be empty if specified.")
-            
+
         questions = data.get("questions")
         if questions is None:
             raise DatasetValidationError("Dataset is missing 'questions' field.")
@@ -39,7 +40,7 @@ class DatasetValidator:
             raise DatasetValidationError("'questions' field must be a list.")
         if len(questions) == 0:
             raise DatasetValidationError("Dataset must contain at least one question.")
-            
+
         seen_ids = set()
         for idx, q in enumerate(questions):
             q_id = q.get("id")
@@ -48,7 +49,7 @@ class DatasetValidator:
             if q_id in seen_ids:
                 raise DatasetValidationError(f"Duplicate question ID found: {q_id}")
             seen_ids.add(q_id)
-            
+
             category = q.get("category")
             if not category:
                 raise DatasetValidationError(f"Question {q_id} is missing a 'category'.")
@@ -57,36 +58,36 @@ class DatasetValidator:
                     f"Question {q_id} has invalid category '{category}'. "
                     f"Must be one of {VALID_CATEGORIES}"
                 )
-                
+
             question_text = q.get("question")
             if not question_text or not question_text.strip():
                 raise DatasetValidationError(f"Question {q_id} is missing 'question' text.")
-                
+
             expected_sources = q.get("expected_sources")
             if not expected_sources or not isinstance(expected_sources, list):
                 raise DatasetValidationError(f"Question {q_id} must have a non-empty 'expected_sources' list.")
-                
+
             # Check duplicate expected sources
             if len(expected_sources) != len(set(expected_sources)):
                 raise DatasetValidationError(f"Question {q_id} contains duplicate entries in 'expected_sources'.")
-                
+
             expected_layers = q.get("expected_layers")
             if not expected_layers or not isinstance(expected_layers, list):
                 raise DatasetValidationError(f"Question {q_id} must have a non-empty 'expected_layers' list.")
-                
+
             if len(expected_sources) != len(expected_layers):
                 raise DatasetValidationError(
                     f"Question {q_id}: length of 'expected_sources' ({len(expected_sources)}) "
                     f"does not match 'expected_layers' ({len(expected_layers)})."
                 )
-                
+
             for layer in expected_layers:
                 if layer not in VALID_LAYERS:
                     raise DatasetValidationError(
                         f"Question {q_id} has invalid layer '{layer}'. "
                         f"Must be one of {VALID_LAYERS}"
                     )
-                    
+
             # Check minimum match if present
             minimum_match = q.get("minimum_match")
             if minimum_match is not None:
@@ -113,10 +114,10 @@ class DatasetValidator:
         for q in questions:
             for src in q.get("expected_sources", []):
                 all_sources.add(src)
-                
+
         if not all_sources:
             return
-            
+
         try:
             pool = await get_db_pool()
         except Exception as e:
@@ -124,7 +125,7 @@ class DatasetValidator:
                 f"Failed to connect to database for knowledge base validation: {e}. "
                 "Ensure PostgreSQL is running and seeded."
             )
-            
+
         async with pool.acquire() as conn:
             if project:
                 query = "SELECT DISTINCT source_file FROM chunks WHERE project = $1 AND source_file = any($2::text[])"
@@ -133,7 +134,7 @@ class DatasetValidator:
                 query = "SELECT DISTINCT source_file FROM chunks WHERE source_file = any($1::text[])"
                 rows = await conn.fetch(query, list(all_sources))
             existing = {row["source_file"] for row in rows}
-            
+
             missing = all_sources - existing
             if missing:
                 if project:

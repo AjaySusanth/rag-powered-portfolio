@@ -39,7 +39,7 @@ def discover_projects(knowledge_dir: Path) -> List[str]:
     if not knowledge_dir.exists() or not knowledge_dir.is_dir():
         logger.warning(f"Knowledge directory does not exist: {knowledge_dir}")
         return []
-    
+
     projects = []
     for p in knowledge_dir.iterdir():
         if p.is_dir():
@@ -50,7 +50,7 @@ def discover_projects(knowledge_dir: Path) -> List[str]:
 def load_manual_documents(project_name: str, knowledge_dir: Path) -> List[Document]:
     """
     Loads manual Markdown documents for either a specific project or the global namespace.
-    
+
     1. If project_name == GLOBAL_PROJECT_NAME:
        Reads global identity files in the root knowledge_dir (resume.md, about-me.md, faq.md, etc.)
        and assigns them project = GLOBAL_PROJECT_NAME.
