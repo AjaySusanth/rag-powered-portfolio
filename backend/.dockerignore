@@ -1,0 +1,19 @@
+# WHY THIS WAS CHOSEN:
+# Prevents Python caching directories, virtual environments, tests, and configuration
+# files from being copied into the backend Docker build context.
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+venv/
+.env*
+.git
+.gitignore
+.dockerignore
+Dockerfile
+tests/
+scripts/
+evaluation/
