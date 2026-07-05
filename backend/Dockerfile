@@ -41,6 +41,7 @@ COPY --from=builder /install /usr/local
 
 COPY --chown=appuser:appgroup src/ /app/src/
 COPY --chown=appuser:appgroup data/ /app/data/
+COPY --chown=appuser:appgroup assets/ /app/assets/
 
 ENV PYTHONPATH=/app
 

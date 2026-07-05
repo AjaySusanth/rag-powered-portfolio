@@ -3,6 +3,11 @@ WHY THIS WAS CHOSEN:
 This service isolates filesystem interactions for deterministic portfolio resources.
 The route layer remains thin and unaware of exact file locations. We use lru_cache
 for get_stack to prevent redundant I/O operations on every API request.
+
+WHY DATA_DIR / RESUME_DIR instead of PROJECT_ROOT / "backend" / ...:
+All path constants are centralized in config.py. APP_ROOT always resolves to the
+backend root — `backend/` on the host and `/app` inside Docker — so data/ and
+assets/ are always at the right location regardless of execution environment.
 """
 
 import json
@@ -10,7 +15,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict
 
-from src.config import PROJECT_ROOT
+from src.config import DATA_DIR, RESUME_DIR
 
 
 class PortfolioService:
@@ -23,7 +28,7 @@ class PortfolioService:
         """
         Returns the absolute path to the resume PDF file.
         """
-        return PROJECT_ROOT / "backend" / "assets" / "resume" / "Ajay_Susanth_Resume.pdf"
+        return RESUME_DIR / "Ajay_Susanth_Resume.pdf"
 
     @staticmethod
     @lru_cache(maxsize=1)
@@ -32,7 +37,7 @@ class PortfolioService:
         Reads, parses, and returns the technology stack from stack.json.
         Cached via lru_cache to ensure we only load and parse the JSON file once.
         """
-        stack_file = PROJECT_ROOT / "backend" / "data" / "stack.json"
+        stack_file = DATA_DIR / "stack.json"
 
         if not stack_file.exists():
             raise FileNotFoundError(f"Stack metadata file not found at: {stack_file}")
@@ -47,11 +52,10 @@ class PortfolioService:
         Reads, parses, and returns hiring details from hire.json.
         Cached via lru_cache to ensure we only load and parse the JSON file once.
         """
-        hire_file = PROJECT_ROOT / "backend" / "data" / "hire.json"
+        hire_file = DATA_DIR / "hire.json"
 
         if not hire_file.exists():
             raise FileNotFoundError(f"Hiring metadata file not found at: {hire_file}")
 
         with open(hire_file, "r", encoding="utf-8") as f:
             return json.load(f)
-
