@@ -1,4 +1,3 @@
-import pytest
 from src.services.prompt_guard import PromptGuard
 
 

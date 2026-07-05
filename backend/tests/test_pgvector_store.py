@@ -1,16 +1,14 @@
 import pytest
 import asyncpg
-import json
 from src.config import settings
 from src.db.init_db import init_db
-from src.db.core import get_db_pool, close_db_pool
+from src.db.core import close_db_pool
 from src.models.chunk import Chunk
 from src.vectorstore.pgvector_store import (
     upsert_chunks,
     similarity_search,
     delete_project,
-    count_chunks,
-    DatabaseError
+    count_chunks
 )
 
 

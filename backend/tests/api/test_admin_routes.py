@@ -1,8 +1,7 @@
 import pytest
 import asyncpg
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from httpx import AsyncClient, ASGITransport
-from pathlib import Path
 
 from src.main import app
 from src.config import settings

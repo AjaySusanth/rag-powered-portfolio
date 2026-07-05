@@ -71,7 +71,7 @@ class RetrievalEvaluator:
                 if src in expected_sources:
                     unique_retrieved_expected.add(src)
 
-            recall = len(unique_retrieved_expected) / len(expected_sources)
+            len(unique_retrieved_expected) / len(expected_sources)
             is_hit = len(unique_retrieved_expected) >= minimum_match
 
             failure_reason = None
@@ -177,8 +177,9 @@ class RetrievalEvaluator:
         for layer in ["identity", "design", "artifact"]:
             layer_results = []
             for r in question_results:
-                layer_indices = [i for i, l in enumerate(r.expected_layers) if l == layer]
+                layer_indices = [i for i, lyr in enumerate(r.expected_layers) if lyr == layer]
                 if layer_indices:
+
                     layer_results.append((r, layer_indices))
 
             layer_total = len(layer_results)

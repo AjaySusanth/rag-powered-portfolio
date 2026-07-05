@@ -12,7 +12,6 @@ from src.evaluation.dataset_validator import DatasetValidator, DatasetValidation
 from src.evaluation.retrieval_evaluator import RetrievalEvaluator, Retriever
 from src.models.retrieval_result import RetrievalResult
 from src.models.chunk import Chunk
-from src.models.evaluation_result import EvaluationResult
 
 
 # A Mock Retriever implementation

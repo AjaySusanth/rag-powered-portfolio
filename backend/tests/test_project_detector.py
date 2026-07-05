@@ -1,4 +1,3 @@
-import pytest
 from src.retrieval.project_detector import detect_project, normalize_text
 
 def test_normalize_text():

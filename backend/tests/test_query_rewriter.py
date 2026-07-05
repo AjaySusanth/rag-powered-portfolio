@@ -10,7 +10,6 @@ retrieval pipeline doesn't break query flows and behaves predictably under mock 
 import pytest
 from src.config import settings
 from src.models.rewrite_result import RewriteResult
-from src.retrieval.rewriters.base import BaseQueryRewriter
 from src.retrieval.rewriters.mock import MockQueryRewriter
 from src.retrieval.rewriters.factory import create_rewriter_from_settings
 from src.retrieval.rewriters.gemini import GeminiQueryRewriter

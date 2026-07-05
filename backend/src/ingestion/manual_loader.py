@@ -18,7 +18,7 @@ This avoids project-specific re-index operations from accidentally reading, dele
 
 import logging
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List
 
 from src.config import GLOBAL_PROJECT_NAME
 from src.models.document import Document, determine_document_layer

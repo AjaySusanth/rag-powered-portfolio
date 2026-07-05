@@ -7,8 +7,9 @@ and the administrative HTTP route (POST /ingest) can invoke the same logic witho
 """
 
 import time
-from pathlib import Path
+from pathlib import Path  # noqa: F401
 from typing import List
+
 
 from src.config import PROJECT_ROOT, GLOBAL_PROJECT_NAME
 from src.ingestion.github_fetcher import fetch_github_repository

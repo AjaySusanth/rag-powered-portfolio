@@ -14,8 +14,7 @@ tests remain fast, deterministic, and runnable offline.
 
 import pytest
 import asyncpg
-from unittest.mock import patch, MagicMock
-from pathlib import Path
+from unittest.mock import patch
 
 from src.config import settings, GLOBAL_PROJECT_NAME
 from src.services.ingestion_service import IngestionService

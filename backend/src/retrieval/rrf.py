@@ -14,7 +14,7 @@ ranks (first, second, third, etc.) into reciprocal fractions (1 / (k + rank)) an
 """
 
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from src.models.retrieval_result import RetrievalResult
 
 logger = logging.getLogger(__name__)

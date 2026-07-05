@@ -7,7 +7,7 @@ LLM calls, which significantly reduces latency and token cost.
 """
 
 import logging
-from typing import List, Optional, AsyncIterator, AsyncGenerator
+from typing import List, Optional, AsyncGenerator
 from google.genai import types
 
 from pydantic import BaseModel, Field

@@ -8,7 +8,7 @@ into mutually exclusive categories to isolate the exact bottleneck in the retrie
 
 import asyncio
 import logging
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from typing import List, Dict, Any, Optional, Set
 from src.retrieval import vector_retriever, bm25_retriever
 from src.retrieval.rrf import RRFFuser

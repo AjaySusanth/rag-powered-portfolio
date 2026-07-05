@@ -8,7 +8,7 @@ without executing real external network calls.
 
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from src.llm.gemini_client import generate_answer, LLMError, get_gemini_client
+from src.llm.gemini_client import generate_answer, LLMError
 
 
 @pytest.mark.anyio

@@ -36,12 +36,10 @@ async def lifespan(app: FastAPI):
     logger.info(f"LLM Provider (Generator): {settings.GENERATOR_PROVIDER}")
 
     # 1. Database Connection Check
-    db_connected = False
     try:
         pool = await get_db_pool()
         async with pool.acquire() as conn:
             await conn.execute("SELECT 1")
-        db_connected = True
         logger.info("Database connection: CONNECTED")
     except Exception as e:
         logger.error(f"Database connection: FAILED - {e}")
@@ -50,13 +48,11 @@ async def lifespan(app: FastAPI):
             raise RuntimeError(f"Database is required but connection failed: {e}") from e
 
     # 2. Redis Connection Check
-    redis_connected = False
     try:
         cache = create_cache_from_settings()
         if isinstance(cache, RedisCache):
             client = await cache._get_client()
             await client.ping()
-            redis_connected = True
             logger.info("Redis connection: CONNECTED")
         else:
             logger.info("Redis connection: N/A (Using non-Redis cache)")

@@ -103,7 +103,7 @@ def test_rrf_tie_breaking_rules():
     chunk_y = make_mock_chunk("chunk-y")
     
     # Passing them in y then x to verify it sorts alphabetically
-    res2 = fuser.fuse(
+    fuser.fuse(
         [],
         [
             RetrievalResult(chunk=chunk_y, score=50.0),

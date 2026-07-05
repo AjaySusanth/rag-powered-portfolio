@@ -7,7 +7,7 @@ enabling easy testing and provider swapping.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional, Literal, AsyncIterator, AsyncGenerator
+from typing import List, Optional, Literal, AsyncGenerator
 from pydantic import BaseModel, Field
 from src.models.retrieval_result import RetrievalResult
 

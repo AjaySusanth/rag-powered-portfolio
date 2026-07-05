@@ -199,7 +199,7 @@ async def fetch_github_repository(yaml_path: str) -> List[Document]:
         try:
             resp = await client.get(repo_url, headers=headers)
             if resp.status_code == 401:
-                raise GitHubIngestionError(f"GitHub authentication failed. Check GITHUB_TOKEN.")
+                raise GitHubIngestionError("GitHub authentication failed. Check GITHUB_TOKEN.")
             elif resp.status_code == 403:
                 # Check for rate limit
                 rate_limit_remaining = resp.headers.get("X-RateLimit-Remaining")

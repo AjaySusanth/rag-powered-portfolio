@@ -12,7 +12,6 @@ It validates the full ingestion flow:
 
 import os
 from pathlib import Path
-from unittest.mock import AsyncMock, patch
 import pytest
 import asyncpg
 from src.config import settings

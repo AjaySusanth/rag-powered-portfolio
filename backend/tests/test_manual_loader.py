@@ -9,7 +9,6 @@ metadata correctly without needing to access the live filesystem during tests.
 """
 
 import pytest
-from pathlib import Path
 from src.ingestion.manual_loader import discover_projects, load_manual_documents, ManualIngestionError
 from src.models.document import Document
 

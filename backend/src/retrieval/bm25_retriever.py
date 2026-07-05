@@ -14,7 +14,7 @@ providing a thread-safe-like wrapper to initialize, refresh, and query the index
 
 import re
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Optional
 from rank_bm25 import BM25Okapi
 
 from src.models.chunk import Chunk

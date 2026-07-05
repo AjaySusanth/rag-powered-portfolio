@@ -1,7 +1,5 @@
 import pytest
-from pathlib import PurePosixPath
 from unittest.mock import AsyncMock, MagicMock, patch
-import httpx
 
 # Import from the module we are building
 from src.ingestion.github_fetcher import (
@@ -11,7 +9,7 @@ from src.ingestion.github_fetcher import (
     fetch_github_repository,
     is_binary_file
 )
-from src.models.document import Document, determine_document_layer
+from src.models.document import determine_document_layer
 
 # -----------------------------------------------------------------------------
 # Unit Tests for Matcher (Satisfying Rule 6)

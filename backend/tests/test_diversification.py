@@ -1,4 +1,3 @@
-import pytest
 from src.models.retrieval_result import RetrievalResult
 from src.models.chunk import Chunk
 from src.retrieval.diversification import diversify_by_source

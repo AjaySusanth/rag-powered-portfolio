@@ -9,12 +9,10 @@ to isolate the API route and the ChatOrchestrator, making no external network or
 
 import pytest
 import json
-import asyncio
 from unittest.mock import AsyncMock, patch, MagicMock
 from httpx import AsyncClient, ASGITransport
 
 from src.main import app
-from src.api.schemas.chat import StreamTokenEvent, StreamErrorEvent
 from src.models.retrieval_result import RetrievalResult
 from src.models.chunk import Chunk
 from src.retrieval.rewriters.base import BaseQueryRewriter
@@ -487,7 +485,7 @@ async def test_chat_endpoint_injection_attempt_success(
             mock_analyze.assert_called_once_with(payload["message"])
             
             # Verify PromptGuard analyzed and found injection
-            analyzed_res = mock_analyze.spy_return if hasattr(mock_analyze, 'spy_return') else mock_analyze.return_value
+            mock_analyze.spy_return if hasattr(mock_analyze, 'spy_return') else mock_analyze.return_value
             # We can also check the result of the call directly
             res = PromptGuard.analyze(payload["message"])
             assert res.contains_injection is True

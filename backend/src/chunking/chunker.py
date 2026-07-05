@@ -21,7 +21,7 @@ Deterministic SHA-256 IDs are generated to support idempotent upserts in the dat
 
 import re
 import tiktoken
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Optional
 from pydantic import BaseModel, Field
 
 from src.models.document import Document

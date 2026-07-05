@@ -19,7 +19,7 @@ from src.cache.factory import create_cache_from_settings
 from src.retrieval.project_detector import detect_project
 from src.retrieval.rewriters.factory import create_rewriter_from_settings
 from src.retrieval.hybrid_retriever import retrieve
-from src.services.prompt_builder import PromptBuilder, PromptBuildResult
+from src.services.prompt_builder import PromptBuilder
 from src.services.prompt_guard import PromptGuard
 from src.llm.factory import create_generator_from_settings, create_attributor_from_settings
 from src.llm.gemini_client import LLMError
@@ -58,7 +58,7 @@ class ChatOrchestrator:
             return
 
         # 0. Prompt Injection Detection
-        guard_result = PromptGuard.analyze(query)
+        PromptGuard.analyze(query)
 
         # 0.5 Cache Lookup
         cached_response = await self.cache.get_chat_response(query)

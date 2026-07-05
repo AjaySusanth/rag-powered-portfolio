@@ -4,7 +4,7 @@ import base64
 from unittest.mock import AsyncMock, patch, MagicMock
 from src.cache.redis import RedisCache
 from src.config import settings
-from src.ingestion.embedder import embed_texts, EmbeddingError
+from src.ingestion.embedder import embed_texts
 
 
 # ---------------------------------------------------------------------------
