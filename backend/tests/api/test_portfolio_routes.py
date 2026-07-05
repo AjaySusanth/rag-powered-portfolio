@@ -4,6 +4,7 @@ from unittest.mock import patch
 import pytest
 from httpx import ASGITransport, AsyncClient
 
+from src.config import DATA_DIR, RESUME_DIR
 from src.main import app
 from src.services.portfolio_service import PortfolioService
 
@@ -31,7 +32,10 @@ async def test_get_resume_success(mock_get_resume_path, tmp_path) -> None:
         response = await client.get("/resume")
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/pdf"
-        assert 'attachment; filename="Ajay_Susanth_Resume.pdf"' in response.headers["content-disposition"]
+        assert (
+            'attachment; filename="Ajay_Susanth_Resume.pdf"'
+            in response.headers["content-disposition"]
+        )
         assert response.content == b"dummy pdf contents"
 
 
@@ -61,10 +65,10 @@ async def test_get_stack_success(clean_lru_cache) -> None:
 
 
 @pytest.mark.anyio
-@patch("src.services.portfolio_service.PROJECT_ROOT")
-async def test_get_stack_missing(mock_project_root, clean_lru_cache) -> None:
+@patch("src.services.portfolio_service.DATA_DIR")
+async def test_get_stack_missing(mock_data_dir, clean_lru_cache) -> None:
     # Force service to look for stack.json in a non-existent folder
-    mock_project_root.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value.exists.return_value = False
+    mock_data_dir.__truediv__.return_value.exists.return_value = False
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -97,10 +101,10 @@ async def test_get_hire_success(clean_lru_cache) -> None:
 
 
 @pytest.mark.anyio
-@patch("src.services.portfolio_service.PROJECT_ROOT")
-async def test_get_hire_missing(mock_project_root, clean_lru_cache) -> None:
+@patch("src.services.portfolio_service.DATA_DIR")
+async def test_get_hire_missing(mock_data_dir, clean_lru_cache) -> None:
     # Force service to look for hire.json in a non-existent folder
-    mock_project_root.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value.exists.return_value = False
+    mock_data_dir.__truediv__.return_value.exists.return_value = False
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -153,3 +157,25 @@ async def test_no_rag_components_invoked(
     mock_gen.assert_not_called()
     mock_cache.assert_not_called()
 
+
+def test_portfolio_filesystem_layout() -> None:
+    """
+    Regression test: verifies that the centralized path constants in config.py
+    resolve to files that actually exist on the current filesystem layout.
+
+    WHY THIS MATTERS:
+    This test would have caught the Docker path regression (PROJECT_ROOT resolving
+    to the repo root inside the container, making backend/data unreachable) before
+    it reached production. If DATA_DIR or RESUME_DIR are wrong, this test fails
+    during CI — before any Docker build or Render deploy can succeed.
+    """
+    assert DATA_DIR.is_dir(), (
+        f"DATA_DIR does not exist: {DATA_DIR}. "
+        "Check APP_ROOT in config.py matches the current runtime layout."
+    )
+    assert (DATA_DIR / "stack.json").is_file(), f"stack.json not found in {DATA_DIR}"
+    assert (DATA_DIR / "hire.json").is_file(), f"hire.json not found in {DATA_DIR}"
+    assert RESUME_DIR.is_dir(), f"RESUME_DIR does not exist: {RESUME_DIR}"
+    assert (RESUME_DIR / "Ajay_Susanth_Resume.pdf").is_file(), (
+        f"Resume PDF not found in {RESUME_DIR}"
+    )
