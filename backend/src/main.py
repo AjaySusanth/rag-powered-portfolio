@@ -96,7 +96,7 @@ app.include_router(portfolio.router)
 app.include_router(admin.router)
 
 
-@app.get("/health")
+@app.get("/api-status")
 async def health_check():
     """Simple healthcheck endpoint."""
     return {"status": "healthy"}

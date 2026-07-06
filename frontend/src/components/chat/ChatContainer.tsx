@@ -4,6 +4,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { useChat } from "@/hooks/useChat";
 import { useAutoScroll } from "@/hooks/useAutoScroll";
+import { healthCheck } from "@/services/api/portfolio";
 import { Conversation } from "./Conversation";
 import { ChatInput } from "./ChatInput";
 import { OfflineState } from "@/components/home/OfflineState";
@@ -28,25 +29,9 @@ export function ChatContainer() {
   // Check backend liveness on mount and check for ?q= query param
   useEffect(() => {
     const checkLiveness = async () => {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 2000);
-        
-        // Probe health check endpoint; if connection fails, TypeError is thrown
-        await fetch(`${apiUrl}/health`, {
-          method: "GET",
-          signal: controller.signal,
-        }).catch((e) => {
-          // If fetch fails with network-level error, mark backend offline
-          if (e instanceof TypeError) {
-            setBackendOffline(true);
-          }
-        });
-        clearTimeout(timeout);
-      } catch {
-        setBackendOffline(true);
-      }
+      // Use the centralized helper to ping the new /api-status endpoint
+      const isAlive = await healthCheck();
+      setBackendOffline(!isAlive);
     };
     checkLiveness();
 

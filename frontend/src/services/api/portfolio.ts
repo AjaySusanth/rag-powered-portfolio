@@ -24,7 +24,7 @@ export async function fetchHire(): Promise<HireResponse> {
 
 export async function healthCheck(): Promise<boolean> {
   try {
-    const response = await fetch(`${API_URL}/health`, { signal: AbortSignal.timeout(3000) });
+    const response = await fetch(`${API_URL}/api-status`, { signal: AbortSignal.timeout(3000) });
     return response.ok;
   } catch {
     return false;
