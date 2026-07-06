@@ -97,7 +97,13 @@ app.include_router(admin.router)
 
 
 @app.get("/api-status")
+async def api_status():
+    """Healthcheck endpoint for client frontend to bypass adblockers."""
+    return {"status": "healthy"}
+
+
+@app.get("/health")
 async def health_check():
-    """Simple healthcheck endpoint."""
+    """Healthcheck endpoint for infrastructure monitoring (Render, etc.)."""
     return {"status": "healthy"}
 
