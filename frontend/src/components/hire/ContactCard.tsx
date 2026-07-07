@@ -1,3 +1,10 @@
+/**
+ * WHY THIS DESIGN WAS CHOSEN:
+ * The ContactCard component displays the user's primary contact details and links.
+ * To optimize for mobile screens and satisfy touch target accessibility standards,
+ * the list links are given vertical padding (`py-2.5 sm:py-0`) and the "Download Resume PDF" button is
+ * set to 44px (`h-11 sm:h-7`) height on mobile devices, ensuring they are easily tappable.
+ */
 import * as React from "react";
 import { Mail, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -44,23 +51,23 @@ export function ContactCard({ email, linkedin, github, portfolio, resumeUrl }: C
         <h3 className="font-bold text-foreground text-xs uppercase tracking-wider">Contact & Links</h3>
       </div>
       <div className="space-y-4 text-xs">
-        <div className="space-y-2.5">
-          <a href={`mailto:${email}`} className="flex items-center gap-2.5 text-muted-foreground hover:text-primary transition-colors">
+        <div className="flex flex-col space-y-2 md:space-y-2.5">
+          <a href={`mailto:${email}`} className="flex items-center gap-2.5 py-2.5 sm:py-0 text-muted-foreground hover:text-primary transition-colors">
             <Mail className="h-4 w-4 shrink-0 text-muted-foreground/75" />
             <span className="truncate">{email}</span>
           </a>
-          <a href={linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-muted-foreground hover:text-primary transition-colors">
+          <a href={linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 py-2.5 sm:py-0 text-muted-foreground hover:text-primary transition-colors">
             <LinkedinIcon />
             <span>LinkedIn Profile</span>
           </a>
-          <a href={github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-muted-foreground hover:text-primary transition-colors">
+          <a href={github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 py-2.5 sm:py-0 text-muted-foreground hover:text-primary transition-colors">
             <GithubIcon />
             <span>GitHub Profile</span>
           </a>
         </div>
         <div className="pt-3.5 border-t border-border/45">
           <a href={resumeUrl} download="Ajay_Susanth_Resume.pdf">
-            <Button size="sm" className="w-full gap-1.5 font-bold cursor-pointer text-xs">
+            <Button size="sm" className="w-full h-11 sm:h-7 px-4 sm:px-2.5 gap-1.5 font-bold cursor-pointer text-xs">
               <Download className="h-3.5 w-3.5" />
               Download Resume PDF
             </Button>
@@ -70,3 +77,4 @@ export function ContactCard({ email, linkedin, github, portfolio, resumeUrl }: C
     </div>
   );
 }
+

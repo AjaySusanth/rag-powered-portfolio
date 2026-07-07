@@ -1,3 +1,10 @@
+/**
+ * WHY THIS DESIGN WAS CHOSEN:
+ * The CitationItem component renders individual citation source cards.
+ * To support narrow viewports, the filename utilizes `flex-1 min-w-0 truncate` rather than a hardcoded max-width,
+ * ensuring it scales dynamically and truncates gracefully. The metadata badges are wrapped using `flex-wrap`
+ * to avoid overflowing the card edges on extremely small screens (320px-360px).
+ */
 import * as React from "react";
 import { Citation } from "@/types/chat";
 import { FileText, FileCode, Settings, File } from "lucide-react";
@@ -26,14 +33,14 @@ export function CitationItem({ citation, index }: CitationItemProps) {
   const filename = citation.file.split("/").pop() || citation.file;
 
   return (
-    <div className="group flex flex-col p-3 bg-muted/30 border border-border/80 rounded-xl text-xs hover:border-primary/35 hover:bg-muted/50 transition-all duration-200 select-none">
+    <div className="group flex flex-col p-3 bg-muted/30 border border-border/80 rounded-xl text-xs hover:border-primary/35 hover:bg-muted/50 transition-all duration-200 select-none min-w-0">
       
       {/* File details */}
-      <div className="flex items-center justify-between gap-2 mb-2 pb-1.5 border-b border-border/30">
-        <div className="flex items-center gap-1.5 min-w-0">
+      <div className="flex items-center justify-between gap-2 mb-2 pb-1.5 border-b border-border/30 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
           {getDocumentIcon(filename)}
           <span
-            className="font-extrabold text-foreground truncate max-w-[130px] group-hover:text-primary transition-colors"
+            className="font-extrabold text-foreground truncate group-hover:text-primary transition-colors flex-1"
             title={citation.file}
           >
             {filename}
@@ -43,6 +50,7 @@ export function CitationItem({ citation, index }: CitationItemProps) {
           [{index}]
         </span>
       </div>
+
 
       {/* Metadata tags */}
       <div className="flex flex-wrap gap-1.5">

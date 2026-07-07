@@ -1,3 +1,10 @@
+/**
+ * WHY THIS DESIGN WAS CHOSEN:
+ * The Header component serves as the application's header and navigation controller.
+ * On mobile viewports, the menu trigger button, GitHub profile link, and theme toggle button
+ * are sized to 44x44px (`h-11 w-11 md:h-9 md:w-9`) to ensure they satisfy mobile touch target
+ * guidelines, while maintaining a compact 36x36px (`h-9 w-9`) height on desktop layouts.
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -35,16 +42,16 @@ export function Header({ onMenuToggle }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-16 items-center px-4 md:px-8 gap-4 justify-between">
+      <div className="flex h-16 items-center px-2 sm:px-4 md:px-8 gap-1.5 sm:gap-4 justify-between">
         
         {/* Left Side: Menu Trigger + Logo + Title */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           {/* Mobile menu trigger */}
           <Button
             variant="ghost"
             size="icon"
             onClick={onMenuToggle}
-            className="md:hidden h-9 w-9 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            className="md:hidden h-9 w-9 min-[380px]:h-11 min-[380px]:w-11 md:h-9 md:w-9 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Open menu"
           >
             <Menu className="h-5 w-5" />
@@ -63,12 +70,12 @@ export function Header({ onMenuToggle }: HeaderProps) {
         </div>
 
         {/* Right Side: GitHub + Theme Toggle */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-0.5 sm:gap-2">
           {/* GitHub Link */}
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            className="h-9 w-9 min-[380px]:h-11 min-[380px]:w-11 md:h-9 md:w-9 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="GitHub Profile"
             nativeButton={false}
             render={
@@ -87,7 +94,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
             variant="ghost"
             size="icon"
             onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-            className="h-9 w-9 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            className="h-9 w-9 min-[380px]:h-11 min-[380px]:w-11 md:h-9 md:w-9 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Toggle theme"
           >
             {mounted ? (
@@ -102,7 +109,9 @@ export function Header({ onMenuToggle }: HeaderProps) {
           </Button>
         </div>
 
+
       </div>
     </header>
   );
 }
+
