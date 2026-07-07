@@ -1,3 +1,11 @@
+/**
+ * WHY THIS DESIGN WAS CHOSEN:
+ * The AssistantMessage component displays AI-generated responses with markdown rendering support.
+ * The message bubble utilizes a responsive max-width calculation (`max-w-[calc(100%-2.75rem)] md:max-w-[85%]`)
+ * to prevent horizontal overflow caused by the avatar width (32px) and gap (12px) on mobile viewports.
+ * In addition, inline code blocks, tables, and lists are styled to wrap or scroll horizontally
+ * within the bubble container to preserve layout bounds.
+ */
 "use client";
 
 import * as React from "react";
@@ -36,7 +44,7 @@ export function AssistantMessage({ message, onRetry }: AssistantMessageProps) {
       </div>
 
       {/* Message Bubble Container */}
-      <div className="flex-1 max-w-[92%] md:max-w-[85%] rounded-2xl border border-border bg-card p-4 sm:p-5 text-sm text-foreground shadow-sm space-y-3">
+      <div className="flex-1 max-w-[calc(100%-2.75rem)] md:max-w-[85%] rounded-2xl border border-border bg-card p-4 sm:p-5 text-sm text-foreground shadow-sm space-y-3">
         {/* 1. Loading Phase */}
         {isStreaming && isEmpty && <ThinkingIndicator />}
 

@@ -1,3 +1,10 @@
+/**
+ * WHY THIS DESIGN WAS CHOSEN:
+ * The HeroSection component introduces the user and provides quick navigation CTA links.
+ * To optimize usability on mobile screens, the call-to-action buttons are given a larger
+ * height of 44px (`h-11 sm:h-9`) on mobile to meet standard touch accessibility guidelines,
+ * while maintaining their original compact size on desktop screens.
+ */
 "use client";
 
 import * as React from "react";
@@ -46,7 +53,7 @@ export function HeroSection() {
       <div className="flex flex-wrap gap-3 items-center">
         <Button
           variant="default"
-          className="gap-2 px-5 font-semibold"
+          className="gap-2 h-11 sm:h-9 px-5 font-semibold"
           render={<a href={ctas.chat.href} />}
           nativeButton={false}
         >
@@ -56,7 +63,7 @@ export function HeroSection() {
 
         <Button
           variant="outline"
-          className="gap-2 hover:bg-muted font-semibold"
+          className="gap-2 h-11 sm:h-9 hover:bg-muted font-semibold"
           render={<Link href={ctas.resume.href} />}
           nativeButton={false}
         >
@@ -66,7 +73,7 @@ export function HeroSection() {
 
         <Button
           variant="outline"
-          className="gap-2 hover:bg-muted font-semibold"
+          className="gap-2 h-11 sm:h-9 hover:bg-muted font-semibold"
           render={<Link href={ctas.hire.href} />}
           nativeButton={false}
         >
@@ -76,7 +83,7 @@ export function HeroSection() {
 
         <Button
           variant="outline"
-          className="gap-2 hover:bg-muted font-semibold"
+          className="gap-2 h-11 sm:h-9 hover:bg-muted font-semibold"
           render={
             <a
               href={ctas.github.href}
