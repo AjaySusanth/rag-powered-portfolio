@@ -56,7 +56,8 @@ async def test_ingest_success(mock_ingest_project) -> None:
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        response = await client.post("/ingest", json={"project_name": "test-project"})
+        headers = {"X-Admin-Key": "dev-admin-key"}
+        response = await client.post("/ingest", json={"project_name": "test-project"}, headers=headers)
         assert response.status_code == 200
 
         data = response.json()
@@ -79,7 +80,8 @@ async def test_ingest_missing_config(mock_ingest_project) -> None:
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        response = await client.post("/ingest", json={"project_name": "invalid-project"})
+        headers = {"X-Admin-Key": "dev-admin-key"}
+        response = await client.post("/ingest", json={"project_name": "invalid-project"}, headers=headers)
         assert response.status_code == 404
         assert "Configuration ingest.yml not found" in response.json()["detail"]
 
@@ -92,7 +94,8 @@ async def test_ingest_pipeline_failure(mock_ingest_project) -> None:
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        response = await client.post("/ingest", json={"project_name": "test-project"})
+        headers = {"X-Admin-Key": "dev-admin-key"}
+        response = await client.post("/ingest", json={"project_name": "test-project"}, headers=headers)
         assert response.status_code == 500
         assert "Database insertion failed" in response.json()["detail"]
 
@@ -146,8 +149,9 @@ async def test_ingest_repeated_success_no_duplicates(
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
+        headers = {"X-Admin-Key": "dev-admin-key"}
         # First Ingestion Run
-        resp1 = await client.post("/ingest", json={"project_name": "test-project"})
+        resp1 = await client.post("/ingest", json={"project_name": "test-project"}, headers=headers)
         assert resp1.status_code == 200
         data1 = resp1.json()["summary"]
         assert data1["status"] == "success"
@@ -160,7 +164,7 @@ async def test_ingest_repeated_success_no_duplicates(
         assert initial_chunks >= 2
 
         # Second Ingestion Run (Repeated Ingestion)
-        resp2 = await client.post("/ingest", json={"project_name": "test-project"})
+        resp2 = await client.post("/ingest", json={"project_name": "test-project"}, headers=headers)
         assert resp2.status_code == 200
         data2 = resp2.json()["summary"]
         assert data2["status"] == "success"

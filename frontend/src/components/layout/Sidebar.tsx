@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { Home, Briefcase, Network, FileText, Layers, Mail } from "lucide-react";
+import { Home, Briefcase, Network, FileText, Layers, Mail, Cpu } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 
 export const NAV_ITEMS = [
@@ -13,6 +13,7 @@ export const NAV_ITEMS = [
   { label: "Architecture", href: "/architecture", icon: Network },
   { label: "Resume", href: "/resume", icon: FileText },
   { label: "Tech Stack", href: "/stack", icon: Layers },
+  { label: "RAG Debugger", href: "/admin/trace", icon: Cpu },
   { label: "Hire Me", href: "/hire", icon: Mail },
 ];
 

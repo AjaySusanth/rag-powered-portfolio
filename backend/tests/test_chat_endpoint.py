@@ -165,7 +165,8 @@ async def test_chat_endpoint_query_rewriter(
                 project="n8n-aks-platform",
                 top_k=15,
                 diversify=True,
-                grade=True
+                grade=True,
+                trace=None
             )
 
 
@@ -499,7 +500,8 @@ async def test_chat_endpoint_injection_attempt_success(
                 project="talentforge",
                 top_k=15,
                 diversify=True,
-                grade=True
+                grade=True,
+                trace=None
             )
 
             # Read the stream lines
