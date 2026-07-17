@@ -52,7 +52,7 @@ async def test_hybrid_retrieve_orchestration(mock_bm25_retrieve, mock_vector_ret
     results = await retrieve("kubernetes", top_k=2, project="n8n", diversify=False)
 
     # Assert retriever functions called with correct arguments (candidate_k=20 by default)
-    mock_vector_retrieve.assert_called_once_with(query="kubernetes", top_k=20, project="n8n")
+    mock_vector_retrieve.assert_called_once_with(query="kubernetes", top_k=20, project="n8n", trace=None)
     mock_bm25_retrieve.assert_called_once_with(query="kubernetes", top_k=20, project="n8n")
 
     # Top-K should slice result to 2

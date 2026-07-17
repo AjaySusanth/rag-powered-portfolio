@@ -11,20 +11,20 @@ access to both the chunks and their relevance scores without parsing raw dicts.
 """
 
 import logging
+import time
 from typing import List, Optional
 
 from src.embedding.azure_openai_embedder import embed_query
 from src.models.chunk import Chunk
 from src.models.retrieval_result import RetrievalResult
+from src.observability.tracing import PipelineTrace
 from src.vectorstore.pgvector_store import similarity_search
 
 logger = logging.getLogger(__name__)
 
 
 async def retrieve(
-    query: str,
-    top_k: int = 5,
-    project: Optional[str] = None
+    query: str, top_k: int = 5, project: Optional[str] = None, trace: Optional[PipelineTrace] = None
 ) -> List[RetrievalResult]:
     """
     Executes a vector similarity search for the given natural language query.
@@ -41,14 +41,20 @@ async def retrieve(
 
     try:
         # 1. Embed the query
+        t0 = time.perf_counter()
         query_vector = await embed_query(query)
+        embed_duration = (time.perf_counter() - t0) * 1000.0
+        if trace:
+            trace.timings.stages["retrieval_embedding"] = embed_duration
 
         # 2. Execute pgvector similarity search
+        t1 = time.perf_counter()
         rows = await similarity_search(
-            query_embedding=query_vector,
-            limit=top_k,
-            project_filter=project
+            query_embedding=query_vector, limit=top_k, project_filter=project
         )
+        search_duration = (time.perf_counter() - t1) * 1000.0
+        if trace:
+            trace.timings.stages["retrieval_vector_db_search"] = search_duration
 
         # 3. Reconstruct models
         results: List[RetrievalResult] = []
@@ -69,7 +75,7 @@ async def retrieve(
                 chunk_index=row.get("chunk_index", 0),
                 token_count=row.get("token_count", 0),
                 char_count=row.get("char_count", 0),
-                metadata=row.get("metadata", {})
+                metadata=row.get("metadata", {}),
             )
 
             results.append(RetrievalResult(chunk=chunk, score=score))

@@ -127,6 +127,23 @@ Each user query passes through the following stages before a response is generat
 
 ---
 
+## RAG Pipeline Debugger (Admin Only)
+
+To inspect and audit the retrieval pipeline's internal state, the portfolio contains a dedicated administrative path (`/admin/trace`). For any given query, this dashboard visualizes the execution flow step-by-step:
+1. **Query Processing**: Displays the original query, detected project, scope resolution, rewrite decision, and expansion logic.
+2. **Vector Retrieval**: Displays top semantic search matches from the pgvector HNSW index.
+3. **BM25 Retrieval**: Displays keyword matches from the rank-bm25 index.
+4. **Reciprocal Rank Fusion**: Shows the rank-fused union and score calculations.
+5. **Source Diversification**: Displays source coverage stats and chunk capping results.
+6. **Retrieval Grader**: Highlights accepted versus rejected chunks (including explicit grading rejection reasons).
+7. **Context Assembly**: Shows token counts, layer distribution, and input documents.
+8. **Answer Generation**: Shows the model preview and token estimates.
+
+> [!NOTE]
+> The debugger operates as a **passive tool**. The `PipelineTrace` collection logic is completely isolated from production chat paths and will not influence the retrieval results, ranking algorithms, or prompt context assembly of regular visitors.
+
+---
+
 ## Tech Stack
 
 | Category | Technology |

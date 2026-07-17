@@ -72,6 +72,11 @@ class Settings(BaseSettings):
     )
     REDIS_URL: str = Field(default="redis://localhost:6379", description="Redis connection URL")
 
+    ADMIN_API_KEY: str = Field(
+        default="dev-admin-key",
+        description="Secret key to authorize admin operations (ingestion, tracing)",
+    )
+
     # Azure OpenAI Configuration
     AZURE_OPENAI_API_KEY: Optional[str] = Field(
         default=None,
