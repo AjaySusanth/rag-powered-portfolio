@@ -7,14 +7,13 @@ All external connections are mocked to prevent real database or LLM network requ
 """
 
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 
 from src.main import app
 from src.observability.metrics import (
     rag_queries_total,
-    rag_requests_in_progress,
-    rag_query_duration_seconds,
 )
 
 
@@ -50,10 +49,12 @@ async def test_metrics_updated_on_chat(
     # 1. Setup mocks
     mock_detect_project.return_value = None
     mock_retrieve.return_value = []
-    
+
     mock_generator = MagicMock()
+
     async def mock_stream_iter(prompt: str, system_instruction: str):
         yield "Response"
+
     mock_generator.stream.side_effect = mock_stream_iter
     mock_create_generator.return_value = mock_generator
 
