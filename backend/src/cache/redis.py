@@ -69,15 +69,8 @@ class RedisCache(BaseCache):
         try:
             client = await self._get_client()
             key = self._generate_key(query)
-            payload = {
-                "answer": answer,
-                "citations": [c.model_dump() for c in citations]
-            }
-            await client.set(
-                name=key,
-                value=json.dumps(payload),
-                ex=settings.CACHE_TTL_SECONDS
-            )
+            payload = {"answer": answer, "citations": [c.model_dump() for c in citations]}
+            await client.set(name=key, value=json.dumps(payload), ex=settings.CACHE_TTL_SECONDS)
         except RedisError:
             pass
         except Exception:
@@ -103,7 +96,7 @@ class RedisCache(BaseCache):
             data = await client.get(key)
             if data:
                 packed_bytes = base64.b64decode(data.encode("ascii"))
-                return list(struct.unpack(f"{len(packed_bytes)//4}f", packed_bytes))
+                return list(struct.unpack(f"{len(packed_bytes) // 4}f", packed_bytes))
             return None
         except RedisError:
             return None
@@ -119,11 +112,7 @@ class RedisCache(BaseCache):
             key = self._generate_embedding_key(text)
             packed_bytes = struct.pack(f"{len(embedding)}f", *embedding)
             b64_str = base64.b64encode(packed_bytes).decode("ascii")
-            await client.set(
-                name=key,
-                value=b64_str,
-                ex=settings.EMBEDDING_CACHE_TTL_SECONDS
-            )
+            await client.set(name=key, value=b64_str, ex=settings.EMBEDDING_CACHE_TTL_SECONDS)
         except RedisError:
             pass
         except Exception:
@@ -145,7 +134,9 @@ class RedisCache(BaseCache):
             for data in results:
                 if data:
                     packed_bytes = base64.b64decode(data.encode("ascii"))
-                    embeddings.append(list(struct.unpack(f"{len(packed_bytes)//4}f", packed_bytes)))
+                    embeddings.append(
+                        list(struct.unpack(f"{len(packed_bytes) // 4}f", packed_bytes))
+                    )
                 else:
                     embeddings.append(None)
             return embeddings

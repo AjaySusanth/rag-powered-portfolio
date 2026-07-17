@@ -28,24 +28,67 @@ logger = logging.getLogger(__name__)
 # Common binary file extensions to skip
 BINARY_EXTENSIONS = {
     # Images
-    '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.ico', '.tiff', '.webp',
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".bmp",
+    ".ico",
+    ".tiff",
+    ".webp",
     # Documents
-    '.pdf', '.docx', '.xlsx', '.pptx', '.odt', '.ods', '.odp',
+    ".pdf",
+    ".docx",
+    ".xlsx",
+    ".pptx",
+    ".odt",
+    ".ods",
+    ".odp",
     # Archives/compression
-    '.zip', '.tar', '.gz', '.tgz', '.bz2', '.xz', '.rar', '.7z',
+    ".zip",
+    ".tar",
+    ".gz",
+    ".tgz",
+    ".bz2",
+    ".xz",
+    ".rar",
+    ".7z",
     # Executables/binaries
-    '.exe', '.dll', '.so', '.dylib', '.bin', '.out', '.class', '.pyc', '.pyd',
+    ".exe",
+    ".dll",
+    ".so",
+    ".dylib",
+    ".bin",
+    ".out",
+    ".class",
+    ".pyc",
+    ".pyd",
     # Audio/Video
-    '.mp3', '.wav', '.mp4', '.avi', '.mkv', '.mov', '.flv', '.webm',
+    ".mp3",
+    ".wav",
+    ".mp4",
+    ".avi",
+    ".mkv",
+    ".mov",
+    ".flv",
+    ".webm",
     # Databases/stores
-    '.db', '.sqlite', '.sqlite3', '.dat',
+    ".db",
+    ".sqlite",
+    ".sqlite3",
+    ".dat",
     # Fonts
-    '.woff', '.woff2', '.ttf', '.eot', '.otf',
+    ".woff",
+    ".woff2",
+    ".ttf",
+    ".eot",
+    ".otf",
 }
 
 
 class GitHubIngestionError(Exception):
     """Raised for unrecoverable failures during GitHub ingestion."""
+
     pass
 
 
@@ -55,7 +98,7 @@ def parse_ingest_yaml(yaml_path: str) -> Dict[str, Any]:
     Extracts project name, GitHub repository, auto_ingest globs, and ignore globs.
     """
     try:
-        with open(yaml_path, 'r', encoding='utf-8') as f:
+        with open(yaml_path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
         if not data:
@@ -82,7 +125,7 @@ def parse_ingest_yaml(yaml_path: str) -> Dict[str, Any]:
             "project": project,
             "github_repo": github_repo,
             "auto_ingest": auto_ingest,
-            "ignore": ignore
+            "ignore": ignore,
         }
     except FileNotFoundError:
         raise GitHubIngestionError(f"Configuration file not found: {yaml_path}")
@@ -107,10 +150,10 @@ def expand_pattern(pattern: str, max_depth: int) -> List[str]:
     Since Python <3.13 PurePosixPath.match() does not recursively match '**' inside paths,
     we expand any '**' in the pattern into 0 to max_depth segments of '*' (e.g. '', '*', '*/*', etc.).
     """
-    if '**' not in pattern:
+    if "**" not in pattern:
         return [pattern]
 
-    parts = pattern.split('**', 1)
+    parts = pattern.split("**", 1)
     prefix = parts[0]
     suffix = parts[1]
 
@@ -118,16 +161,16 @@ def expand_pattern(pattern: str, max_depth: int) -> List[str]:
     for k in range(max_depth + 1):
         if k == 0:
             # Collapse double asterisk
-            if prefix == '':
-                expanded = suffix.lstrip('/')
-            elif suffix == '':
-                expanded = prefix.rstrip('/')
-            elif prefix.endswith('/') and suffix.startswith('/'):
+            if prefix == "":
+                expanded = suffix.lstrip("/")
+            elif suffix == "":
+                expanded = prefix.rstrip("/")
+            elif prefix.endswith("/") and suffix.startswith("/"):
                 expanded = prefix + suffix[1:]
             else:
                 expanded = prefix + suffix
         else:
-            stars = '/'.join(['*'] * k)
+            stars = "/".join(["*"] * k)
             expanded = prefix + stars + suffix
 
         # Recursively expand remaining '**' in the suffix
@@ -148,8 +191,8 @@ def match_pattern(path: str, pattern: str) -> bool:
 
     for ep in set(expanded_patterns):
         # Normalize double slashes
-        while '//' in ep:
-            ep = ep.replace('//', '/')
+        while "//" in ep:
+            ep = ep.replace("//", "/")
         if p.match(ep):
             return True
 
@@ -188,7 +231,7 @@ async def fetch_github_repository(yaml_path: str) -> List[Document]:
     # Prepare headers for GitHub API
     headers = {
         "Accept": "application/vnd.github.v3+json",
-        "User-Agent": "antigravity-portfolio-ingester"
+        "User-Agent": "antigravity-portfolio-ingester",
     }
 
     if settings.GITHUB_TOKEN:
@@ -290,6 +333,7 @@ async def fetch_github_repository(yaml_path: str) -> List[Document]:
                     if encoding == "base64":
                         # GitHub returns base64-encoded content with embedded newlines
                         import base64
+
                         raw_bytes = base64.b64decode(raw_content.replace("\n", ""))
                     else:
                         # Unlikely, but handle plain text blobs defensively
@@ -299,7 +343,9 @@ async def fetch_github_repository(yaml_path: str) -> List[Document]:
                     try:
                         content = raw_bytes.decode("utf-8")
                     except UnicodeDecodeError:
-                        logger.info(f"Skipping file {path} as it could not be decoded as UTF-8 text.")
+                        logger.info(
+                            f"Skipping file {path} as it could not be decoded as UTF-8 text."
+                        )
                         return None
 
                     layer = determine_document_layer(path, "github")
@@ -308,7 +354,7 @@ async def fetch_github_repository(yaml_path: str) -> List[Document]:
                         project=project,
                         layer=layer,
                         source_type="github",
-                        source_file=path
+                        source_file=path,
                     )
                 except UnicodeDecodeError:
                     logger.info(f"Skipping file {path} as it could not be decoded as UTF-8 text.")
@@ -316,7 +362,6 @@ async def fetch_github_repository(yaml_path: str) -> List[Document]:
                 except Exception as e:
                     logger.error(f"Failed to fetch content for file {path} (SHA: {sha}): {e}")
                     return None
-
 
         tasks = [fetch_file(path, sha) for path, sha in matched_items]
         results = await asyncio.gather(*tasks)

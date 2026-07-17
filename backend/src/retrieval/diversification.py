@@ -15,9 +15,7 @@ from src.models.retrieval_result import RetrievalResult
 
 
 def diversify_by_source(
-    results: List[RetrievalResult],
-    limit: int,
-    max_per_source: int = 3
+    results: List[RetrievalResult], limit: int, max_per_source: int = 3
 ) -> List[RetrievalResult]:
     """
     Greedily selects chunks from unique source files up to max_per_source per file.

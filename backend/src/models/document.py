@@ -37,6 +37,7 @@ class Document:
     """
     Canonical document representation utilized throughout the RAG pipeline.
     """
+
     content: str
     project: str
     layer: str  # 'identity', 'design', or 'artifact'

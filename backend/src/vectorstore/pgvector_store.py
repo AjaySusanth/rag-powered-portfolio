@@ -24,13 +24,11 @@ logger = logging.getLogger(__name__)
 
 class DatabaseError(Exception):
     """Raised when a vector store database operation fails."""
+
     pass
 
 
-async def upsert_chunks(
-    chunks: List[Chunk],
-    embeddings: List[List[float]]
-) -> None:
+async def upsert_chunks(chunks: List[Chunk], embeddings: List[List[float]]) -> None:
     """
     Saves a batch of Chunk objects and their corresponding embeddings into the database.
     If a chunk with the same chunk_id already exists, it updates fields in-place.
@@ -59,7 +57,7 @@ async def upsert_chunks(
             chunk.token_count,
             chunk.char_count,
             json.dumps(chunk.metadata),
-            embeddings[i]
+            embeddings[i],
         )
         for i, chunk in enumerate(chunks)
     ]
@@ -99,9 +97,7 @@ async def upsert_chunks(
 
 
 async def similarity_search(
-    query_embedding: List[float],
-    limit: int = 5,
-    project_filter: Optional[str] = None
+    query_embedding: List[float], limit: int = 5, project_filter: Optional[str] = None
 ) -> List[Dict[str, Any]]:
     """
     Searches the vector store for closest chunks to the query embedding using cosine similarity.
@@ -166,6 +162,7 @@ async def count_chunks() -> int:
     except Exception as e:
         logger.error(f"Failed to count chunks: {e}")
         raise DatabaseError(f"Count failed: {e}") from e
+
 
 async def get_all_chunks() -> List[Dict[str, Any]]:
     """

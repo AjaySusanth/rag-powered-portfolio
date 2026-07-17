@@ -4,6 +4,7 @@ We use strongly typed dataclasses for evaluation metrics to ensure that the eval
 does not rely on raw dictionaries. This provides compile-time safety, easier JSON serialization,
 and clear contracts between the evaluator and the reporting layers.
 """
+
 from dataclasses import dataclass, field
 from typing import List, Optional
 
@@ -25,6 +26,7 @@ class QuestionResult:
     rewrite_explanation: Optional[str] = None
     rewrite_latency: Optional[float] = None
 
+
 @dataclass
 class CategoryMetrics:
     category: str
@@ -34,6 +36,7 @@ class CategoryMetrics:
     mrr: float
     average_similarity: float
 
+
 @dataclass
 class LayerMetrics:
     layer: str
@@ -42,6 +45,7 @@ class LayerMetrics:
     recall: float
     mrr: float
     average_similarity: float
+
 
 @dataclass
 class EvaluationResult:

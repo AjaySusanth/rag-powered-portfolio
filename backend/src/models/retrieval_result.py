@@ -21,6 +21,7 @@ class RetrievalResult:
     where higher values indicate stronger semantic similarity to the query.
     For hybrid search (RRF), it holds the fused RRF score.
     """
+
     chunk: Chunk
     score: float
     vector_rank: Optional[int] = None

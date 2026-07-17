@@ -31,7 +31,9 @@ async def chat_endpoint(request: ChatRequest) -> StreamingResponse:
 
     async def sse_generator():
         try:
-            async for event in orchestrator.stream_chat(query=request.message, session_id=request.session_id):
+            async for event in orchestrator.stream_chat(
+                query=request.message, session_id=request.session_id
+            ):
                 # Serialize the Pydantic model event to a JSON string
                 payload = event.model_dump(mode="json")
                 yield f"data: {json.dumps(payload)}\n\n"
@@ -47,7 +49,11 @@ async def chat_endpoint(request: ChatRequest) -> StreamingResponse:
             raise
         except Exception as e:
             logger.error(f"Error occurred in route SSE generator: {e}")
-            err_payload = {"event": "error", "code": "internal_server_error", "message": "An unexpected error occurred."}
+            err_payload = {
+                "event": "error",
+                "code": "internal_server_error",
+                "message": "An unexpected error occurred.",
+            }
             yield f"data: {json.dumps(err_payload)}\n\n"
             # Ensure DONE event is yielded even on error
             yield "data: [DONE]\n\n"

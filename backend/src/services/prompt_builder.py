@@ -18,6 +18,7 @@ from src.models.retrieval_result import RetrievalResult
 
 class PromptBuildResult(BaseModel):
     """Container holding the constructed prompt and the actual chunks used to build it."""
+
     prompt: str
     chunks_used: List[RetrievalResult]
 
@@ -39,7 +40,9 @@ class PromptBuilder:
     )
 
     @classmethod
-    def build(cls, original_query: str, chunks: List[RetrievalResult], max_chunks: int = 15) -> PromptBuildResult:
+    def build(
+        cls, original_query: str, chunks: List[RetrievalResult], max_chunks: int = 15
+    ) -> PromptBuildResult:
         """
         Assembles and formats the final prompt text.
 
@@ -60,7 +63,7 @@ class PromptBuilder:
             project = res.chunk.project or "global"
             heading = res.chunk.metadata.get("heading") or "No Heading"
             content = res.chunk.content or ""
-            context_str += f"--- CONTEXT CHUNK {i+1} (Project: {project} | Source: {source_file} > {heading}) ---\n{content}\n\n"
+            context_str += f"--- CONTEXT CHUNK {i + 1} (Project: {project} | Source: {source_file} > {heading}) ---\n{content}\n\n"
 
         prompt = f"User Question: {original_query}\n\nRetrieved Context:\n{context_str}"
         return PromptBuildResult(prompt=prompt, chunks_used=sorted_results)

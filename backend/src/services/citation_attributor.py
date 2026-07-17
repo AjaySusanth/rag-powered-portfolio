@@ -31,6 +31,7 @@ Analyze the generated answer carefully and check each retrieved chunk's content 
 Your output must contain only the list of supporting chunk IDs in the requested JSON structure.
 """
 
+
 class CitationAttributionSchema(BaseModel):
     chunk_ids: List[str] = Field(
         description="A list of chunk IDs that directly support statements made in the generated answer."
@@ -41,6 +42,7 @@ class GeminiCitationAttributor(BaseCitationAttributor):
     """
     Citation Attributor implementation using Google Gemini structured JSON outputs.
     """
+
     def __init__(self, model_name: str = settings.MODEL_ATTRIBUTOR):
         self.model_name = model_name
 
@@ -68,11 +70,7 @@ class GeminiCitationAttributor(BaseCitationAttributor):
             prompt += f"Content Preview: {preview}\n\n"
         return prompt
 
-    async def attribute_citations(
-        self,
-        answer: str,
-        results: List[RetrievalResult]
-    ) -> List[str]:
+    async def attribute_citations(self, answer: str, results: List[RetrievalResult]) -> List[str]:
         """
         Determines which retrieved chunks support the answer in a structured JSON call.
         """
@@ -80,6 +78,7 @@ class GeminiCitationAttributor(BaseCitationAttributor):
             return []
 
         import asyncio
+
         client = get_gemini_client()
         prompt_content = self._format_prompt(answer, results)
 
@@ -96,7 +95,7 @@ class GeminiCitationAttributor(BaseCitationAttributor):
                         temperature=0.0,
                         response_mime_type="application/json",
                         response_schema=CitationAttributionSchema,
-                    )
+                    ),
                 )
 
                 result: CitationAttributionSchema = response.parsed
@@ -107,14 +106,18 @@ class GeminiCitationAttributor(BaseCitationAttributor):
 
             except Exception as e:
                 err_str = str(e)
-                is_transient = any(code in err_str for code in ["429", "503", "RESOURCE_EXHAUSTED", "UNAVAILABLE"])
+                is_transient = any(
+                    code in err_str for code in ["429", "503", "RESOURCE_EXHAUSTED", "UNAVAILABLE"]
+                )
                 if is_transient and attempt < max_retries - 1:
-                    sleep_time = backoff * (2 ** attempt)
+                    sleep_time = backoff * (2**attempt)
                     logger.warning(
-                        f"Gemini Attributor API transient issue (attempt {attempt+1}/{max_retries}). "
+                        f"Gemini Attributor API transient issue (attempt {attempt + 1}/{max_retries}). "
                         f"Retrying in {sleep_time:.2f}s... Error: {e}"
                     )
                     await asyncio.sleep(sleep_time)
                 else:
-                    logger.error(f"Gemini citation attribution failed after {attempt+1} attempts: {e}")
+                    logger.error(
+                        f"Gemini citation attribution failed after {attempt + 1} attempts: {e}"
+                    )
                     raise LLMError(f"Gemini citation attribution failed: {e}") from e

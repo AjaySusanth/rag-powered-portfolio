@@ -18,18 +18,22 @@ from src.retrieval.rrf import RRFFuser
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class DiagnosticTrace:
     """Represents the retrieval trace of a single candidate document."""
+
     source_file: str
     vector_rank: Optional[int]
     bm25_rank: Optional[int]
     rrf_score: float
     fused_rank: int
 
+
 @dataclass
 class FailureDetail:
     """Detailed diagnostics of a single unretrieved expected source."""
+
     source_file: str
     category: str  # Missing from both, Candidate starvation, Fusion ordering, Duplicate domination
     explanation: str
@@ -38,9 +42,11 @@ class FailureDetail:
     bm25_rank: Optional[int]
     rrf_rank: Optional[int]
 
+
 @dataclass
 class QueryDiagnostics:
     """Diagnostic state for a single query."""
+
     question_id: str
     question: str
     is_hit: bool
@@ -50,9 +56,11 @@ class QueryDiagnostics:
     failures: List[FailureDetail]
     top_5_sources: List[str]
 
+
 @dataclass
 class DiagnosticsSummary:
     """Global diagnostics summary for the dataset."""
+
     project: str
     total_queries: int
     failed_queries: int
@@ -69,6 +77,7 @@ class RetrievalDiagnostics:
     Orchestrates deep diagnostics of the retrieval pipeline by querying
     underlying systems at top_k=20 and analyzing failures.
     """
+
     def __init__(self, k: int = 60):
         self.fuser = RRFFuser(k=k)
 
@@ -89,8 +98,12 @@ class RetrievalDiagnostics:
 
             # 1. Fetch top-20 candidates concurrently
             resolved_project = project if project is not None else detect_project(question_text)
-            vector_task = vector_retriever.retrieve(query=question_text, top_k=20, project=resolved_project)
-            bm25_task = bm25_retriever.retrieve(query=question_text, top_k=20, project=resolved_project)
+            vector_task = vector_retriever.retrieve(
+                query=question_text, top_k=20, project=resolved_project
+            )
+            bm25_task = bm25_retriever.retrieve(
+                query=question_text, top_k=20, project=resolved_project
+            )
             vector_20, bm25_20 = await asyncio.gather(vector_task, bm25_task)
 
             # 2. Compute candidate overlap metrics
@@ -109,7 +122,9 @@ class RetrievalDiagnostics:
 
             # Calculate duplicate density in top-5 (chunks per unique source)
             unique_top_5_sources = set(top_5_sources)
-            duplicate_density = len(top_5_sources) / len(unique_top_5_sources) if unique_top_5_sources else 1.0
+            duplicate_density = (
+                len(top_5_sources) / len(unique_top_5_sources) if unique_top_5_sources else 1.0
+            )
 
             # Determine if query succeeded (minimum match met in top-5)
             retrieved_expected = [src for src in top_5_sources if src in expected_sources]
@@ -120,7 +135,9 @@ class RetrievalDiagnostics:
 
             if not is_hit:
                 # Find which expected sources were missed in the top 5
-                missed_sources = [src for src in expected_sources if src not in unique_retrieved_expected]
+                missed_sources = [
+                    src for src in expected_sources if src not in unique_retrieved_expected
+                ]
 
                 for missed_src in missed_sources:
                     # Trace ranking state of this missed source in the fused list
@@ -132,15 +149,17 @@ class RetrievalDiagnostics:
 
                     # 1. Missing from both retrievers
                     if fused_match is None:
-                        failures.append(FailureDetail(
-                            source_file=missed_src,
-                            category="Missing from both retrievers",
-                            explanation=f"The expected file '{missed_src}' did not appear in the top-20 candidates of either Vector or BM25 search.",
-                            recommendation="Improve retrieval quality, chunking, or indexing.",
-                            vector_rank=None,
-                            bm25_rank=None,
-                            rrf_rank=None
-                        ))
+                        failures.append(
+                            FailureDetail(
+                                source_file=missed_src,
+                                category="Missing from both retrievers",
+                                explanation=f"The expected file '{missed_src}' did not appear in the top-20 candidates of either Vector or BM25 search.",
+                                recommendation="Improve retrieval quality, chunking, or indexing.",
+                                vector_rank=None,
+                                bm25_rank=None,
+                                rrf_rank=None,
+                            )
+                        )
                     else:
                         rrf_rank, res = fused_match
                         vr = res.vector_rank
@@ -153,15 +172,17 @@ class RetrievalDiagnostics:
                         b_starved = br is None or br > 5
 
                         if v_starved and b_starved:
-                            failures.append(FailureDetail(
-                                source_file=missed_src,
-                                category="Candidate starvation",
-                                explanation=f"The expected file was retrieved (fused rank: {rrf_rank}) but both Vector rank ({vr}) and BM25 rank ({br}) were > 5, preventing it from entering the fusion candidate pool under top-5 limits.",
-                                recommendation="Increase retrieval candidate pool before fusion.",
-                                vector_rank=vr,
-                                bm25_rank=br,
-                                rrf_rank=rrf_rank
-                            ))
+                            failures.append(
+                                FailureDetail(
+                                    source_file=missed_src,
+                                    category="Candidate starvation",
+                                    explanation=f"The expected file was retrieved (fused rank: {rrf_rank}) but both Vector rank ({vr}) and BM25 rank ({br}) were > 5, preventing it from entering the fusion candidate pool under top-5 limits.",
+                                    recommendation="Increase retrieval candidate pool before fusion.",
+                                    vector_rank=vr,
+                                    bm25_rank=br,
+                                    rrf_rank=rrf_rank,
+                                )
+                            )
                         else:
                             # The file entered the fusion pool (at least one rank <= 5), but missed top 5 fused results.
                             # Deduplicate fused results by source file
@@ -182,38 +203,44 @@ class RetrievalDiagnostics:
                             # 3. Fusion ordering
                             # If even after deduplication it remains outside top 5, RRF simply ranked it too low
                             if dedup_rank is None or dedup_rank > 5:
-                                failures.append(FailureDetail(
-                                    source_file=missed_src,
-                                    category="Fusion ordering",
-                                    explanation=f"The expected file entered the RRF pool but was ranked poorly (fused rank: {rrf_rank}, deduplicated rank: {dedup_rank}) due to weak scores in both retrievers.",
-                                    recommendation="Tune RRF parameters or investigate fusion strategy.",
-                                    vector_rank=vr,
-                                    bm25_rank=br,
-                                    rrf_rank=rrf_rank
-                                ))
+                                failures.append(
+                                    FailureDetail(
+                                        source_file=missed_src,
+                                        category="Fusion ordering",
+                                        explanation=f"The expected file entered the RRF pool but was ranked poorly (fused rank: {rrf_rank}, deduplicated rank: {dedup_rank}) due to weak scores in both retrievers.",
+                                        recommendation="Tune RRF parameters or investigate fusion strategy.",
+                                        vector_rank=vr,
+                                        bm25_rank=br,
+                                        rrf_rank=rrf_rank,
+                                    )
+                                )
                             # 4. Duplicate source domination
                             # If deduplication would have successfully raised it into the top 5
                             else:
-                                failures.append(FailureDetail(
-                                    source_file=missed_src,
-                                    category="Duplicate source domination",
-                                    explanation=f"The expected file entered the RRF pool (fused rank: {rrf_rank}) but was crowded out of the top-5 by duplicate chunks of other source files. Deduplication would raise it to rank {dedup_rank}.",
-                                    recommendation="Implement Source Diversification.",
-                                    vector_rank=vr,
-                                    bm25_rank=br,
-                                    rrf_rank=rrf_rank
-                                ))
+                                failures.append(
+                                    FailureDetail(
+                                        source_file=missed_src,
+                                        category="Duplicate source domination",
+                                        explanation=f"The expected file entered the RRF pool (fused rank: {rrf_rank}) but was crowded out of the top-5 by duplicate chunks of other source files. Deduplication would raise it to rank {dedup_rank}.",
+                                        recommendation="Implement Source Diversification.",
+                                        vector_rank=vr,
+                                        bm25_rank=br,
+                                        rrf_rank=rrf_rank,
+                                    )
+                                )
 
-            query_details.append(QueryDiagnostics(
-                question_id=q_id,
-                question=question_text,
-                is_hit=is_hit,
-                overlap_count=overlap_count,
-                jaccard_overlap=jaccard_overlap,
-                duplicate_density=duplicate_density,
-                failures=failures,
-                top_5_sources=top_5_sources
-            ))
+            query_details.append(
+                QueryDiagnostics(
+                    question_id=q_id,
+                    question=question_text,
+                    is_hit=is_hit,
+                    overlap_count=overlap_count,
+                    jaccard_overlap=jaccard_overlap,
+                    duplicate_density=duplicate_density,
+                    failures=failures,
+                    top_5_sources=top_5_sources,
+                )
+            )
 
         # 4. Compute global aggregations
         total_queries = len(questions)
@@ -223,7 +250,7 @@ class RetrievalDiagnostics:
             "Missing from both retrievers": 0,
             "Candidate starvation": 0,
             "Fusion ordering": 0,
-            "Duplicate source domination": 0
+            "Duplicate source domination": 0,
         }
 
         for qd in query_details:
@@ -231,22 +258,40 @@ class RetrievalDiagnostics:
                 if f.category in category_counts:
                     category_counts[f.category] += 1
 
-        avg_overlap = sum(qd.overlap_count for qd in query_details) / total_queries if total_queries > 0 else 0.0
-        avg_jaccard = sum(qd.jaccard_overlap for qd in query_details) / total_queries if total_queries > 0 else 0.0
-        avg_dup_density = sum(qd.duplicate_density for qd in query_details) / total_queries if total_queries > 0 else 0.0
+        avg_overlap = (
+            sum(qd.overlap_count for qd in query_details) / total_queries
+            if total_queries > 0
+            else 0.0
+        )
+        avg_jaccard = (
+            sum(qd.jaccard_overlap for qd in query_details) / total_queries
+            if total_queries > 0
+            else 0.0
+        )
+        avg_dup_density = (
+            sum(qd.duplicate_density for qd in query_details) / total_queries
+            if total_queries > 0
+            else 0.0
+        )
 
         # Determine top recommendation based on the dominant failure mode
         dominant_mode = max(category_counts, key=category_counts.get)
         if category_counts[dominant_mode] == 0:
             top_rec = "No failures detected. System is operating optimally."
         elif dominant_mode == "Missing from both retrievers":
-            top_rec = "Retrieval quality improvements (improve retrieval quality, chunking, or indexing)."
+            top_rec = (
+                "Retrieval quality improvements (improve retrieval quality, chunking, or indexing)."
+            )
         elif dominant_mode == "Candidate starvation":
-            top_rec = "Larger candidate pool (increase retrieval candidate pool size before fusion)."
+            top_rec = (
+                "Larger candidate pool (increase retrieval candidate pool size before fusion)."
+            )
         elif dominant_mode == "Fusion ordering":
             top_rec = "Tune RRF parameters or investigate fusion strategy."
         else:
-            top_rec = "Source Diversification (prevent duplicate source files from dominating the Top-K)."
+            top_rec = (
+                "Source Diversification (prevent duplicate source files from dominating the Top-K)."
+            )
 
         return DiagnosticsSummary(
             project=project,
@@ -257,5 +302,5 @@ class RetrievalDiagnostics:
             avg_jaccard_overlap=avg_jaccard,
             avg_duplicate_density=avg_dup_density,
             top_recommendation=top_rec,
-            query_details=query_details
+            query_details=query_details,
         )

@@ -15,6 +15,7 @@ class MockQueryRewriter(BaseQueryRewriter):
     """
     Mock query rewriter for unit tests.
     """
+
     def __init__(self, rewrites: Optional[Dict[str, RewriteResult]] = None):
         """
         Initializes the mock rewriter.
@@ -36,5 +37,5 @@ class MockQueryRewriter(BaseQueryRewriter):
         return RewriteResult(
             rewritten_query=query,
             rewritten=False,
-            explanation="Mock rewriter: no preconfigured rule found. Query passed through unchanged."
+            explanation="Mock rewriter: no preconfigured rule found. Query passed through unchanged.",
         )

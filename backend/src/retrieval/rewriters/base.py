@@ -17,6 +17,7 @@ class BaseQueryRewriter(ABC):
     Abstract interface for query rewriting.
     All query rewriter implementations must inherit from this and implement the rewrite method.
     """
+
     @abstractmethod
     async def rewrite(self, query: str, project: Optional[str] = None) -> RewriteResult:
         """
