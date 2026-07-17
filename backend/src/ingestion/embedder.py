@@ -26,11 +26,13 @@ logger = logging.getLogger(__name__)
 # Custom Exceptions
 # ---------------------------------------------------------------------------
 
+
 class EmbeddingError(Exception):
     """
     Raised when embedding generation fails due to API errors, timeouts, or
     configuration issues.
     """
+
     pass
 
 
@@ -65,6 +67,7 @@ def get_azure_client() -> AsyncAzureOpenAI:
 # ---------------------------------------------------------------------------
 # Embedding Logic
 # ---------------------------------------------------------------------------
+
 
 async def embed_texts(texts: List[str], batch_size: int = 100) -> List[List[float]]:
     """
@@ -107,14 +110,13 @@ async def embed_texts(texts: List[str], batch_size: int = 100) -> List[List[floa
             try:
                 # Azure OpenAI uses the deployment name as the "model" parameter
                 response = await client.embeddings.create(
-                    input=batch,
-                    model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT
+                    input=batch, model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT
                 )
                 # Sort data by index to guarantee order matches the input
                 sorted_data = sorted(response.data, key=lambda x: x.index)
                 new_embeddings.extend([item.embedding for item in sorted_data])
             except Exception as e:
-                logger.error(f"Failed to generate embeddings for batch {i//batch_size}: {e}")
+                logger.error(f"Failed to generate embeddings for batch {i // batch_size}: {e}")
                 raise EmbeddingError(f"Azure OpenAI embedding generation failed: {e}") from e
 
         # 5. Store newly generated embeddings in the Redis cache

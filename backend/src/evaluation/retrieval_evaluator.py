@@ -5,6 +5,7 @@ It takes a retriever implementation (decoupled via Python Protocol), executes qu
 defined in validation-safe datasets, and calculates granular IR metrics (Recall@K, Hit Rate, MRR,
 Average Similarity, Layer Recall, Category Accuracy) alongside detailed failure logs.
 """
+
 from typing import Any, Dict, List, Optional, Protocol
 
 from src.evaluation.dataset_validator import DatasetValidator
@@ -18,19 +19,19 @@ from src.models.retrieval_result import RetrievalResult
 
 
 class Retriever(Protocol):
-    async def retrieve(self, query: str, top_k: int, project: Optional[str] = None) -> List[RetrievalResult]:
+    async def retrieve(
+        self, query: str, top_k: int, project: Optional[str] = None
+    ) -> List[RetrievalResult]:
         """Contract for any retrieval implementation (Vector, BM25, Hybrid, RRF)."""
         ...
+
 
 class RetrievalEvaluator:
     def __init__(self, retriever: Retriever):
         self.retriever = retriever
 
     async def evaluate_dataset(
-        self,
-        dataset: Dict[str, Any],
-        top_k: int = 5,
-        db_check: bool = True
+        self, dataset: Dict[str, Any], top_k: int = 5, db_check: bool = True
     ) -> EvaluationResult:
         """
         Runs the evaluator against a single validated dataset.
@@ -40,7 +41,9 @@ class RetrievalEvaluator:
 
         project = dataset.get("project")
         # Validate expected sources exist in the database (can be bypassed for tests)
-        await DatasetValidator.validate_knowledge_base(project, dataset["questions"], db_check=db_check)
+        await DatasetValidator.validate_knowledge_base(
+            project, dataset["questions"], db_check=db_check
+        )
 
         question_results: List[QuestionResult] = []
 
@@ -54,9 +57,7 @@ class RetrievalEvaluator:
 
             # Invoke retriever
             retrieved = await self.retriever.retrieve(
-                query=question_text,
-                top_k=top_k,
-                project=project
+                query=question_text, top_k=top_k, project=project
             )
 
             # Extract retrieved properties
@@ -102,22 +103,24 @@ class RetrievalEvaluator:
                     rewrite_explanation = details.get("explanation")
                     rewrite_latency = details.get("latency")
 
-            question_results.append(QuestionResult(
-                question_id=q_id,
-                question=question_text,
-                category=category,
-                expected_sources=expected_sources,
-                retrieved_sources=retrieved_sources,
-                similarity_scores=similarity_scores,
-                is_hit=is_hit,
-                rank=first_match_rank,
-                expected_layers=expected_layers,
-                failure_reason=failure_reason,
-                rewritten_query=rewritten_query,
-                rewritten=rewritten,
-                rewrite_explanation=rewrite_explanation,
-                rewrite_latency=rewrite_latency
-            ))
+            question_results.append(
+                QuestionResult(
+                    question_id=q_id,
+                    question=question_text,
+                    category=category,
+                    expected_sources=expected_sources,
+                    retrieved_sources=retrieved_sources,
+                    similarity_scores=similarity_scores,
+                    is_hit=is_hit,
+                    rank=first_match_rank,
+                    expected_layers=expected_layers,
+                    failure_reason=failure_reason,
+                    rewritten_query=rewritten_query,
+                    rewritten=rewritten,
+                    rewrite_explanation=rewrite_explanation,
+                    rewrite_latency=rewrite_latency,
+                )
+            )
 
         total_questions = len(question_results)
 
@@ -131,17 +134,18 @@ class RetrievalEvaluator:
         ]
         avg_recall = sum(global_recalls) / total_questions if total_questions > 0 else 0.0
 
-        mrr = sum(
-            1.0 / r.rank if r.rank else 0.0
-            for r in question_results
-        ) / total_questions if total_questions > 0 else 0.0
+        mrr = (
+            sum(1.0 / r.rank if r.rank else 0.0 for r in question_results) / total_questions
+            if total_questions > 0
+            else 0.0
+        )
 
         successful_scores = [
-            r.similarity_scores[r.rank - 1]
-            for r in question_results
-            if r.rank is not None
+            r.similarity_scores[r.rank - 1] for r in question_results if r.rank is not None
         ]
-        avg_similarity = sum(successful_scores) / len(successful_scores) if successful_scores else 0.0
+        avg_similarity = (
+            sum(successful_scores) / len(successful_scores) if successful_scores else 0.0
+        )
 
         # 2. Compute Category Metrics
         categories = sorted(list({q.category for q in question_results}))
@@ -153,29 +157,34 @@ class RetrievalEvaluator:
                 continue
             cat_hits = sum(1 for r in cat_results if r.is_hit)
             cat_hit_rate = cat_hits / cat_total
-            cat_recall = sum(
-                len(set(r.retrieved_sources) & set(r.expected_sources)) / len(r.expected_sources)
-                for r in cat_results
-            ) / cat_total
-            cat_mrr = sum(
-                1.0 / r.rank if r.rank else 0.0
-                for r in cat_results
-            ) / cat_total
+            cat_recall = (
+                sum(
+                    len(set(r.retrieved_sources) & set(r.expected_sources))
+                    / len(r.expected_sources)
+                    for r in cat_results
+                )
+                / cat_total
+            )
+            cat_mrr = sum(1.0 / r.rank if r.rank else 0.0 for r in cat_results) / cat_total
             cat_successful_scores = [
-                r.similarity_scores[r.rank - 1]
-                for r in cat_results
-                if r.rank is not None
+                r.similarity_scores[r.rank - 1] for r in cat_results if r.rank is not None
             ]
-            cat_avg_similarity = sum(cat_successful_scores) / len(cat_successful_scores) if cat_successful_scores else 0.0
+            cat_avg_similarity = (
+                sum(cat_successful_scores) / len(cat_successful_scores)
+                if cat_successful_scores
+                else 0.0
+            )
 
-            category_metrics_list.append(CategoryMetrics(
-                category=cat,
-                total_questions=cat_total,
-                hit_rate=cat_hit_rate,
-                recall=cat_recall,
-                mrr=cat_mrr,
-                average_similarity=cat_avg_similarity
-            ))
+            category_metrics_list.append(
+                CategoryMetrics(
+                    category=cat,
+                    total_questions=cat_total,
+                    hit_rate=cat_hit_rate,
+                    recall=cat_recall,
+                    mrr=cat_mrr,
+                    average_similarity=cat_avg_similarity,
+                )
+            )
 
         # 3. Compute Layer Metrics
         layer_metrics_list: List[LayerMetrics] = []
@@ -184,7 +193,6 @@ class RetrievalEvaluator:
             for r in question_results:
                 layer_indices = [i for i, lyr in enumerate(r.expected_layers) if lyr == layer]
                 if layer_indices:
-
                     layer_results.append((r, layer_indices))
 
             layer_total = len(layer_results)
@@ -198,7 +206,9 @@ class RetrievalEvaluator:
 
             for r, indices in layer_results:
                 expected_sources_in_layer = [r.expected_sources[i] for i in indices]
-                retrieved_in_layer = [src for src in r.retrieved_sources if src in expected_sources_in_layer]
+                retrieved_in_layer = [
+                    src for src in r.retrieved_sources if src in expected_sources_in_layer
+                ]
 
                 unique_retrieved_in_layer = set(retrieved_in_layer)
                 recall_in_layer = len(unique_retrieved_in_layer) / len(expected_sources_in_layer)
@@ -219,16 +229,20 @@ class RetrievalEvaluator:
             layer_hit_rate = layer_hits / layer_total
             layer_avg_recall = sum(layer_recalls) / len(layer_recalls) if layer_recalls else 0.0
             layer_avg_mrr = sum(layer_mrrs) / len(layer_mrrs) if layer_mrrs else 0.0
-            layer_avg_similarity = sum(layer_similarities) / len(layer_similarities) if layer_similarities else 0.0
+            layer_avg_similarity = (
+                sum(layer_similarities) / len(layer_similarities) if layer_similarities else 0.0
+            )
 
-            layer_metrics_list.append(LayerMetrics(
-                layer=layer,
-                total_questions=layer_total,
-                hit_rate=layer_hit_rate,
-                recall=layer_avg_recall,
-                mrr=layer_avg_mrr,
-                average_similarity=layer_avg_similarity
-            ))
+            layer_metrics_list.append(
+                LayerMetrics(
+                    layer=layer,
+                    total_questions=layer_total,
+                    hit_rate=layer_hit_rate,
+                    recall=layer_avg_recall,
+                    mrr=layer_avg_mrr,
+                    average_similarity=layer_avg_similarity,
+                )
+            )
 
         failures = [r for r in question_results if not r.is_hit]
 
@@ -244,5 +258,5 @@ class RetrievalEvaluator:
             category_metrics=category_metrics_list,
             layer_metrics=layer_metrics_list,
             failures=failures,
-            question_results=question_results
+            question_results=question_results,
         )

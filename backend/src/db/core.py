@@ -46,7 +46,7 @@ async def get_db_pool() -> asyncpg.Pool:
                 min_size=2,
                 max_size=10,
                 timeout=30.0,
-                init=init_connection
+                init=init_connection,
             )
         except Exception as e:
             logger.error(f"Failed to create database connection pool: {e}")

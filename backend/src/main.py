@@ -12,7 +12,7 @@ CORS origins are dynamically set based on the environment to ensure security in 
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.routes import admin, chat, portfolio
@@ -24,6 +24,7 @@ from src.db.core import close_db_pool, get_db_pool
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -67,11 +68,12 @@ async def lifespan(app: FastAPI):
     logger.info("=== Shutting Down Application ===")
     await close_db_pool()
 
+
 app = FastAPI(
     title="RAG-Powered Developer Portfolio Backend",
     description="API for the RAG-powered developer portfolio chatbot.",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # CORS configurations
@@ -107,3 +109,10 @@ async def health_check():
     """Healthcheck endpoint for infrastructure monitoring (Render, etc.)."""
     return {"status": "healthy"}
 
+
+@app.get("/metrics")
+def metrics() -> Response:
+    """Exposes Prometheus-compatible metrics endpoint."""
+    from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)

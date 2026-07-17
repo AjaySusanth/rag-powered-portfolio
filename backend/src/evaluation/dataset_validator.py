@@ -5,6 +5,7 @@ that all expected source files exist in the indexed database for a given project
 Enforcing validation prevents execution of outdated or malformed test cases, providing
 fast feedback and preserving dataset integrity.
 """
+
 import logging
 from typing import Any, Dict, List, Optional
 
@@ -15,9 +16,12 @@ logger = logging.getLogger(__name__)
 VALID_CATEGORIES = {"core_logic", "pipeline", "data_models", "infrastructure", "documentation"}
 VALID_LAYERS = {"identity", "design", "artifact"}
 
+
 class DatasetValidationError(Exception):
     """Custom exception raised when dataset validation fails."""
+
     pass
+
 
 class DatasetValidator:
     @staticmethod
@@ -30,7 +34,9 @@ class DatasetValidator:
             raise DatasetValidationError("Dataset is empty.")
 
         project = data.get("project")
-        if "project" in data and (not project or not isinstance(project, str) or not project.strip()):
+        if "project" in data and (
+            not project or not isinstance(project, str) or not project.strip()
+        ):
             raise DatasetValidationError("Dataset 'project' field cannot be empty if specified.")
 
         questions = data.get("questions")
@@ -65,15 +71,21 @@ class DatasetValidator:
 
             expected_sources = q.get("expected_sources")
             if not expected_sources or not isinstance(expected_sources, list):
-                raise DatasetValidationError(f"Question {q_id} must have a non-empty 'expected_sources' list.")
+                raise DatasetValidationError(
+                    f"Question {q_id} must have a non-empty 'expected_sources' list."
+                )
 
             # Check duplicate expected sources
             if len(expected_sources) != len(set(expected_sources)):
-                raise DatasetValidationError(f"Question {q_id} contains duplicate entries in 'expected_sources'.")
+                raise DatasetValidationError(
+                    f"Question {q_id} contains duplicate entries in 'expected_sources'."
+                )
 
             expected_layers = q.get("expected_layers")
             if not expected_layers or not isinstance(expected_layers, list):
-                raise DatasetValidationError(f"Question {q_id} must have a non-empty 'expected_layers' list.")
+                raise DatasetValidationError(
+                    f"Question {q_id} must have a non-empty 'expected_layers' list."
+                )
 
             if len(expected_sources) != len(expected_layers):
                 raise DatasetValidationError(
@@ -92,9 +104,13 @@ class DatasetValidator:
             minimum_match = q.get("minimum_match")
             if minimum_match is not None:
                 if not isinstance(minimum_match, int):
-                    raise DatasetValidationError(f"Question {q_id}: 'minimum_match' must be an integer.")
+                    raise DatasetValidationError(
+                        f"Question {q_id}: 'minimum_match' must be an integer."
+                    )
                 if minimum_match <= 0:
-                    raise DatasetValidationError(f"Question {q_id}: 'minimum_match' must be greater than 0.")
+                    raise DatasetValidationError(
+                        f"Question {q_id}: 'minimum_match' must be greater than 0."
+                    )
                 if minimum_match > len(expected_sources):
                     raise DatasetValidationError(
                         f"Question {q_id}: 'minimum_match' ({minimum_match}) cannot be greater than "
@@ -102,7 +118,9 @@ class DatasetValidator:
                     )
 
     @staticmethod
-    async def validate_knowledge_base(project: Optional[str], questions: List[Dict[str, Any]], db_check: bool = True) -> None:
+    async def validate_knowledge_base(
+        project: Optional[str], questions: List[Dict[str, Any]], db_check: bool = True
+    ) -> None:
         """
         Validates that all expected source files exist in the indexed database for the given project.
         If project is None, validates files exist across any project in the database.
@@ -131,7 +149,9 @@ class DatasetValidator:
                 query = "SELECT DISTINCT source_file FROM chunks WHERE project = $1 AND source_file = any($2::text[])"
                 rows = await conn.fetch(query, project, list(all_sources))
             else:
-                query = "SELECT DISTINCT source_file FROM chunks WHERE source_file = any($1::text[])"
+                query = (
+                    "SELECT DISTINCT source_file FROM chunks WHERE source_file = any($1::text[])"
+                )
                 rows = await conn.fetch(query, list(all_sources))
             existing = {row["source_file"] for row in rows}
 

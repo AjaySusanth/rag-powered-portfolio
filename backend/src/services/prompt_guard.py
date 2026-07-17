@@ -18,6 +18,7 @@ class PromptGuardResult(BaseModel):
     """
     Metadata container representing the analysis results of a prompt guard run.
     """
+
     original_query: str
     contains_injection: bool
     matched_rules: List[str]
@@ -31,8 +32,13 @@ class PromptGuard:
     # Curator of highly specific regex rules to target override and jailbreak phrasing
     # while minimizing false positives on legitimate queries.
     RULES = {
-        "ignore_previous_instructions": re.compile(r"ignore\s+(?:all\s+)?(?:previous\s+)?(?:instructions|prompts|queries)", re.IGNORECASE),
-        "disregard_previous_instructions": re.compile(r"disregard\s+(?:all\s+)?(?:previous\s+)?(?:instructions|prompts|queries)", re.IGNORECASE),
+        "ignore_previous_instructions": re.compile(
+            r"ignore\s+(?:all\s+)?(?:previous\s+)?(?:instructions|prompts|queries)", re.IGNORECASE
+        ),
+        "disregard_previous_instructions": re.compile(
+            r"disregard\s+(?:all\s+)?(?:previous\s+)?(?:instructions|prompts|queries)",
+            re.IGNORECASE,
+        ),
         "forget_system_prompt": re.compile(r"forget\s+(?:your\s+)?system\s+prompt", re.IGNORECASE),
         "reveal_prompt": re.compile(r"reveal\s+(?:your\s+)?prompt", re.IGNORECASE),
         "developer_mode": re.compile(r"developer\s+mode", re.IGNORECASE),
@@ -58,5 +64,5 @@ class PromptGuard:
         return PromptGuardResult(
             original_query=query,
             contains_injection=len(matched_rules) > 0,
-            matched_rules=matched_rules
+            matched_rules=matched_rules,
         )

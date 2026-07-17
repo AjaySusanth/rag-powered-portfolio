@@ -44,16 +44,16 @@ def tokenize_code(text: str) -> List[str]:
 
     # 1. Insert space before capitals to split camelCase/PascalCase
     # e.g., 'authMiddleware' -> 'auth Middleware', 'HTTPResponse' -> 'HTTP Response'
-    s1 = re.sub(r'([a-z0-9])([A-Z])', r'\1 \2', text)
-    s2 = re.sub(r'([A-Z]+)([A-Z][a-z])', r'\1 \2', s1)
+    s1 = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", text)
+    s2 = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1 \2", s1)
 
     # Insert space between letters and numbers
     # e.g., 'Token123' -> 'Token 123', '123Token' -> '123 Token'
-    s3 = re.sub(r'([a-zA-Z])([0-9])', r'\1 \2', s2)
-    s4 = re.sub(r'([0-9])([a-zA-Z])', r'\1 \2', s3)
+    s3 = re.sub(r"([a-zA-Z])([0-9])", r"\1 \2", s2)
+    s4 = re.sub(r"([0-9])([a-zA-Z])", r"\1 \2", s3)
 
     # 2. Split on punctuation by replacing any non-alphanumeric character with a space
-    s5 = re.sub(r'[^a-zA-Z0-9\s]', ' ', s4)
+    s5 = re.sub(r"[^a-zA-Z0-9\s]", " ", s4)
 
     # 3. Lowercase and split on whitespace to get clean tokens
     tokens = [t.lower() for t in s5.split() if t]
@@ -69,6 +69,7 @@ class BM25Index:
     of documents to a given search query. It is based on term frequency (TF) and inverse document frequency (IDF).
     This class maintains the corpus, tokenized representation, metadata mappings, and the raw BM25Okapi object.
     """
+
     def __init__(self) -> None:
         self.corpus: List[Chunk] = []
         self.tokenized_corpus: List[List[str]] = []
@@ -100,12 +101,14 @@ class BM25Index:
                         chunk_index=row.get("chunk_index", 0),
                         token_count=row.get("token_count", 0),
                         char_count=row.get("char_count", 0),
-                        metadata=row.get("metadata", {})
+                        metadata=row.get("metadata", {}),
                     )
                 )
 
             if not chunks:
-                logger.warning("No chunks found in database. Initializing BM25 index with empty corpus.")
+                logger.warning(
+                    "No chunks found in database. Initializing BM25 index with empty corpus."
+                )
                 self.corpus = []
                 self.tokenized_corpus = []
                 self.bm25 = None
@@ -125,10 +128,7 @@ class BM25Index:
             raise
 
     def search(
-        self,
-        query: str,
-        top_k: int = 5,
-        project: Optional[str] = None
+        self, query: str, top_k: int = 5, project: Optional[str] = None
     ) -> List[RetrievalResult]:
         """
         Queries the BM25 index, scores all chunks, filters by project, and returns ranked results.
@@ -173,9 +173,7 @@ index_instance = BM25Index()
 
 
 async def retrieve(
-    query: str,
-    top_k: int = 5,
-    project: Optional[str] = None
+    query: str, top_k: int = 5, project: Optional[str] = None
 ) -> List[RetrievalResult]:
     """
     Retrieves chunks matching the natural language query using the BM25 index.

@@ -71,4 +71,3 @@ async def init_db() -> None:
         raise RuntimeError(f"Database initialization failed: {e}") from e
     finally:
         await conn.close()
-

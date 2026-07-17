@@ -40,6 +40,7 @@ MIN_SECTION_BODY_TOKENS: int = 20
 
 class LayerConfig(BaseModel):
     """Configuration parameters for a specific document layer's chunking behavior."""
+
     chunk_size: int = Field(description="Max tokens allowed per chunk")
     overlap: int = Field(description="Token overlap between consecutive chunks")
 
@@ -54,6 +55,7 @@ LAYER_CONFIGS: Dict[str, LayerConfig] = {
 
 class _Section(BaseModel):
     """Internal representation of a heading + body pair after the first pass split."""
+
     heading: Optional[str]
     body: str
 
@@ -90,6 +92,7 @@ def _split_by_headings(text: str) -> List[_Section]:
 
 class _RawChunk(BaseModel):
     """Temporary struct to hold chunked text content and heading before mapping to Chunk model."""
+
     content: str
     heading: Optional[str]
 
@@ -184,10 +187,7 @@ def chunk_document(doc: Document) -> List[Chunk]:
             appended_heading = full_heading if full_heading else ""
             appended = f"\n\n{appended_heading}\n\n{body}" if appended_heading else f"\n\n{body}"
             last = raw_chunks[-1]
-            raw_chunks[-1] = _RawChunk(
-                content=last.content + appended,
-                heading=last.heading
-            )
+            raw_chunks[-1] = _RawChunk(content=last.content + appended, heading=last.heading)
             continue
 
         # Normal/oversized section: run sliding window

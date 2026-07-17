@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 class ManualIngestionError(Exception):
     """Raised for errors during manual document loading."""
+
     pass
 
 
@@ -79,12 +80,14 @@ def load_manual_documents(project_name: str, knowledge_dir: Path) -> List[Docume
                                 layer=layer,
                                 source_type="manual",
                                 source_file=path.name,
-                                metadata={"source": "manual", "original_file": path.name}
+                                metadata={"source": "manual", "original_file": path.name},
                             )
                         )
                     except Exception as e:
                         logger.error(f"Failed to read global document {path.name}: {e}")
-                        raise ManualIngestionError(f"Failed to load global document {path.name}: {e}") from e
+                        raise ManualIngestionError(
+                            f"Failed to load global document {path.name}: {e}"
+                        ) from e
         return documents
 
     # 2. Load project-specific documents
@@ -110,12 +113,14 @@ def load_manual_documents(project_name: str, knowledge_dir: Path) -> List[Docume
                             layer=layer,
                             source_type="manual",
                             source_file=rel_path,
-                            metadata={"source": "manual", "original_file": rel_path}
+                            metadata={"source": "manual", "original_file": rel_path},
                         )
                     )
                 except Exception as e:
                     logger.error(f"Failed to read project document {rel_path}: {e}")
-                    raise ManualIngestionError(f"Failed to load project document {rel_path}: {e}") from e
+                    raise ManualIngestionError(
+                        f"Failed to load project document {rel_path}: {e}"
+                    ) from e
     else:
         logger.warning(f"Project manual directory does not exist: {project_dir}")
 

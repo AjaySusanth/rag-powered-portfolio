@@ -74,7 +74,7 @@ class IngestionService:
                 chunks_created=0,
                 embeddings_generated=0,
                 duration_seconds=round(duration, 2),
-                errors=["No documents found to ingest."]
+                errors=["No documents found to ingest."],
             )
 
         # 4. Chunk documents
@@ -85,7 +85,9 @@ class IngestionService:
                 all_chunks.extend(chunks)
             except Exception as e:
                 # Capture chunking failure as a partial failure / error
-                errors.append(f"Failed to chunk document '{doc.metadata.get('source', 'unknown')}': {str(e)}")
+                errors.append(
+                    f"Failed to chunk document '{doc.metadata.get('source', 'unknown')}': {str(e)}"
+                )
 
         num_chunks = len(all_chunks)
         if num_chunks == 0:
@@ -97,7 +99,7 @@ class IngestionService:
                 chunks_created=0,
                 embeddings_generated=0,
                 duration_seconds=round(duration, 2),
-                errors=errors + ["No chunks were produced from documents."]
+                errors=errors + ["No chunks were produced from documents."],
             )
 
         # 5. Generate embeddings
@@ -128,5 +130,5 @@ class IngestionService:
             chunks_created=num_chunks,
             embeddings_generated=num_embeddings,
             duration_seconds=round(duration, 2),
-            errors=errors
+            errors=errors,
         )

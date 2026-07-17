@@ -62,7 +62,7 @@ class RateLimiter:
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail="Too Many Requests. Please try again later.",
-                headers={"Retry-After": str(time_remaining)}
+                headers={"Retry-After": str(time_remaining)},
             )
 
         # Otherwise, increment the counter for the current window

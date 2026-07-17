@@ -35,10 +35,12 @@ You will be given the user's raw query and an optional project context detected 
 Format the output strictly as a JSON object matching the requested schema.
 """
 
+
 class GeminiQueryRewriter(BaseQueryRewriter):
     """
     Query Rewriter implementation using Google Gemini structured JSON outputs.
     """
+
     def __init__(self, model_name: str = settings.MODEL_REWRITER):
         self.model_name = model_name
 
@@ -58,9 +60,7 @@ class GeminiQueryRewriter(BaseQueryRewriter):
         """
         if not query or not query.strip():
             return RewriteResult(
-                rewritten_query="",
-                rewritten=False,
-                explanation="Empty query provided."
+                rewritten_query="", rewritten=False, explanation="Empty query provided."
             )
 
         client = get_gemini_client()
@@ -79,12 +79,14 @@ class GeminiQueryRewriter(BaseQueryRewriter):
                         temperature=0.0,
                         response_mime_type="application/json",
                         response_schema=RewriteResult,
-                    )
+                    ),
                 )
 
                 result: RewriteResult = response.parsed
                 if result is None or not hasattr(result, "rewritten_query"):
-                    logger.warning("Gemini did not return a valid RewriteResult, attempting fallback parsing.")
+                    logger.warning(
+                        "Gemini did not return a valid RewriteResult, attempting fallback parsing."
+                    )
                     raise LLMError("Gemini structured output parsing failed.")
 
                 logger.info(
@@ -96,19 +98,21 @@ class GeminiQueryRewriter(BaseQueryRewriter):
             except Exception as e:
                 err_str = str(e)
                 # Check for rate limit (429) or temporary server unavailability (503)
-                is_transient = any(code in err_str for code in ["429", "503", "RESOURCE_EXHAUSTED", "UNAVAILABLE"])
+                is_transient = any(
+                    code in err_str for code in ["429", "503", "RESOURCE_EXHAUSTED", "UNAVAILABLE"]
+                )
                 if is_transient and attempt < max_retries - 1:
-                    sleep_time = backoff * (2 ** attempt)
+                    sleep_time = backoff * (2**attempt)
                     logger.warning(
-                        f"Gemini Query Rewriter transient issue (attempt {attempt+1}/{max_retries}). "
+                        f"Gemini Query Rewriter transient issue (attempt {attempt + 1}/{max_retries}). "
                         f"Retrying in {sleep_time:.2f}s... Error: {e}"
                     )
                     await asyncio.sleep(sleep_time)
                 else:
-                    logger.error(f"Gemini query rewrite failed after {attempt+1} attempts: {e}")
+                    logger.error(f"Gemini query rewrite failed after {attempt + 1} attempts: {e}")
                     # Fallback to the original query if LLM rewriting fails completely
                     return RewriteResult(
                         rewritten_query=query,
                         rewritten=False,
-                        explanation=f"Query rewriter failed after multiple retries. Error: {e}"
+                        explanation=f"Query rewriter failed after multiple retries. Error: {e}",
                     )

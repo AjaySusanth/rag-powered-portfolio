@@ -12,6 +12,7 @@ class RewriteResult(BaseModel):
     """
     Encapsulates the structured output of the query rewriter.
     """
+
     rewritten_query: str = Field(
         description="The expanded, search-optimized query. If no rewrite was needed, this contains the original query."
     )

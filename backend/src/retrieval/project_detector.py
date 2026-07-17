@@ -30,8 +30,9 @@ PROJECTS: Dict[str, List[str]] = {
     "classsync": [
         "classsync",
         "class sync",
-    ]
+    ],
 }
+
 
 def normalize_text(text: str) -> str:
     """
@@ -43,10 +44,11 @@ def normalize_text(text: str) -> str:
     # Convert to lowercase
     text = text.lower()
     # Replace punctuation, hyphens, and slashes with spaces to avoid merging words
-    text = re.sub(r'[-_/\\,.:;!?(){}[\]"\'`]', ' ', text)
+    text = re.sub(r'[-_/\\,.:;!?(){}[\]"\'`]', " ", text)
     # Collapse multiple spaces into one
-    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r"\s+", " ", text)
     return text.strip()
+
 
 def detect_project(query: str) -> Optional[str]:
     """

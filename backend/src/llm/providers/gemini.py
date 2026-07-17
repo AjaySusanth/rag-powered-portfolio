@@ -35,15 +35,20 @@ For each chunk, you must output a structured evaluation containing:
 Be strict but fair. High-level design documents that do not provide concrete details for infrastructure/logic questions should generally be classified as 'background_only' (not_relevant) if more specific code/infrastructure chunks are present.
 """
 
+
 class RetrievalGrading(BaseModel):
     """Container schema for batched chunk grading output."""
-    grades: List[ChunkGrade] = Field(description="A list of grades corresponding to each of the evaluated chunks.")
+
+    grades: List[ChunkGrade] = Field(
+        description="A list of grades corresponding to each of the evaluated chunks."
+    )
 
 
 class GeminiGrader(BaseGrader):
     """
     Retrieval Grader implementation using Google Gemini structured JSON outputs.
     """
+
     def __init__(self, model_name: str = settings.MODEL_GRADER):
         self.model_name = model_name
 
@@ -65,6 +70,7 @@ class GeminiGrader(BaseGrader):
             return []
 
         import asyncio
+
         client = get_gemini_client()
         prompt_content = self._format_prompt(query, results)
 
@@ -83,13 +89,15 @@ class GeminiGrader(BaseGrader):
                         temperature=0.0,
                         response_mime_type="application/json",
                         response_schema=RetrievalGrading,
-                    )
+                    ),
                 )
 
                 # Parsed structured output is automatically available in response.parsed
                 result: RetrievalGrading = response.parsed
                 if result is None or not hasattr(result, "grades"):
-                    logger.warning("Gemini did not return parsed grades, attempting fallback parsing.")
+                    logger.warning(
+                        "Gemini did not return parsed grades, attempting fallback parsing."
+                    )
                     raise LLMError("Gemini structured output parsing failed.")
 
                 return result.grades
@@ -97,16 +105,20 @@ class GeminiGrader(BaseGrader):
             except Exception as e:
                 err_str = str(e)
                 # Check for rate limit (429) or temporary server unavailability (503)
-                is_transient = any(code in err_str for code in ["429", "503", "RESOURCE_EXHAUSTED", "UNAVAILABLE"])
+                is_transient = any(
+                    code in err_str for code in ["429", "503", "RESOURCE_EXHAUSTED", "UNAVAILABLE"]
+                )
                 if is_transient and attempt < max_retries - 1:
-                    sleep_time = backoff * (2 ** attempt)
+                    sleep_time = backoff * (2**attempt)
                     logger.warning(
-                        f"Gemini API transient issue (attempt {attempt+1}/{max_retries}). "
+                        f"Gemini API transient issue (attempt {attempt + 1}/{max_retries}). "
                         f"Retrying in {sleep_time:.2f}s... Error: {e}"
                     )
                     await asyncio.sleep(sleep_time)
                 else:
-                    logger.error(f"Gemini retrieval grading failed after {attempt+1} attempts: {e}")
+                    logger.error(
+                        f"Gemini retrieval grading failed after {attempt + 1} attempts: {e}"
+                    )
                     raise LLMError(f"Gemini retrieval grading failed: {e}") from e
 
 
@@ -114,13 +126,12 @@ class GeminiGenerator(BaseGenerator):
     """
     Answer Generator implementation using Google Gemini content streaming.
     """
+
     def __init__(self, model_name: str = settings.GEMINI_MODEL_NAME):
         self.model_name = model_name
 
     async def stream(
-        self,
-        prompt: str,
-        system_instruction: Optional[str] = None
+        self, prompt: str, system_instruction: Optional[str] = None
     ) -> AsyncGenerator[str, None]:
         """
         Streams answer tokens asynchronously from Gemini.
@@ -134,9 +145,7 @@ class GeminiGenerator(BaseGenerator):
 
         try:
             response_stream = await client.aio.models.generate_content_stream(
-                model=self.model_name,
-                contents=prompt,
-                config=config
+                model=self.model_name, contents=prompt, config=config
             )
             async for chunk in response_stream:
                 if chunk.text:
@@ -144,4 +153,3 @@ class GeminiGenerator(BaseGenerator):
         except Exception as e:
             logger.error(f"Gemini streaming failed: {e}")
             raise LLMError(f"Gemini streaming failed: {e}") from e
-

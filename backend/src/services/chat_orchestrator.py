@@ -62,230 +62,294 @@ class ChatOrchestrator:
         Yields:
             Subclasses of BaseStreamEvent (e.g. StreamTokenEvent or StreamErrorEvent).
         """
+        from src.observability.metrics import (
+            rag_cache_hits_total,
+            rag_cache_misses_total,
+            rag_errors_total,
+            rag_queries_total,
+            rag_query_duration_seconds,
+            rag_requests_in_progress,
+        )
+
+        rag_requests_in_progress.inc()
         request_start = time.perf_counter()
         logger.info(f"Initiating chat request. session_id={session_id}")
 
-        if trace:
-            trace.request.original_query = query
-            trace.metadata.timestamp = time.time()
-            trace.metadata.model_name = settings.GEMINI_MODEL_NAME
+        status = "success"
+        cache_status = "miss"
+        retrieval_scope = "global"
 
-        if not query or not query.strip():
-            yield StreamErrorEvent(code="invalid_query", message="Query string cannot be empty.")
-            return
+        try:
+            if trace:
+                trace.request.original_query = query
+                trace.metadata.timestamp = time.time()
+                trace.metadata.model_name = settings.GEMINI_MODEL_NAME
 
-        # 0. Prompt Injection Detection
-        PromptGuard.analyze(query)
-
-        # 0.5 Cache Lookup
-        if not skip_cache:
-            cached_response = await self.cache.get_chat_response(query)
-            if cached_response:
-                logger.info("Cache hit for query.")
-                if trace:
-                    trace.metadata.cache_hit = True
-                    trace.generation.response_preview = cached_response["answer"][:300]
-                    trace.timings.total_request_ms = (time.perf_counter() - request_start) * 1000.0
-                yield StreamTokenEvent(token=cached_response["answer"])
-                citations = [Citation(**c) for c in cached_response.get("citations", [])]
-                yield StreamCitationsEvent(citations=citations)
+            if not query or not query.strip():
+                status = "error"
+                rag_errors_total.labels(stage="injection_detection").inc()
+                yield StreamErrorEvent(
+                    code="invalid_query", message="Query string cannot be empty."
+                )
                 return
-        else:
-            if trace:
-                trace.metadata.cache_hit = False
 
-        # 1. Project Detection
-        qp_start = time.perf_counter()
-        try:
-            proj_start = time.perf_counter()
-            project = detect_project(query)
-            proj_duration = (time.perf_counter() - proj_start) * 1000.0
-            if trace:
-                trace.request.detected_project = project
-                trace.request.project_scope = project or "global"
-                trace.timings.stages["project_detection"] = proj_duration
-            logger.info(f"Project detection completed. Detected project: {project}")
-        except Exception as e:
-            logger.error(f"Project detection failed: {e}. Falling back to global search.")
-            project = None
-            if trace:
-                trace.request.project_scope = "global"
-                trace.timings.stages["project_detection"] = (
-                    time.perf_counter() - qp_start
-                ) * 1000.0
+            # 0. Prompt Injection Detection
+            PromptGuard.analyze(query)
 
-        # 2. Query Rewriter (optional)
-        search_query = query
-        rewriter_duration = 0.0
-        rewrite_applied = False
-        rewrite_reason = "Query rewriter is disabled in settings."
-        if settings.ENABLE_QUERY_REWRITER:
-            try:
-                rewrite_start = time.perf_counter()
-                rewriter = create_rewriter_from_settings()
-                rewrite_result = await rewriter.rewrite(query, project)
-                rewriter_duration = (time.perf_counter() - rewrite_start) * 1000.0
-                rewrite_applied = rewrite_result.rewritten
-                rewrite_reason = rewrite_result.explanation
-                if rewrite_result.rewritten:
-                    search_query = rewrite_result.rewritten_query
-                    logger.info(f"Query rewritten: '{query}' -> '{search_query}'")
-            except Exception as e:
-                logger.error(f"Query rewriter failed: {e}. Falling back to original query.")
-                search_query = query
-                rewrite_applied = False
-                rewrite_reason = f"Query rewriter failed with error: {str(e)}"
-                rewriter_duration = (time.perf_counter() - rewrite_start) * 1000.0
-        else:
-            if trace:
-                trace.request.rewrite_applied = False
-                trace.request.rewrite_reason = rewrite_reason
-
-        if trace:
-            trace.request.rewritten_query = search_query
-            trace.request.rewrite_applied = rewrite_applied
-            trace.request.rewrite_reason = rewrite_reason
-            trace.timings.stages["query_rewriting"] = rewriter_duration
-            trace.timings.query_processing_ms = (time.perf_counter() - qp_start) * 1000.0
-
-        # 3. Hybrid Retrieval & Grader
-        try:
-            logger.info(f"Executing hybrid retrieval for: '{search_query}'")
-            # Note: retrieve() handles vector search, BM25, RRF, Diversification, and Grader filtering.
-            chunks = await retrieve(
-                query=search_query,
-                project=project,
-                top_k=15,
-                diversify=True,
-                grade=True,
-                trace=trace,
-            )
-            logger.info(f"Retrieval complete. Retrieved {len(chunks)} relevant chunks.")
-        except Exception as e:
-            logger.error(f"Retrieval pipeline failed: {e}")
-            yield StreamErrorEvent(
-                code="retrieval_failed",
-                message="Retrieval pipeline encountered an unexpected error.",
-            )
-            return
-
-        # 4. Prompt Construction (always with original query)
-        gen_start = time.perf_counter()
-        try:
-            build_result = PromptBuilder.build(original_query=query, chunks=chunks)
-            if trace:
-                trace.retrieval.final_context = build_result.prompt
-        except Exception as e:
-            logger.error(f"Prompt construction failed: {e}")
-            yield StreamErrorEvent(
-                code="prompt_construction_failed", message="Context assembly failed."
-            )
-            return
-
-        # 5. LLM Streaming
-        full_answer = ""
-        try:
-            generator = create_generator_from_settings()
-            async for token in generator.stream(
-                build_result.prompt, system_instruction=PromptBuilder.SYSTEM_INSTRUCTION
-            ):
-                full_answer += token
-                yield StreamTokenEvent(token=token)
-        except LLMError as e:
-            logger.error(f"LLM streaming error: {e}")
-            yield StreamErrorEvent(
-                code="llm_error", message="The model failed to stream a response."
-            )
-            return
-        except Exception as e:
-            logger.error(f"Unexpected generator error: {e}")
-            yield StreamErrorEvent(
-                code="unexpected_error", message="An unexpected error occurred during generation."
-            )
-            return
-
-        # 6. Yield Citations (only on successful completion of token streaming)
-        citations = []
-        try:
-            # Post-generation citation attribution
-            try:
-                attributor = create_attributor_from_settings()
-                logger.info("Executing post-generation citation attribution...")
-                supporting_ids = await attributor.attribute_citations(
-                    full_answer, build_result.chunks_used
-                )
-
-                # 1. Deduplicate supporting_ids returned by the LLM
-                seen_supporting = set()
-                deduped_supporting = []
-                for cid in supporting_ids:
-                    if cid not in seen_supporting:
-                        seen_supporting.add(cid)
-                        deduped_supporting.append(cid)
-
-                # 2. Filter and map back to RetrievalResult, ignoring unknown IDs safely
-                valid_chunks_map = {
-                    res.chunk.chunk_id: res
-                    for res in build_result.chunks_used
-                    if res.chunk.chunk_id
-                }
-
-                attributed_chunks = []
-                for cid in deduped_supporting:
-                    if cid in valid_chunks_map:
-                        attributed_chunks.append(valid_chunks_map[cid])
-                    else:
-                        logger.warning(
-                            f"Attributor returned unknown chunk ID: {cid}. Safely ignoring."
-                        )
-
-                # 3. Apply fallback if no valid grounding chunks are returned (unless explicitly 0)
-                if attributed_chunks:
-                    logger.info(
-                        f"Attribution complete. Filtered citations from {len(build_result.chunks_used)} -> {len(attributed_chunks)}."
-                    )
-                    chunks_for_citations = attributed_chunks
+            # 0.5 Cache Lookup
+            if not skip_cache:
+                cached_response = await self.cache.get_chat_response(query)
+                if cached_response:
+                    logger.info("Cache hit for query.")
+                    cache_status = "hit"
+                    rag_cache_hits_total.inc()
+                    if trace:
+                        trace.metadata.cache_hit = True
+                        trace.generation.response_preview = cached_response["answer"][:300]
+                        trace.timings.total_request_ms = (
+                            time.perf_counter() - request_start
+                        ) * 1000.0
+                    yield StreamTokenEvent(token=cached_response["answer"])
+                    citations = [Citation(**c) for c in cached_response.get("citations", [])]
+                    yield StreamCitationsEvent(citations=citations)
+                    return
                 else:
-                    if len(supporting_ids) == 0:
-                        logger.info("Attributor explicitly returned 0 citations.")
-                        chunks_for_citations = []
-                    else:
-                        logger.warning(
-                            "Attributor returned no valid grounding chunks. Falling back to all retrieved chunks."
-                        )
-                        chunks_for_citations = build_result.chunks_used
-            except Exception as attr_err:
-                logger.error(
-                    f"Citation attribution failed: {attr_err}. Falling back to all retrieved chunks."
+                    cache_status = "miss"
+                    rag_cache_misses_total.inc()
+            else:
+                cache_status = "miss"
+                rag_cache_misses_total.inc()
+                if trace:
+                    trace.metadata.cache_hit = False
+
+            # 1. Project Detection
+            qp_start = time.perf_counter()
+            try:
+                proj_start = time.perf_counter()
+                project = detect_project(query)
+                retrieval_scope = "project" if project else "global"
+                proj_duration = (time.perf_counter() - proj_start) * 1000.0
+                if trace:
+                    trace.request.detected_project = project
+                    trace.request.project_scope = project or "global"
+                    trace.timings.stages["project_detection"] = proj_duration
+                logger.info(f"Project detection completed. Detected project: {project}")
+            except Exception as e:
+                logger.error(f"Project detection failed: {e}. Falling back to global search.")
+                rag_errors_total.labels(stage="project_detection").inc()
+                project = None
+                retrieval_scope = "global"
+                if trace:
+                    trace.request.project_scope = "global"
+                    trace.timings.stages["project_detection"] = (
+                        time.perf_counter() - qp_start
+                    ) * 1000.0
+
+            # 2. Query Rewriter (optional)
+            search_query = query
+            rewriter_duration = 0.0
+            rewrite_applied = False
+            rewrite_reason = "Query rewriter is disabled in settings."
+            if settings.ENABLE_QUERY_REWRITER:
+                try:
+                    rewrite_start = time.perf_counter()
+                    rewriter = create_rewriter_from_settings()
+                    rewrite_result = await rewriter.rewrite(query, project)
+                    rewriter_duration = (time.perf_counter() - rewrite_start) * 1000.0
+                    rewrite_applied = rewrite_result.rewritten
+                    rewrite_reason = rewrite_result.explanation
+                    if rewrite_result.rewritten:
+                        search_query = rewrite_result.rewritten_query
+                        logger.info(f"Query rewritten: '{query}' -> '{search_query}'")
+                except Exception as e:
+                    logger.error(f"Query rewriter failed: {e}. Falling back to original query.")
+                    rag_errors_total.labels(stage="query_rewriting").inc()
+                    search_query = query
+                    rewrite_applied = False
+                    rewrite_reason = f"Query rewriter failed with error: {str(e)}"
+                    rewriter_duration = (time.perf_counter() - rewrite_start) * 1000.0
+            else:
+                if trace:
+                    trace.request.rewrite_applied = False
+                    trace.request.rewrite_reason = rewrite_reason
+
+            if trace:
+                trace.request.rewritten_query = search_query
+                trace.request.rewrite_applied = rewrite_applied
+                trace.request.rewrite_reason = rewrite_reason
+                trace.timings.stages["query_rewriting"] = rewriter_duration
+                trace.timings.query_processing_ms = (time.perf_counter() - qp_start) * 1000.0
+
+            # 3. Hybrid Retrieval & Grader
+            try:
+                logger.info(f"Executing hybrid retrieval for: '{search_query}'")
+                # Note: retrieve() handles vector search, BM25, RRF, Diversification, and Grader filtering.
+                chunks = await retrieve(
+                    query=search_query,
+                    project=project,
+                    top_k=15,
+                    diversify=True,
+                    grade=True,
+                    trace=trace,
                 )
-                chunks_for_citations = build_result.chunks_used
+                logger.info(f"Retrieval complete. Retrieved {len(chunks)} relevant chunks.")
+            except Exception as e:
+                logger.error(f"Retrieval pipeline failed: {e}")
+                status = "error"
+                rag_errors_total.labels(stage="retrieval").inc()
+                yield StreamErrorEvent(
+                    code="retrieval_failed",
+                    message="Retrieval pipeline encountered an unexpected error.",
+                )
+                return
 
-            seen_files = set()
-            for res in chunks_for_citations:
-                source_file = res.chunk.source_file or "unknown"
-                project = res.chunk.project or "global"
-                dedup_key = (project, source_file)
-                if dedup_key not in seen_files:
-                    seen_files.add(dedup_key)
-                    citations.append(
-                        Citation(
-                            file=source_file, layer=res.chunk.layer or "unknown", project=project
-                        )
+            # 4. Prompt Construction (always with original query)
+            gen_start = time.perf_counter()
+            try:
+                build_result = PromptBuilder.build(original_query=query, chunks=chunks)
+                if trace:
+                    trace.retrieval.final_context = build_result.prompt
+            except Exception as e:
+                logger.error(f"Prompt construction failed: {e}")
+                status = "error"
+                rag_errors_total.labels(stage="prompt_construction").inc()
+                yield StreamErrorEvent(
+                    code="prompt_construction_failed", message="Context assembly failed."
+                )
+                return
+
+            # 5. LLM Streaming
+            full_answer = ""
+            try:
+                generator = create_generator_from_settings()
+                async for token in generator.stream(
+                    build_result.prompt, system_instruction=PromptBuilder.SYSTEM_INSTRUCTION
+                ):
+                    full_answer += token
+                    yield StreamTokenEvent(token=token)
+            except LLMError as e:
+                logger.error(f"LLM streaming error: {e}")
+                status = "error"
+                rag_errors_total.labels(stage="generation").inc()
+                yield StreamErrorEvent(
+                    code="llm_error", message="The model failed to stream a response."
+                )
+                return
+            except Exception as e:
+                logger.error(f"Unexpected generator error: {e}")
+                status = "error"
+                rag_errors_total.labels(stage="generation").inc()
+                yield StreamErrorEvent(
+                    code="unexpected_error",
+                    message="An unexpected error occurred during generation.",
+                )
+                return
+
+            # 6. Yield Citations (only on successful completion of token streaming)
+            citations = []
+            try:
+                # Post-generation citation attribution
+                try:
+                    attributor = create_attributor_from_settings()
+                    logger.info("Executing post-generation citation attribution...")
+                    supporting_ids = await attributor.attribute_citations(
+                        full_answer, build_result.chunks_used
                     )
-            yield StreamCitationsEvent(citations=citations)
-            logger.info(f"Successfully emitted {len(citations)} citations.")
+
+                    # 1. Deduplicate supporting_ids returned by the LLM
+                    seen_supporting = set()
+                    deduped_supporting = []
+                    for cid in supporting_ids:
+                        if cid not in seen_supporting:
+                            seen_supporting.add(cid)
+                            deduped_supporting.append(cid)
+
+                    # 2. Filter and map back to RetrievalResult, ignoring unknown IDs safely
+                    valid_chunks_map = {
+                        res.chunk.chunk_id: res
+                        for res in build_result.chunks_used
+                        if res.chunk.chunk_id
+                    }
+
+                    attributed_chunks = []
+                    for cid in deduped_supporting:
+                        if cid in valid_chunks_map:
+                            attributed_chunks.append(valid_chunks_map[cid])
+                        else:
+                            logger.warning(
+                                f"Attributor returned unknown chunk ID: {cid}. Safely ignoring."
+                            )
+
+                    # 3. Apply fallback if no valid grounding chunks are returned (unless explicitly 0)
+                    if attributed_chunks:
+                        logger.info(
+                            f"Attribution complete. Filtered citations from {len(build_result.chunks_used)} -> {len(attributed_chunks)}."
+                        )
+                        chunks_for_citations = attributed_chunks
+                    else:
+                        if len(supporting_ids) == 0:
+                            logger.info("Attributor explicitly returned 0 citations.")
+                            chunks_for_citations = []
+                        else:
+                            logger.warning(
+                                "Attributor returned no valid grounding chunks. Falling back to all retrieved chunks."
+                            )
+                            chunks_for_citations = build_result.chunks_used
+                except Exception as attr_err:
+                    logger.error(
+                        f"Citation attribution failed: {attr_err}. Falling back to all retrieved chunks."
+                    )
+                    rag_errors_total.labels(stage="citations").inc()
+                    chunks_for_citations = build_result.chunks_used
+
+                seen_files = set()
+                for res in chunks_for_citations:
+                    source_file = res.chunk.source_file or "unknown"
+                    project = res.chunk.project or "global"
+                    dedup_key = (project, source_file)
+                    if dedup_key not in seen_files:
+                        seen_files.add(dedup_key)
+                        citations.append(
+                            Citation(
+                                file=source_file,
+                                layer=res.chunk.layer or "unknown",
+                                project=project,
+                            )
+                        )
+                yield StreamCitationsEvent(citations=citations)
+                logger.info(f"Successfully emitted {len(citations)} citations.")
+            except Exception as e:
+                logger.error(f"Error compiling citations: {e}")
+                rag_errors_total.labels(stage="citations").inc()
+                yield StreamCitationsEvent(citations=[])
+
+            gen_duration = (time.perf_counter() - gen_start) * 1000.0
+            if trace:
+                trace.generation.response_preview = full_answer[:300]
+                trace.timings.generation_ms = gen_duration
+
+            # Record generation duration in Prometheus (in seconds)
+            gen_duration_seconds = time.perf_counter() - gen_start
+            from src.observability.metrics import rag_generation_duration_seconds
+
+            rag_generation_duration_seconds.labels(retrieval_scope=retrieval_scope).observe(
+                gen_duration_seconds
+            )
+
+            # 7. Cache the successful response
+            if not skip_cache and full_answer.strip():
+                await self.cache.set_chat_response(query, full_answer, citations)
+
+            if trace:
+                trace.timings.total_request_ms = (time.perf_counter() - request_start) * 1000.0
+
         except Exception as e:
-            logger.error(f"Error compiling citations: {e}")
-            yield StreamCitationsEvent(citations=[])
-
-        gen_duration = (time.perf_counter() - gen_start) * 1000.0
-        if trace:
-            trace.generation.response_preview = full_answer[:300]
-            trace.timings.generation_ms = gen_duration
-
-        # 7. Cache the successful response
-        if not skip_cache and full_answer.strip():
-            await self.cache.set_chat_response(query, full_answer, citations)
-
-        if trace:
-            trace.timings.total_request_ms = (time.perf_counter() - request_start) * 1000.0
+            status = "error"
+            raise e
+        finally:
+            rag_requests_in_progress.dec()
+            duration = time.perf_counter() - request_start
+            rag_query_duration_seconds.labels(cache_status=cache_status).observe(duration)
+            rag_queries_total.labels(
+                cache_status=cache_status, retrieval_scope=retrieval_scope, status=status
+            ).inc()

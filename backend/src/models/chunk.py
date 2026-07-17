@@ -21,6 +21,7 @@ class Chunk:
     """
     Canonical chunk representation within the RAG pipeline.
     """
+
     chunk_id: str
     parent_document_id: str
     content_hash: str

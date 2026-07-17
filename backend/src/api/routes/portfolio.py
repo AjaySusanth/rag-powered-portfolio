@@ -25,11 +25,7 @@ async def get_resume() -> FileResponse:
     if not path.exists():
         raise HTTPException(status_code=404, detail="Resume PDF file not found.")
 
-    return FileResponse(
-        path=path,
-        media_type="application/pdf",
-        filename="Ajay_Susanth_Resume.pdf"
-    )
+    return FileResponse(path=path, media_type="application/pdf", filename="Ajay_Susanth_Resume.pdf")
 
 
 @router.get("/stack", response_model=StackResponse)
@@ -58,8 +54,4 @@ async def get_hire() -> HireResponse:
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except (ValidationError, Exception) as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Server-side configuration error: {str(e)}"
-        )
-
+        raise HTTPException(status_code=500, detail=f"Server-side configuration error: {str(e)}")

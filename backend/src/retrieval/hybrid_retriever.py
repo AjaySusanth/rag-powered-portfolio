@@ -132,6 +132,13 @@ async def retrieve(
         rrf_latency = (time.perf_counter() - rrf_start) * 1000.0
 
         rrf_candidates = len(vector_results) + len(bm25_results)
+
+        # Track retrieval candidates count in Prometheus
+        from src.observability.metrics import rag_retrieval_candidates
+
+        retrieval_scope = "project" if project else "global"
+        rag_retrieval_candidates.labels(retrieval_scope=retrieval_scope).observe(rrf_candidates)
+
         rrf_duplicates_removed = rrf_candidates - len(fused_results)
         _record_stage(
             fused_results,
@@ -183,9 +190,18 @@ async def retrieve(
 
             results = graded_results
 
-        overall_latency = (time.perf_counter() - overall_start) * 1000.0
+        overall_latency_ms = (time.perf_counter() - overall_start) * 1000.0
         if trace:
-            trace.timings.total_retrieval_ms = overall_latency
+            trace.timings.total_retrieval_ms = overall_latency_ms
+
+        # Track retrieval pipeline latency in Prometheus (in seconds)
+        overall_latency_seconds = time.perf_counter() - overall_start
+        from src.observability.metrics import rag_retrieval_duration_seconds
+
+        retrieval_scope = "project" if project else "global"
+        rag_retrieval_duration_seconds.labels(retrieval_scope=retrieval_scope).observe(
+            overall_latency_seconds
+        )
 
         return results
 

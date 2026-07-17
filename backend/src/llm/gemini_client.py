@@ -27,8 +27,10 @@ logger = logging.getLogger(__name__)
 # Custom Exceptions
 # ---------------------------------------------------------------------------
 
+
 class LLMError(Exception):
     """Raised when an LLM API call fails."""
+
     pass
 
 
@@ -69,6 +71,7 @@ def get_gemini_client() -> genai.Client:
 # Core Generation Function
 # ---------------------------------------------------------------------------
 
+
 def format_prompt(query: str, context_chunks: List[Dict[str, Any]]) -> str:
     """Formats context chunks and query into a structured text prompt."""
     context_str = ""
@@ -76,7 +79,9 @@ def format_prompt(query: str, context_chunks: List[Dict[str, Any]]) -> str:
         source_file = chunk.get("source_file", "unknown")
         heading = chunk.get("heading") or "No Heading"
         content = chunk.get("content", "")
-        context_str += f"--- CONTEXT CHUNK {i+1} (Source: {source_file} > {heading}) ---\n{content}\n\n"
+        context_str += (
+            f"--- CONTEXT CHUNK {i + 1} (Source: {source_file} > {heading}) ---\n{content}\n\n"
+        )
 
     prompt = f"User Question: {query}\n\nRetrieved Context:\n{context_str}"
     return prompt
@@ -99,7 +104,7 @@ async def generate_answer(query: str, context_chunks: List[Dict[str, Any]]) -> s
                 config=types.GenerateContentConfig(
                     system_instruction=SYSTEM_PROMPT,
                     temperature=0.0,
-                )
+                ),
             )
 
             # The returned text response
