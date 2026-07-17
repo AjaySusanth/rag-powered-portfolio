@@ -5,7 +5,6 @@ It validates the endpoint routing, schema validation, telemetry recording, cachi
 and the calculations for stage/aggregate latencies and statistics without making real network or DB calls.
 """
 
-import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -31,7 +30,7 @@ def make_test_chunk() -> Chunk:
         chunk_index=0,
         token_count=10,
         char_count=50,
-        metadata={"heading": "About Ajay"}
+        metadata={"heading": "About Ajay"},
     )
 
 
@@ -41,10 +40,7 @@ def make_test_chunk() -> Chunk:
 @patch("src.services.chat_orchestrator.create_generator_from_settings")
 @patch("src.services.chat_orchestrator.create_cache_from_settings")
 async def test_retrieval_trace_endpoint_success(
-    mock_create_cache,
-    mock_create_generator,
-    mock_retrieve,
-    mock_detect_project
+    mock_create_cache, mock_create_generator, mock_retrieve, mock_detect_project
 ) -> None:
     """Verifies that the /admin/retrieval-trace endpoint correctly populates all stages of the PipelineTrace."""
     # 1. Setup mock returns
@@ -60,10 +56,12 @@ async def test_retrieval_trace_endpoint_success(
 
     # Stream generator mock
     mock_generator = MagicMock()
+
     async def mock_stream_iter(prompt, system_instruction):
         yield "Hello"
         yield " "
         yield "world!"
+
     mock_generator.stream.side_effect = mock_stream_iter
     mock_create_generator.return_value = mock_generator
 
@@ -79,7 +77,7 @@ async def test_retrieval_trace_endpoint_success(
 
         # 3. Assert trace structure matches Pydantic model
         trace = PipelineTrace(**data)
-        
+
         # Request verification
         assert trace.request.original_query == "Tell me about Ajay's skills"
         assert trace.request.detected_project == "n8n-aks-platform"
@@ -114,16 +112,14 @@ async def test_retrieval_trace_authentication_failure() -> None:
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         payload = {"query": "test"}
-        
+
         # Missing header -> 401
         res1 = await client.post("/admin/retrieval-trace", json=payload)
         assert res1.status_code == 401
-        
+
         # Incorrect header -> 403
         res2 = await client.post(
-            "/admin/retrieval-trace",
-            json=payload,
-            headers={"X-Admin-Key": "wrong-key"}
+            "/admin/retrieval-trace", json=payload, headers={"X-Admin-Key": "wrong-key"}
         )
         assert res2.status_code == 403
 
@@ -145,5 +141,3 @@ async def test_verify_admin_endpoint() -> None:
         res3 = await client.get("/admin/verify", headers={"X-Admin-Key": "dev-admin-key"})
         assert res3.status_code == 200
         assert res3.json() == {"status": "authenticated"}
-
-
