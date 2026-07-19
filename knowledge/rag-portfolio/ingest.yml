@@ -1,6 +1,6 @@
 project: rag-portfolio
 type: fullstack
-github_repo: AjaySusanth/rag-portfolio
+github_repo: AjaySusanth/rag-powered-portfolio
 
 auto_ingest:
   - "README.md"
