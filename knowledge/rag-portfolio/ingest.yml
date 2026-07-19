@@ -1,0 +1,22 @@
+project: rag-portfolio
+type: fullstack
+github_repo: AjaySusanth/rag-portfolio
+
+auto_ingest:
+  - "README.md"
+  - "prd-rag-portfolio.md"
+  - "backend/src/**/*.py"
+  - "backend/scripts/**/*.py"
+  - "frontend/src/**/*.ts"
+  - "frontend/src/**/*.tsx"
+  # Infrastructure config — proves deployment knowledge
+  - "docker-compose.yml"
+  - "render.yaml"
+
+ignore:
+  - "**/__pycache__/**"
+  - "**/.venv/**"
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/.git/**"
+  - "knowledge/**"

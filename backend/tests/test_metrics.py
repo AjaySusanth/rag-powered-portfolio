@@ -34,6 +34,7 @@ async def test_metrics_endpoint_success() -> None:
 
 
 @pytest.mark.anyio
+@patch("src.services.chat_orchestrator.create_cache_from_settings")
 @patch("src.services.chat_orchestrator.detect_project")
 @patch("src.services.chat_orchestrator.retrieve", new_callable=AsyncMock)
 @patch("src.services.chat_orchestrator.create_generator_from_settings")
@@ -41,12 +42,18 @@ async def test_metrics_updated_on_chat(
     mock_create_generator: MagicMock,
     mock_retrieve: AsyncMock,
     mock_detect_project: MagicMock,
+    mock_create_cache: MagicMock,
 ) -> None:
     """
     Verifies that processing a chat request correctly increments the RAG query counters
     in the Prometheus registry.
     """
     # 1. Setup mocks
+    mock_cache = MagicMock()
+    mock_cache.get_chat_response = AsyncMock(return_value=None)
+    mock_cache.set_chat_response = AsyncMock()
+    mock_create_cache.return_value = mock_cache
+
     mock_detect_project.return_value = None
     mock_retrieve.return_value = []
 
@@ -80,7 +87,10 @@ async def test_metrics_updated_on_chat(
         payload = {"message": "Test metrics query"}
         response = await client.post("/chat", json=payload)
         assert response.status_code == 200
+        # Consume the stream fully to trigger generator execution
+        await response.aread()
 
     # 3. Check that query counter incremented by 1
     new_queries = get_query_count()
     assert new_queries == initial_queries + 1
+
