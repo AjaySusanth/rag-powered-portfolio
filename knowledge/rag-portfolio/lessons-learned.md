@@ -1,0 +1,10 @@
+# RAG-Powered Developer Portfolio - Lessons Learned
+
+## Value of Quantifiable Offline Retrieval Metrics in RAG-Powered Developer Portfolio
+In the RAG-Powered Developer Portfolio project, attempting to tune prompt formats, chunk sizes, and retrieval parameters based on manual testing was slow and unreliable. A change that fixed one query would silently break others. The major takeaway was implementing an offline evaluation framework utilizing a golden dataset. By calculating Hit Rate, Recall, and MRR, the team could objectively measure retrieval changes. For instance, evaluation showed that while Source Diversification kept Hit Rate stable, it directly raised MRR from 0.456 to 0.467.
+
+## Crucial Role of Lexical BM25 in Code Base Ingestion in RAG-Powered Developer Portfolio
+In the RAG-Powered Developer Portfolio project, relying solely on vector search for codebase RAG led to poor retrieval of code files. OpenAI's embedding model is trained on natural language and struggled with specific code variables or syntax. A query about "JWT authentication" would rank high-level design documents above the actual `authController.js` file. We learned that BM25 keyword matching is essential for codebases because it targets exact syntax. Combining them via Reciprocal Rank Fusion ensures that semantic questions match conceptual documents, while syntax-specific terms find the exact code implementation.
+
+## Designing for Cloud Economics from Day One in RAG-Powered Developer Portfolio
+In the RAG-Powered Developer Portfolio project, deploying enterprise-grade cloud services like Azure Cache for Redis and Azure Database for PostgreSQL for early staging proved unnecessarily expensive and complex. We learned that local development should rely entirely on lightweight containerization (Docker Compose with pgvector and Redis-alpine images), and production staging should use serverless free tiers (Neon serverless Postgres, Upstash Redis, Vercel, and Render). This kept hosting costs at zero while remaining compatible with standard database drivers, facilitating an eventual migration to Azure AKS.

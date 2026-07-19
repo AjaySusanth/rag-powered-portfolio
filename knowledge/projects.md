@@ -52,3 +52,21 @@ This catalog lists the completed software engineering and DevOps projects develo
     *   **Webhook & Poll Routing System**: Designed a custom webhook router in n8n to digest and translate incoming Google Classroom feed updates.
     *   **State Tracking**: Implemented automated MongoDB polling states to deduplicate updates and track announcement delivery history, preventing duplicate messages to student channels.
     *   **Telegram Delivery Engine**: Built custom Telegram bot integrations with interactive commands for students to filter announcements by course subject or assignment type.
+
+---
+
+## 4. RAG-Powered Developer Portfolio
+
+*   **Description**: An AI-powered developer portfolio answering recruiter and engineer questions using a production-grade Retrieval-Augmented Generation pipeline with grounded inline citations.
+*   **Problem Solved**: Traditional portfolios are static documents that require recruiters to manually search resumes and do not support interactive, grounded querying of technical decisions or implementation details.
+*   **Major Technologies**:
+    *   **Backend**: FastAPI, Python 3.12, Uvicorn
+    *   **Frontend**: Next.js 16 (App Router), React 19, Tailwind CSS, TypeScript
+    *   **Databases**: PostgreSQL 16, pgvector (HNSW Index, cosine similarity), Redis 7 (caching)
+    *   **AI/ML**: Google Gemini (generation, grading, query rewriting, citation attribution), Azure OpenAI embeddings (`text-embedding-3-small` 1536-dimensional vectors), `rank-bm25` (lexical search)
+*   **Key Engineering Highlights**:
+    *   **Hybrid Retrieval Pipeline**: Integrated pgvector semantic search and BM25 lexical search with Reciprocal Rank Fusion (RRF) and source diversification to guarantee context variety and lexical precision.
+    *   **Self-Healing & Grading**: Implemented an LLM-based query rewriter for user input expansion and a batched LLM retrieval grader to filter out low-signal context chunks before response generation.
+    *   **Dual Cache Layer**: Designed an embedding cache (7-day TTL) and a response cache (24-hour TTL) in Redis to eliminate redundant LLM calls and reduce latency to under 3 seconds.
+    *   **Offline Evaluation Framework**: Developed a retrieval regression suite using a golden dataset to track Hit Rate, Recall, MRR, and Source Diversity metrics.
+
